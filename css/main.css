@@ -717,10 +717,10 @@ img::-moz-selection {
   .btn, .navigation__item a {
     display: inline-block;
     margin-right: 0px;
-    padding: 5px 5px 5px 5px;
-    font-size: .6em;
+    padding: 8px 8px 8px 8px;
+    font-size: 1.0em;
     text-shadow: none;
-    color: #BF1827;
+    color: #FFF;
   }
   .navigation__item {
     display: inline-block;

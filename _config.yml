@@ -7,13 +7,12 @@ description: Welcome to my Personal Website
 # 头像里面的标题
 avatarTitle: 生活就是远方
 # 头像里面的描述
-avatarDesc: xxoo
+avatarDesc: Learning
 url: "yun-long.github.io/"
 
 # Comment
 comment:
-    # disqus: leopard
-    duoshuo: leopard 
+    duoshuo: Yunlon Song
 
 # Social
 social:
@@ -21,15 +20,6 @@ social:
     github: yun-long
     twitter: Cprimer_
     mail: yun-long.song@outlook.com
-
-# 《----------------- 上面的信息修改成你自己的 ---------------------------》
-#
-#
-#  _post/ 下的文章更换成你自己的文章
-#  帮忙star一下，感谢~😆 地址： https://github.com/leopardpan/leopardpan.github.io
-#
-#
-# 《--------------- 下面的信息可以自行选择是否修改 ------------------------》
 
 
 permalink: /:year/:month/:title/
@@ -48,7 +38,7 @@ blog_button:
 # Navigation buttons in the front page.s
 nav:
     - {title: Archive, description: archive, url: '/archive'}   
-    - {title: Tags, description: tags, url: '/tags'}      
+    - {title: CV, description: CV, url: '/tags'}      
     - {title: About, description: about, url: '/about'}      
     
 
