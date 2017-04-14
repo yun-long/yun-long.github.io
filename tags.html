@@ -1,25 +1,59 @@
 ---
 layout: page
-title: 
-header: 根据快速导航到相应的文章
+title: CV
+header: CV
 group: navigation
 ---
 {% include JB/setup %}
 
-<ul class="tag_box inline">
-  {% assign tags_list = site.tags %}  
-  {% include JB/tags_list %}
+<h3> Personal Information </h3>  
+<ul style="list-style-type:disc">
+  <li> <strong>Address:</strong>  Alfred-Messel-Weg, 8A, 64287 Darmstadt, Germany </li>
+  <li> <strong>Gender:</strong>  Male </li>
+  <li> <strong>Email:</strong> yun-long.song@outlook.com </li>
+  <li> <strong>HomePage:</strong>  https://yun-long.github.io </li>
+
 </ul>
 
-<div class = "card">
-{% for tag in site.tags %} 
+<h3> Education </h3>  
+<ul style="list-style-type:disc">
+  <li> <strong>M.Eng in Information and Communication Engineering</strong> 
+      <div class="name"> Technical University of Darmstadt  </div> 
+      <div class="time"> Oct.2015 - Present </div>
 
-  <h3 id="{{ tag[0] }}-ref">{{ tag[0] }}</h3>
-  <ul>
-    {% assign pages_list = tag[1] %}  
-    {% include JB/pages_list %}
-  </ul>
+  </li>
 
+  <li> <strong>B.Eng in Communication Engineering</strong> 
+      <div class="name"> Shanghai University </div>
+      <div class="time"> Sep. 2010 - Jul. 2014 </div>
+  </li>
+</ul>
 
-{% endfor %}
+<h3> Skills </h3>  
+<ul style="list-style-type:disc">
+  <li> <strong>Languages:</strong>
+       <div class="name"> 中文 </div> 
+       <div class="name"> English  </div> 
+       <div class="name"> Deutsch  </div>          
+  </li>
+
+  <li> <strong>Programming Languages:</strong>
+       <div class="name"> Python </div> 
+       <div class="name"> Matlab  </div> 
+       <div class="name"> C/C++ </div>  
+       <div class="name"> Java </div> 
+  </li>
+  <li> <strong>Tools:</strong> 
+       <div class="name"> Linux </div> 
+       <div class="name"> Git  </div> 
+       <div class="name"> Tensorflow </div>  
+       <div class="name"> OpenCV </div>
+       <div class="name"> LaTex </div> 
+  </li>
+</ul>
+
+<h3> Working Experiences </h3>  
+<h3> Research Experiences </h3>  
+<h3> Honors And Awards </h3>  
+
 </div>

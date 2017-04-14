@@ -20,6 +20,8 @@ body {
   line-height: 1; 
 }
 
+table {border: none;}
+
 ol, ul {
   list-style: none; }
 
