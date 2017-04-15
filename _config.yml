@@ -1,5 +1,5 @@
 # Basic
-markdown:  maruku
+markdown:  Kramdown
 exclude: ['README.md']
 title: 宋运龙 ／ Yunlong Song 
 subtitle: 个人站 / Personal Website
