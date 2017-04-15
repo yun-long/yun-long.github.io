@@ -56,6 +56,8 @@
   </script>
   {% endif %}
 
-  {% include mathjax_support %}
+  {% if page.use_math %}
+      {% include mathjax_support %}
+  {% endif %}
 
 </head>
