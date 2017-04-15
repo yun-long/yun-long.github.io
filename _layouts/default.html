@@ -3,6 +3,10 @@
 
   {% include head.html %}
 
+  {% if page.use_math %}
+      {% include mathjax_support.html %}
+  {% endif %}
+
   <body>
 
     <span class="mobile btn-mobile-menu">        
@@ -26,6 +30,8 @@
     
     {% include side-panel.html %}
 
+
+
     <div class="content-wrapper">
         <div class="content-wrapper__inner">
             {{ content }}
@@ -36,7 +42,7 @@
     {% include external.html %}
     
     <script type="text/javascript"
-    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+      src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
     </script>
 
   </body>
