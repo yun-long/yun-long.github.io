@@ -63,3 +63,30 @@ Some nouns have irregular plural forms without s (man - men). To show possession
 * the man's work vs. the men's work
 * the mouse's cage vs. the mice's cage
 * a person's clothes vs. people's clothes 
+
+### I  *Elementary Rules of Usage*  (**Comma ,**)
+
+**2. In a series of three or more terms with a single conjunction, use a comma after each term except the last.**
+
+Thus write
+
+> * red, white, and blue
+* gold, silver, or copper
+* He opened the letter, read it, and made a note of its contents.
+
+This comma is often referred to as the "serial" comma.
+
+In the names of **business firms** the last comma is usually omitted. Follow the usage of the individual firm.
+
+> * Little, Brown and Company
+* Donaldson, Lufkin & Jenrette
+
+### I  *Elementary Rules of Usage*  (**Parenthetic Expressions**)
+
+**3. Enclose parenthetic expressions between commas.**
+
+> * e.g.: The best way to see a country, unless you are pressed for time, is to travel on foot. 
+
+This rule is difficult to apply; it is frequently hard to decide whether a single word, such as *however*, or a brief phrase is or is not parenthetic. 
+
+***To be continued ...*** 
