@@ -7,6 +7,8 @@ use_math: true
 ---
 <img src="/images/posts/RL_intro/digram.png" height="250" width="400">  
 
+Learning models can be easier than physical modelling as well as of learning control policies. Using learned models to obtain a new policy is very data efficient. 
+
 ### Model Learning for Control
 Optimal control is an optimization method for deriving control laws. The goal is to find a optimal law or policy in order to follow the desired trajectory that minimizes a cost funtion. 
 \begin{equation}
@@ -122,11 +124,11 @@ We can plot the forces and torques predicted by your model over time, as well as
 the results.
 
 Forces / torques for the first joint $q_1$:
-<img src="/images/posts/RL_intro/u1.png" height="300" width="400">  
+<img src="/images/posts/RL_intro/u1.png" height="200" width="300">  
 Forces / torques for the second joint $q_2$:
-<img src="/images/posts/RL_intro/u2.png" height="300" width="400">  
+<img src="/images/posts/RL_intro/u2.png" height="200" width="300">  
 Forces / torques for the third joint $q_3$:
-<img src="/images/posts/RL_intro/u3.png" height="300" width="400">  
+<img src="/images/posts/RL_intro/u3.png" height="200" width="300">  
 
 The red line represents the forces/torques predicted from the learned model. And the blue line represents the recorded forces/torques. The prediction for the first joint is almost perfect. Also the one for the third joint is acceptable. However, the prediction for the second model is not very accurate. The reason is that your model most likely did not capture all the features necessary for describing the real robot’s inverse dynamics. Without designing many features by hand, you could learn a non-parametric model using kernel regression or locally weighted regression.
 
