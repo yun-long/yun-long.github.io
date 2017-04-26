@@ -22,7 +22,7 @@ Optimal control is an optimization method for deriving control laws. The goal is
 Dynamic programming, intdoduced in the 1940s by Richard Bellman, are often used for optimization. A dynamic programming algorithm will examine the previously solved subproblems and will combine their solutions to give the best solution for the given problem. Unfortunately, optimal control relies on an exact model and can be solved exactly for only two cases, linear control or control within a discrete state space. However, as the state space for a learning system becomes high dimensional, its combinational state space exponentially explodes. Thus, finding an optimal control policy is not
 always feasible, but global optimality is not always required. Learning algorithms can be employed to derive a reasonably good policy.
 
-###Learning a model for control
+### Learning a model for control
 
 The environment a robot operates in, the objects a robot interacts with as well as the robot itself, i.e. its mechanical system, the kinematics and dynamics can be modelled. It has initially been thought that learning control e.g. by reinforcement learning reduces the need for an accurate model of the mechanical system to be controlled. However, it became apparent that the existence of accurate models directly impacts intitial performance and learning efficiency. Better models lead to faster command error correction while reducing the amount of practice needed to attain a given level
 of performance.
@@ -30,12 +30,12 @@ of performance.
 Often however, analytical models are not sufficient or accurate enough or too costly to derive. Rigid body dynamics, albeit well understood, are not expressive enough for most real world applications. Therefore, the model is often learned. Learned models also remove the necessity for building robotswith the focus on being straightforward to model. They can be chosen to fulfill the tasks requirements in terms of compliance with the environment, energy efficiency, and other factors. Online learning can be employed to generalize learned models to gradually adapt for mechanical
 wear and tear and larger state space.
 
-###Model-based learning
+### Model-based learning
 
 Once we have infered the behavior of the system either analytically or by learning from observations, we must determine how to optimally manipulate the system. While the first part is a pure modelling problem, the second question is related to the learning control architectures which can be used together with the model. Given a perfect model, it is possible to solve the optimal control problem exactly for two limited cases using recursive algorithms such as value iteration (1957) or policy iteration (1960). The limitations are severe: the model may only depend linearly on the state and action with quadratic rewards or the model must be discrete in states and actions. While the later limitation seems less severe, such models are often impractical due to the curse of dimensionality in robotics.
 
 
-### Example
+### Spinbot Robot Example 
 
 The new and improved Spinbot 2000 is a multi-purpose robot platform. It is made of a kinematic chain consisting of a linear axis $q_1$, a rotational axis $q_2$ and another linear axis $q_3$, as shown in the figure below. These three joints are actuated with forces and torques of $u_1$, $u_2$, and $u_3$. Different end effectors, including a gripper or a table tennis racket, can be mounted on the end of the robot, indicated by the letter $E$. Thanks to Spinbot’s patented SuperLight technology, the robot’s mass is distributed according to one point mass of $m_1$ at the second joint and another point mass of $m_2$ at the end of the robot $E$.
 
