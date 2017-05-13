@@ -20,6 +20,12 @@ social:
     twitter: Cprimer_
     mail: yun-long.song@outlook.com
 
+#markdown: kramdown
+
+#kramdown:
+  #input: GFM
+  #syntax_highlighter: rouge
+
 
 permalink: /:year/:month/:title/
 # Format
