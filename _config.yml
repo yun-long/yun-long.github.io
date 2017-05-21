@@ -1,3 +1,8 @@
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
 # Basic  
 exclude: ['README.md']
 title: 宋运龙 ／ Yunlong Song 
