@@ -133,17 +133,77 @@ A Markov Decision Process [MDP] is a Markov reward process with decisions. It is
 * $$R$$ is a reward function, $$R^a_s=\mathbb{E}[R_{t+1} \vert S_t=s, A_t=a]$$
 * $$\gamma$$ is a discount factor, $$\gamma \in [0,1]$$ 
 
+### Policies
+
+A policy $$\pi$$, is a mapping from each state $$s \in S$$, and action $$a \in A(s)$$, to the probability $$\pi(a \vert s)$$ of taking action $$a$$ when in state $$s$$. Or a policy is $$\pi$$ is a probability distribution over actions given states.
+
+$$
+\begin{eqnarray}
+\pi (a \vert s) = \mathbb{E}[A_t = a \vert S_t = s]
+\end{eqnarray}
+$$
+
+> * A policy fully defines the behaviour of an agent. 
+* Markov decision process policies depend on current state.
+* Policies are stationary [time independent].
+
+### Value Functions
+
+***state-value function***
+	
+The *state-value function* $$v_{\pi}(s)$$ of an MDP is the expected return starting from state $$s$$, and then following the policy $$\pi$$. 
+
+$$
+\begin{eqnarray}
+v_{\pi}(s) &=& \mathbb{E}_{\pi}[G_t \vert S_t = s] \\
+&=& \mathbb{E}_{\pi}[R_{t+1} + \gamma v_{\pi}(S_{t+1}) \vert S_t = s] 
+\end{eqnarray}
+$$
+
+***action-value function***
+
+The *action-value function* $$q_{\pi}(s, a)$$ is the expected return starting from state $$s$$, taking action $$a$$, following policy $$\pi$$.
+
+$$
+\begin{eqnarray}
+q_{\pi}(s, a) &=& \mathbb{E}_{\pi}[G_t \vert S_t = s, A_t = a] \\
+&=&\mathbb{E}_{\pi} [R_{t+1} + \gamma q_{\pi}(S_{t+1}, A_{t+1}) \vert S_t=s, A_t=a]
+\end{eqnarray}
+$$
+
+***Bellman Expectation Equation***
+
+<img src="/images/posts/RL_MDP/bellman_v.png" height="300" width="500">  
+<img src="/images/posts/RL_MDP/bellman_q.png" height="300" width="500">  
+<img src="/images/posts/RL_MDP/bellman_v2.png" height="300" width="500">  
+<img src="/images/posts/RL_MDP/bellman_q2.png" height="300" width="500">  
 
 
+### Optimal Value Function
 
+The *optimal state-value function* $$v_{\ast}$$ is the maximum  value function over all policies.
 
+$$
+\begin{eqnarray}
+v_{\ast}(s) = \max_{\pi} v_{\pi} (s)
+\end{eqnarray}
+$$
 
+The *optimal action-value function* $$q_{\ast}$$ is the maximum action-value function over all policies.
 
+$$
+\begin{eqnarray}
+q_{\ast}(s, a) = \max_{\pi} q_{\pi} (s, a)
+\end{eqnarray}
+$$
 
+### Optimal Policy
 
+For any Markov Decision Process,
 
-
-
+> * There exists an optimal policy $$\pi_{\ast}$$ that is better than or equal to all other policies, $$\pi_{\ast} \geq \pi, \forall \pi$$
+* All optimal policies achieve the optimal value function, $$v_{\pi_{\ast}} = v_{\ast}(s)$$
+* All optimal policies achieve the optimal action-value function, $$q_{\pi_{\ast}} = q_{\ast}(s, a)$$
 
 
 
