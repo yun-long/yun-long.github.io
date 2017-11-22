@@ -16,7 +16,7 @@ use_math: True
 
 Different from *Dynamic Programming*, Monte Carlo method does not require complete knownledge of the environment. Monte Carlo methods are ways of solving the reinforcement learning problem based on averaging sample returns. To ensure that well-defined returns are available, here we define Monte Carlo methods only for episodic tasks. That is, we assume experience is divided into episodes, and that all episodes eventually terminate no matter what actions are selected.
 
-It has following properties:
+Monte Carlo Learning has following properties:
 
 > * Monte Carlo learn directly from episodes of experience
 * Monte Carlo is model-free, no knownledge of MDP transitions / rewards
@@ -33,6 +33,87 @@ Suppose we wish to estimate $$v_{\pi}(s)$$, the value of a state $$s$$ under pol
 
 <img src="/images/posts/RL_MF/first-mc.png" height="230" width="500">  
 
+### Blackjack Example [MC Learning]
+Blackjack, also known as 21, is one of the most popular card game between usually several players and a dealer in Casinos. The objective of the game is to beat the dealer in one of the following ways:
+
+> * Get 21 points on the player's first two cards ["Blackjack"],  without a dealer blackjack;
+* Reach a final score higher than the dealer without exceeding 21
+* Let the dealer draw additional cards until the dealers's hand exceeds 21
+
+To understand Monte Carlo Learning method in depth, we use a simple Blackjack example that comes from [Denny Britz's github](https://github.com/dennybritz/reinforcement-learning) and uses OpenAI Gym toolkit. 
+
+First, we create a very simple policy for players to play the Blackjack, if the score of the player's hand is greater than 20, sticks, otherwise hits. 
+
+{% highlight python %}
+def sample_policy(observation):
+    """
+    A policy that sticks if the player score is >= 20 and hits otherwise.
+    """
+    score, dealer_score, usable_ace = observation
+    return 0 if score >= 20 else 1
+{% endhighlight %}
+
+Second, following this simple policy, we therefore calculate the state-value function by using First-visit Monte Carlo sampling method.
+
+{% highlight python %}
+def mc_prediction(policy, env, num_episodes, discount_factor=1.0):
+    """
+    Monte Carlo prediction algorithm. Calculates the value function
+    for a given policy using sampling.
+    
+    Args:
+        policy: A function that maps an observation to action probabilities.
+        env: OpenAI gym environment.
+        num_episodes: Nubmer of episodes to sample.
+        discount_factor: Lambda discount factor.
+    
+    Returns:
+        A dictionary that maps from state -> value.
+        The state is a tuple and the value is a float.
+    """
+
+    # Keeps track of sum and count of returns for each state
+    # to calculate an average. We could use an array to save all
+    # returns (like in the book) but that's memory inefficient.
+    returns_sum = defaultdict(float)
+    returns_count = defaultdict(float)
+    
+    # The final value function
+    V = defaultdict(float)
+    
+    for i_episode in range(1, num_episodes + 1):
+        # Generate an episode.
+        # An episode is an array of (state, action, reward) tuples
+        episode = []
+        state = env.reset()
+        for t in range(100): # integer 100 guarantees the episode to teminate eventually
+            action = policy(state)
+            next_state, reward, done, _ = env.step(action)
+            episode.append((state, action, reward))
+            if done:
+                break
+            state = next_state
+
+        # Find all states the we've visited in this episode
+        # We convert each state to a tuple so that we can use it as a dict key
+        states_in_episode = set([tuple(x[0]) for x in episode])
+        for state in states_in_episode:
+            # Find the first occurance of the state in the episode
+            first_occurence_idx = next(i for i,x in enumerate(episode) if x[0] == state)
+            # Sum up all rewards since the first occurance
+            G = sum([x[2]*(discount_factor**i) for i,x in enumerate(episode[first_occurence_idx:])])
+            # Calculate average return for this state over all sampled episodes
+            returns_sum[state] += G
+            returns_count[state] += 1.0
+            V[state] = returns_sum[state] / returns_count[state]
+
+    return V
+{% endhighlight %}
+
+Eventually, plot the **Results**
+
+<img src="/images/posts/RL_MF/blackjack_01.png">  
+<img src="/images/posts/RL_MF/blackjack_02.png">  
 
 ### Temporal Difference Learning
 
