@@ -15,7 +15,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   vertical-align: baseline; }
 
 
-code {
+/*code {
   display: inline;
   color: #000000;
   padding: 1em 1em;
@@ -32,8 +32,8 @@ code {
 pre {
   margin-bottom: 0em;
   padding: 0em 0%;
+  padding-left: 0px;
   background: #e8f2fb;
-  /*border: 5px solid #c9e1f6;*/
   border: 3px solid #1874CD; 
   border-radius: 9px;
   font-family: Consolas, Menlo, Monaco, Lucida 3nsole, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
@@ -48,6 +48,15 @@ pre code {
   background: none;
   border: none;
   word-wrap: normal; 
+}
+*/
+pre {
+  border: 3px solid #1874CD; 
+  background: #f7f4ff;
+  border-radius: 20px;
+  position:relative;
+  padding-left: 0px;
+  line-height: 1.2em;
 }
 
 /* HTML5 display-role reset for older browsers */
