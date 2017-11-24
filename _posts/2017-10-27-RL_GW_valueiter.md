@@ -30,6 +30,53 @@ An agent or a robot tries to clean the room by collecting dirt, which represente
 <img src="/images/posts/RL_MF/gridworld.png" height="600" width="1000">  
 
 ### Value Iteration
+
+The slides from David Silver's lecture explain value iteration in a nice way. I wish I can explain it with nice words. But for now, I am just displaying the slides.
+
+<img src="/images/posts/RL_DP/value_it2.png" height="350" width="500">  
+
+**Value iteration algorithm**
+<img src="/images/posts/RL_DP/value_iteration.png" height="250" width="500">  
+
+**Python code** of implementing value iteration
+
+{% highlight python %}
+def value_iteration(env, theta=0.00001, disount_factor=0.9):
+    """
+    Value Iteration Algorithm
+    """
+    # one step look ahead
+    def one_step_lookahead(V, s):
+        action_value = np.zeros(env.nA)
+        for a in range(env.nA):
+            for prob, next_state, reward, done in env.P[s][a]:
+                action_value[a] += prob * (reward + disount_factor * V[next_state])
+        return action_value
+    #
+    V = np.zeros(env.nS)
+    while True:
+        V_show = V.reshape((9, 10))
+        Delta = 0.0
+        for s in range(env.nS):
+            action_value = one_step_lookahead(V, s)
+            best_action_value = np.max(action_value)
+            Delta = max(Delta, np.abs(best_action_value-V[s]))
+            V[s] = best_action_value
+        if Delta < theta:
+            break
+    # greedy policy
+    def greedy_policy(env, V):
+        policy = np.zeros(env.nS)
+        for s in range(env.nS):
+            action_value = one_step_lookahead(V, s)
+            policy[s] = np.argmax(action_value)
+        return policy
+    #
+    policy = greedy_policy(env, V)
+    return V, policy
+{% endhighlight %}
+
+**Value iteration result**
 <img src="/images/posts/RL_MF/value.gif" height="600" width="800"> 
 
 ### Optimal Policy
