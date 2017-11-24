@@ -80,4 +80,5 @@ def value_iteration(env, theta=0.00001, disount_factor=0.9):
 <img src="/images/posts/RL_MF/value.gif" height="600" width="800"> 
 
 ### Optimal Policy
+
 <img src="/images/posts/RL_MF/policy.png" height="600" width="1000">  
