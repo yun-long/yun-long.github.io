@@ -7,11 +7,11 @@ title: About me
 
 Hi, there. I am Yunlong Song, a master student at Technische Universität Darmstadt (Germany). 
 <p>
-Currently, I am working at <a target="_blank" href="https://www.agtinternational.com/">  AGT Internaltionl </a>, computer vision group, as a student assistent. 
+Currently, I am working at Computer Vision Group, <a target="_blank" href="https://www.agtinternational.com/">  AGT Internaltionl </a>, as a student assistent. 
 
 Also, I am conducting my master thesis under <a target="_blank" href="http://www.ausy.tu-darmstadt.de/Team/BorisBelousov"> Boris Belousov  </a>
 <p>
-I am reading Game Of Thrones. 
+I am reading the Game Of Thrones. 
 
 <p>
 
