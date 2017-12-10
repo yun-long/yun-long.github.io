@@ -93,3 +93,9 @@ However, if we use a small number of basis functions, e.g. 2, the model will be 
 <img src="/images/posts/MachineLearning/under.png" height="480" width="640" >   
 
 And if we use more basis functions, e.g. 20, then the model will be overfitting. 
+
+***Reference***
+
+1. <a target="_blank" href="https://en.wikipedia.org/wiki/Radial_basis_function_network">  Wikipedia </a>
+
+2. <a target="_blank" href="http://work.caltech.edu/telecourse.html">  Caltech Course </a>
