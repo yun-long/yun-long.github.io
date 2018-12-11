@@ -15,7 +15,7 @@
 # in the templates via {{ site.myvariable }}.
 # title: song
 
-baseurl: "/song"
+baseurl: ""
 url: "https://yun-long.github.io"
 permalink: /:year/:month/:day/:title
 paginate: 5
