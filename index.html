@@ -11,9 +11,8 @@ css: ["index.css"]
       <div class="card-content">
         {% if post.thumbnail %}
         <img src="{{ post.thumbnail }}" width=200 align="left" />
-        {% else %}
-        <img src="images/404.png" width=200 align="left" />
         {% endif %}
+        
         <span id="post-title" class="card-title">{{post.title}}</span>
         <p id="post-date">
           <i class="material-icons">date_range</i>
