@@ -16,7 +16,7 @@
 # title: song
 
 baseurl: ""
-url: "https://yun-long.github.io"
+url: "https://yun-long.github.io/about"
 permalink: /:year/:month/:day/:title
 paginate: 5
 
