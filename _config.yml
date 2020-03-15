@@ -22,6 +22,7 @@ paginate: 5
 
 # MatJek specific configurations
 github_profile: "https://github.com/yun-long"
+rpg_profile: "http://rpg.ifi.uzh.ch/people.html"
 user: "Yunlong Song"
 user_email: "song@ifi.uzh.ch"
 disqus_shortname: "yunlong"
