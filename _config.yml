@@ -16,14 +16,14 @@
 # title: song
 
 baseurl: ""
-url: "https://yun-long.github.io/about"
+url: "https://yun-long.github.io/"
 permalink: /:year/:month/:day/:title
 paginate: 5
 
 # MatJek specific configurations
 github_profile: "https://github.com/yun-long"
 user: "Yunlong Song"
-user_email: "yun-long.song@outlook.com"
+user_email: "song@ifi.uzh.ch"
 disqus_shortname: "yunlong"
 
 # Build settings
