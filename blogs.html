@@ -19,7 +19,7 @@ css: ["index.css"]
           <i class="material-icons">date_range</i>
           {{post.date | date: "%d/%m/%Y"}}
         </p>
-        <p class="excerpt">{{ post.content | strip_html | strip_newlines | truncate: 250 }}&hellip;</p>
+        <p class="excerpt">{{ post.content | strip_html | strip_newlines | truncate: 400 }}&hellip;</p>
       </div>
       <div class="card-action">
         <a href="{{post.url | prepend: site.baseurl}}">
