@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Flightmare: A Flexible Quadrotor Simulator (arXiv 2020)"
+title:  "Flightmare: A Flexible Quadrotor Simulator (CoRL 2020)"
 date:  2020-09-04
 categories: Publications
 thumbnail: images/publications/flightmare/flightmare.png
