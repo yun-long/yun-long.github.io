@@ -22,7 +22,7 @@ css: ["index.css"]
         <p class="excerpt">{{ post.content | strip_html | strip_newlines | truncate: 500 }}&hellip;</p>
       </div>
       <div class="card-action">
-        <a href="{{post.url | prepend: site.baseurl}}">
+        <a style="color:#e20606" href="{{post.url | prepend: site.baseurl}}">
           Read More
         </a>
       </div>
