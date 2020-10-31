@@ -4,7 +4,7 @@ css: ["index.css"]
 ---
 
 <div class="row">
-  {% for post in site.posts %}  
+  {% for post in site.posts %}
   {% if post.path contains 'publications' %}
   <div class="col s12">
     <div class="card hoverable">
@@ -19,7 +19,7 @@ css: ["index.css"]
           <i class="material-icons">date_range</i>
           {{post.date | date: "%d/%m/%Y"}}
         </p>
-        <p class="excerpt">{{ post.content | strip_html | strip_newlines | truncate: 300 }}&hellip;</p>
+        <p class="excerpt">{{ post.content | strip_html | strip_newlines | truncate: 500 }}&hellip;</p>
       </div>
       <div class="card-action">
         <a href="{{post.url | prepend: site.baseurl}}">
@@ -36,22 +36,22 @@ css: ["index.css"]
         {% if paginator.previous_page %}
         {% if paginator.previous_page == 1 %}
         <a href="{{site.baseurl}}/publications">
-        {% else %}
-        <a href="{{site.baseurl}}/page{{paginator.previous_page}}">
-        {% endif %}
-        {% else %}
-        <a href="#!">
-        {% endif %}
-          <i class="material-icons">chevron_left</i>
-        </a>
+          {% else %}
+          <a href="{{site.baseurl}}/page{{paginator.previous_page}}">
+            {% endif %}
+            {% else %}
+            <a href="#!">
+              {% endif %}
+              <i class="material-icons">chevron_left</i>
+            </a>
       </li>
       {% if paginator.page == 1 %}
       <li class="active teal">
         <a href="#!">1</a>
-      {% else %}
+        {% else %}
       <li class="waves-effect">
         <a href="{{site.baseurl}}/publications">1</a>
-      {% endif %}
+        {% endif %}
       </li>
       {% for count in (2..paginator.total_pages) %}
       {% if count == paginator.page %}
@@ -63,13 +63,12 @@ css: ["index.css"]
       <li class="{% unless paginator.next_page %}disabled{% else %}waves-effect{% endunless %}">
         {% if paginator.next_page %}
         <a href="{{site.baseurl}}/page{{paginator.next_page}}">
-        {% else %}
-        <a href="#!">
-        {% endif %}
-          <i class="material-icons">chevron_right</i>
-        </a>
+          {% else %}
+          <a href="#!">
+            {% endif %}
+            <i class="material-icons">chevron_right</i>
+          </a>
       </li>
     </ul>
   </div>
 </div>
-
