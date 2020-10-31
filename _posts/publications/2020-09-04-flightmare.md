@@ -7,7 +7,7 @@ thumbnail: images/publications/flightmare/flightmare.png
 comments: false
 ---
 
-<p style="text-align:center; color:#AB3218; font-weight:bold">Y. Song, S. Naji, E. Kaufmann, A. Loquercio, D. Scaramuzza</p>
+<p style="text-align:center; color:#AB3218; font-weight:bold">Yunlong Song, Selim Naji, Elia Kaufmann, Antonio Loquercio, Davide Scaramuzza</p>
 
 ##### Abstract
 
@@ -19,3 +19,18 @@ comments: false
 <iframe width="750" height="421" src="https://www.youtube.com/embed/m9Mx1BCNGFU" frameborder="0"
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+##### BibTex
+<div class="col-lg-8" style="padding:0;">
+<div style="background:#ffffff;margin:0px;padding:0px;">
+<pre>
+    <code class="pre-scrollable" style="background:#ffffff;color:#333;font-size:12px;padding:0px;border-width:0px;">
+    @article{song2020flightmare,
+        title={Flightmare: A Flexible Quadrotor Simulator},
+        author={Song, Yunlong and Naji, Selim and Kaufmann, Elia and Loquercio, Antonio and Scaramuzza, Davide},
+        booktitle={Conference on Robot Learning},
+        year={2020}
+    }
+    </code>
+</pre>
+</div>
+</div>
