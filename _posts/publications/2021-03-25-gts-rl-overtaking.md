@@ -22,7 +22,7 @@ comments: false
 <div style="background:#ffffff;margin:0px;padding:0px;">
 <pre>
     <code class="pre-scrollable" style="background:#ffffff;color:#333;font-size:12px;padding:0px;border-width:0px;">
-    @article{song2021autonomous,
+    @inproceedings{song2021autonomous,
       title={Autonomous Overtaking in Gran Turismo Sport Using Curriculum Reinforcement Learning},
       author={Song, Yunlong and Lin, HaoChih and Kaufmann, Elia and Duerr, Peter and Scaramuzza, Davide},
       booktitle={International Conference on Robotics and Automation (ICRA)}, 

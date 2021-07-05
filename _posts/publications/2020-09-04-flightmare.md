@@ -23,7 +23,7 @@ comments: false
 <div style="background:#ffffff;margin:0px;padding:0px;">
 <pre>
     <code class="pre-scrollable" style="background:#ffffff;color:#333;font-size:12px;padding:0px;border-width:0px;">
-    @article{song2020flightmare,
+    @inproceedings{song2020flightmare,
         title={Flightmare: A Flexible Quadrotor Simulator},
         author={Song, Yunlong and Naji, Selim and Kaufmann, Elia and Loquercio, Antonio and Scaramuzza, Davide},
         booktitle={Conference on Robot Learning},

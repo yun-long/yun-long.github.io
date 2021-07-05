@@ -22,7 +22,7 @@ comments: false
 <div style="background:#ffffff;margin:0px;padding:0px;">
 <pre>
     <code class="pre-scrollable" style="background:#ffffff;color:#333;font-size:12px;padding:0px;border-width:0px;">
-    @article{song2021autonomous,
+    @inproceedings{song2021autonomous,
       title={Autonomous Drone Racing with Deep Reinforcement Learning},
       author={Song, Yunlong and Steinweg, Mats and Kaufmann, Elia and Scaramuzza, Davide},
       journal={arXiv preprint arXiv:2103.08624}, 
