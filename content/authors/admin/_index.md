@@ -1,9 +1,9 @@
 ---
 # Display name
-title: Yunlong Song
+title: 宋运龙
 
 # Name pronunciation (optional)
-name_pronunciation: 宋运龙
+name_pronunciation: Yunlong Song
 
 # Full name (for SEO)
 first_name: Yunlong
@@ -119,5 +119,6 @@ social:
 highlight_name: true
 ---
 
-<!-- Chien Shiung Wu is a professor of artificial intelligence at the Stanford AI Lab. Her research interests include distributed robotics, mobile computing and programmable matter. She leads the Robotic Neurobiology group, which develops self-reconfiguring robots, systems of self-organizing robots, and mobile sensor networks.
-{style="text-align: justify;"} -->
+Yunlong Song is currently a PhD student at the Robotics and Perception Group, which is part of the Department of Informatics, at the University of Zurich, and the Department of Neuroinformatics, which is a joint institute of both the University of Zurich and ETH Zurich. 
+Before that, he received his master’s degree in Information Engineering from TU Darmstadt (Germany) and his bachelor’s degree from Shanghai University, China. 
+{style="text-align: justify;"}
