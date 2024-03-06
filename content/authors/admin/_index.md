@@ -119,8 +119,9 @@ social:
 highlight_name: true
 ---
 
-Yunlong is currently a PhD student at the Robotics and Perception Group, which is part of the Department of Informatics, at the University of Zurich, and the Department of Neuroinformatics, which is a joint institute of both the University of Zurich and ETH Zurich. 
-Before that, he received his master’s degree from TU Darmstadt (Germany) and his bachelor’s degree from Shanghai University (China). 
+Yunlong is currently a PhD student at the [Robotics and Perception Group](https://rpg.ifi.uzh.ch/), which is part of the Department of Informatics, at the [University of Zurich](https://www.uzh.ch/en.html), and the Department of Neuroinformatics, which is a joint institute of both the University of Zurich and [ETH Zurich](https://ethz.ch/en.html). During his PhD, I worked at the [Biomimetic Robotics Lab](https://biomimetics.mit.edu/people) at [MIT](https://www.mit.edu/) with [Prof. Sangbae Kim](https://meche.mit.edu/people/faculty/SANGBAE@MIT.EDU).
+
+Before that, he received his master’s degree from [TU Darmstadt](https://www.tu-darmstadt.de/index.en.jsp) under the supervision of [Prof. Jan Peters](https://www.ias.informatik.tu-darmstadt.de/Member/JanPeters).
 
 
 {style="text-align: justify;"}
