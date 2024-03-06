@@ -39,6 +39,8 @@ education:
   courses:
     - course: PhD in Robotics
       institution: University of Zurich, Switzerland
+    - course: Visiting PhD in Robotics
+      institution: MIT, USA
     - course: MSc in Information Engineering
       institution: TU Darmstadt, Germany
     - course: BSc in Communication Engineering 
