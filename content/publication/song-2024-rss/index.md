@@ -14,11 +14,11 @@ authors:
 #   - 'Equal contribution'
 #   - 'Equal contribution'
 
-date: '2024'
+date: '2024-02-08'
 doi: ''
 
 # Schedule page publish date (NOT publication's date).
-publishDate: '2024'
+publishDate: '2024-02-08'
 
 # Publication type.
 # Accepts a single type but formatted as a YAML list (for Hugo requirements).
@@ -32,7 +32,7 @@ publication_short: In Under Review
 abstract: This work represents the first demonstration of using differentiable simulation for controlling a real quadruped robot.
 
 # Summary. An optional shortened abstract.
-summary: To the best of our knowledge, this work represents the first demonstration of using differentiable simulation for controlling a real quadruped robot.
+summary: This work represents the first demonstration of using differentiable simulation for controlling a real quadruped robot.
 
 tags: []
 
