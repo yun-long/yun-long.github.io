@@ -26,10 +26,9 @@ publication_types: ['journal']
 
 # Publication name and optional abbreviated publication name.
 publication: In IEEE Transactions on Robotics
-publication_short: In T-RO
+publication_short: In TRO
 
 abstract: Policy search and model predictive control (MPC) are two different paradigms for robot control---policy search has the strength of automatically learning complex policies using experienced data, and MPC can offer optimal control performance using models and trajectory optimization. An open research question is how to leverage and combine the advantages of both approaches. In this article, we provide an answer by using policy search for automatically choosing high-level decision variables for MPC, which leads to a novel policy-search-for-model-predictive-control framework. Specifically, we formulate the MPC as a parameterized controller, where the hard-to-optimize decision variables are represented as high-level policies. Such a formulation allows optimizing policies in a self-supervised fashion. We validate this framework by focusing on a challenging problem in agile drone flight---flying a quadrotor through fast-moving gates. Experiments show that our controller achieves robust and real-time control performance in both simulation and the real world. The proposed framework offers a new perspective for merging learning and control.
-{style="text-align: justify;"}
 
 
 # Summary. An optional shortened abstract.
