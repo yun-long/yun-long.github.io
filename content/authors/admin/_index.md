@@ -1,9 +1,9 @@
 ---
 # Display name
-title: 宋运龙
+title: Yunlong Song
 
 # Name pronunciation (optional)
-name_pronunciation: Yunlong Song
+name_pronunciation: 宋运龙
 
 # Full name (for SEO)
 first_name: Yunlong
@@ -32,16 +32,17 @@ interests:
   - Robotics
   - Reinforcement Learning
   - Flying Robots
+  - Legged Robots
 
 # Education to show in About widget
 education:
   courses:
     - course: PhD in Robotics
-      institution: University of Zurich
-    - course: MSc in Information and Communication Engineering
-      institution: TU Darmstadt
-    - course: BSc in Engineer 
-      institution: Shanghai University
+      institution: University of Zurich, Switzerland
+    - course: MSc in Information Engineering
+      institution: TU Darmstadt, Germany
+    - course: BSc in Communication Engineering 
+      institution: Shanghai University, China
       # year: 2008
 
 # Skills
