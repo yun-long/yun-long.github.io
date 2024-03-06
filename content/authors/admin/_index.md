@@ -129,5 +129,5 @@ Before his PhD, Yunlong received his master’s degree from [TU Darmstadt](https
 
 Yunlong’s research interests lie at the intersection of optimal control, reinforcement learning, and differentiable physics. 
 He has developed a reinforcement learning policy that push can an agile drone to its maximum performance in the physical world. 
-Yunlong was born and raised in [a small village](./home.jpg) in South China. 
+Yunlong was born and raised in ![a small village](./home.jpg) in South China. 
 {style="text-align: justify;"}
