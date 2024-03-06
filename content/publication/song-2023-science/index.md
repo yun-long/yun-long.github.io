@@ -1,11 +1,14 @@
 ---
-title: 'Policy Search for Model Predictive Control with Application to Agile Drone Flight'
+title: 'Reaching the Limit in Autonomous Racing: Optimal Control versus Reinforcement Learning'
 
 # Authors
 # If you created a profile for a user (e.g. the default `admin` user), write the username (folder name) here
 # and it will be replaced with their full name and linked to their profile.
 authors:
   - admin
+  - Angel Romero
+  - Mathias Mueller 
+  - Vladlen Koltun
   - Davide Scaramuzza
 
 # # Author notes (optional)
@@ -14,10 +17,10 @@ authors:
 #   - 'Equal contribution'
 
 date: '2023-09-13'
-doi: 'https://doi.org/10.1109/TRO.2022.3141602'
+doi: 'https://doi.org/10.1126/scirobotics.adg1462'
 
 # Schedule page publish date (NOT publication's date).
-publishDate: '2022-02-23'
+publishDate: '2023-09-13'
 
 # Publication type.
 # Accepts a single type but formatted as a YAML list (for Hugo requirements).
@@ -25,14 +28,13 @@ publishDate: '2022-02-23'
 publication_types: ['journal']
 
 # Publication name and optional abbreviated publication name.
-publication: In IEEE Transactions on Robotics
-publication_short: In TRO
+publication: In Science Robotics
+publication_short: In Science Robotics (cover)
 
-abstract: Policy search and model predictive control (MPC) are two different paradigms for robot control---policy search has the strength of automatically learning complex policies using experienced data, and MPC can offer optimal control performance using models and trajectory optimization. An open research question is how to leverage and combine the advantages of both approaches. In this article, we provide an answer by using policy search for automatically choosing high-level decision variables for MPC, which leads to a novel policy-search-for-model-predictive-control framework. Specifically, we formulate the MPC as a parameterized controller, where the hard-to-optimize decision variables are represented as high-level policies. Such a formulation allows optimizing policies in a self-supervised fashion. We validate this framework by focusing on a challenging problem in agile drone flight---flying a quadrotor through fast-moving gates. Experiments show that our controller achieves robust and real-time control performance in both simulation and the real world. The proposed framework offers a new perspective for merging learning and control.
-
+abstract: A central question in robotics is how to design a control system for an agile mobile robot. This paper studies this question systematically, focusing on a challenging setting---autonomous drone racing. We show that a neural network controller trained with reinforcement learning (RL) outperformed optimal control (OC) methods in this setting. We then investigated which fundamental factors have contributed to the success of RL or have limited OC. Our study indicates that the fundamental advantage of RL over OC is not that it optimizes its objective better but that it optimizes a better objective. OC decomposes the problem into planning and control with an explicit intermediate representation, such as a trajectory, that serves as an interface. This decomposition limits the range of behaviors that can be expressed by the controller, leading to inferior control performance when facing unmodeled effects. In contrast, RL can directly optimize a task-level objective and can leverage domain randomization to cope with model uncertainty, allowing the discovery of more robust control responses. Our findings allowed us to push an agile drone to its maximum performance, achieving a peak acceleration greater than 12 times the gravitational acceleration and a peak velocity of 108 kilometers per hour. Our policy achieved superhuman control within minutes of training on a standard workstation. This work presents a milestone in agile robotics and sheds light on the role of RL and OC in robot control.
 
 # Summary. An optional shortened abstract.
-summary: We propose using policy search for automatically choosing high-level decision variables for MPC, which leads to a novel policy-search-for-model-predictive-control framework.
+summary: The fundamental advantage of reinforcement learning over optimal control lies in its optimization objective.
 
 tags: []
 
@@ -44,14 +46,14 @@ featured: true
 # - name: Custom Link
 #   url: http://example.org
 
-url_pdf: 'https://ieeexplore.ieee.org/abstract/document/9719129'
-url_code: 'https://github.com/uzh-rpg/high_mpc'
+url_pdf: 'https://www.science.org/stoken/author-tokens/ST-1485/full'
+# url_code: 'https://github.com/HugoBlox/hugo-blox-builder'
 url_dataset: ''
 url_poster: ''
-url_project: 'https://uzh-rpg.github.io/high_mpc/'
+url_project: ''
 url_slides: ''
 # url_source: 'https://github.com/HugoBlox/hugo-blox-builder'
-url_video: 'https://youtu.be/Qei7oGiEIxY'
+url_video: 'https://youtu.be/HGULBBAo5lA'
 
 # Featured image
 # To use, add an image named `featured.jpg/png` to your page's folder.

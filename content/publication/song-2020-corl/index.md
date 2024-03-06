@@ -1,14 +1,14 @@
 ---
-title: 'Reaching the limit in autonomous racing:Optimal control versus reinforcement learning'
+title: 'Flightmare: A Flexible Quadrotor Simulator'
 
 # Authors
 # If you created a profile for a user (e.g. the default `admin` user), write the username (folder name) here
 # and it will be replaced with their full name and linked to their profile.
 authors:
   - admin
-  - Angel Romero
-  - Mathias Mueller 
-  - Vladlen Koltun
+  - Selim Naji
+  - Elia Kaufmann
+  - Antonio Loquercio
   - Davide Scaramuzza
 
 # # Author notes (optional)
@@ -16,25 +16,25 @@ authors:
 #   - 'Equal contribution'
 #   - 'Equal contribution'
 
-date: '2023-09-13'
-doi: 'https://doi.org/10.1126/scirobotics.adg1462'
+date: '2020-11-16'
+doi: ''
 
 # Schedule page publish date (NOT publication's date).
-publishDate: '2023-09-13'
+publishDate: '2020-11-16'
 
 # Publication type.
 # Accepts a single type but formatted as a YAML list (for Hugo requirements).
 # Enter a publication type from the CSL standard.
-publication_types: ['journal']
+publication_types: ['conference']
 
 # Publication name and optional abbreviated publication name.
-publication: In Science Robotics
-publication_short: In Science Robotics (cover)
+publication: In Conference on Robot Learning 
+publication_short: In CoRL
 
-abstract: A central question in robotics is how to design a control system for an agile mobile robot. This paper studies this question systematically, focusing on a challenging setting---autonomous drone racing. We show that a neural network controller trained with reinforcement learning (RL) outperformed optimal control (OC) methods in this setting. We then investigated which fundamental factors have contributed to the success of RL or have limited OC. Our study indicates that the fundamental advantage of RL over OC is not that it optimizes its objective better but that it optimizes a better objective. OC decomposes the problem into planning and control with an explicit intermediate representation, such as a trajectory, that serves as an interface. This decomposition limits the range of behaviors that can be expressed by the controller, leading to inferior control performance when facing unmodeled effects. In contrast, RL can directly optimize a task-level objective and can leverage domain randomization to cope with model uncertainty, allowing the discovery of more robust control responses. Our findings allowed us to push an agile drone to its maximum performance, achieving a peak acceleration greater than 12 times the gravitational acceleration and a peak velocity of 108 kilometers per hour. Our policy achieved superhuman control within minutes of training on a standard workstation. This work presents a milestone in agile robotics and sheds light on the role of RL and OC in robot control.
+abstract: Currently available quadrotor simulators have a rigid and highly-specialized structure, either are they really fast, physically accurate, or photo-realistic. In this work, we propose a paradigm-shift in the development of simulators, moving the trade-off between accuracy and speed from the developers to the end-users. We release a new modular quadrotor simulator, Flightmare. Flightmare is composed of two main components, a configurable rendering engine built on Unity and a flexible physics engine for dynamics simulation. Those two components are totally decoupled and can run independently from each other. Flightmare comes with several desirable features, (i) a large multi-modal sensor suite, including an interface to extract the 3D point-cloud of the scene; (ii) an API for reinforcement learning which can simulate hundreds of quadrotors in parallel; and (iii) an integration with a virtual-reality headset for interaction with the simulated environment. Flightmare can be used for various applications, including path-planning, reinforcement learning, visual-inertial odometry, deep learning, human-robot interaction, etc.
 
 # Summary. An optional shortened abstract.
-summary: The fundamental advantage of reinforcement learning over optimal control lies in its optimization objective.
+summary: Flightmare is a flexible quadrotor simulator for reinforcement learning. 
 
 tags: []
 
@@ -46,14 +46,14 @@ featured: true
 # - name: Custom Link
 #   url: http://example.org
 
-url_pdf: 'https://www.science.org/stoken/author-tokens/ST-1485/full'
-# url_code: 'https://github.com/HugoBlox/hugo-blox-builder'
+url_pdf: 'https://rpg.ifi.uzh.ch/docs/CoRL20_Yunlong.pdf'
+url_code: 'https://github.com/uzh-rpg/flightmare'
 url_dataset: ''
 url_poster: ''
 url_project: ''
 url_slides: ''
 # url_source: 'https://github.com/HugoBlox/hugo-blox-builder'
-url_video: 'https://youtu.be/HGULBBAo5lA'
+url_video: 'https://youtu.be/m9Mx1BCNGFU'
 
 # Featured image
 # To use, add an image named `featured.jpg/png` to your page's folder.

@@ -21,7 +21,7 @@ role: PhD in Robotics
 
 # Organizations/Affiliations to show in About widget
 organizations:
-  - name: University of Zurich
+  - name: Robotics and Perception Group
     url: https://rpg.ifi.uzh.ch/
 
 # Short bio (displayed in user profile at end of posts)
@@ -90,9 +90,9 @@ education:
 #   For an email link, use "fas" icon pack, "envelope" icon, and a link in the
 #   form "mailto:your-email@example.com" or "/#contact" for contact widget.
 social:
-  # - icon: envelope
-  #   icon_pack: fas
-  #   link: '/#contact'
+  - icon: envelope
+    icon_pack: fas
+    link: '/#contact'
   - icon: twitter
     icon_pack: fab
     link: https://twitter.com/realyunlong
@@ -119,7 +119,7 @@ social:
 highlight_name: true
 ---
 
-Yunlong is currently a PhD student at the [Robotics and Perception Group](https://rpg.ifi.uzh.ch/), which is part of the Department of Informatics, at the [University of Zurich](https://www.uzh.ch/en.html), and the Department of Neuroinformatics, which is a joint institute of both the University of Zurich and [ETH Zurich](https://ethz.ch/en.html). During his PhD, he worked at the [Biomimetic Robotics Lab](https://biomimetics.mit.edu/people) at [MIT](https://www.mit.edu/) with [Prof. Sangbae Kim](https://meche.mit.edu/people/faculty/SANGBAE@MIT.EDU).
+Yunlong is currently a PhD student supervised by [Prof. Davide Scaramuzza](https://rpg.ifi.uzh.ch/people_scaramuzza.html) at the [Robotics and Perception Group](https://rpg.ifi.uzh.ch/), which is part of the Department of Informatics, at the [University of Zurich](https://www.uzh.ch/en.html), and the Department of Neuroinformatics, which is a joint institute of both the University of Zurich and [ETH Zurich](https://ethz.ch/en.html). During his PhD, he worked at the [Biomimetic Robotics Lab](https://biomimetics.mit.edu/people) at [MIT](https://www.mit.edu/) with [Prof. Sangbae Kim](https://meche.mit.edu/people/faculty/SANGBAE@MIT.EDU).
 <!--  -->
 Before his PhD, Yunlong received his master’s degree from [TU Darmstadt](https://www.tu-darmstadt.de/index.en.jsp) under the supervision of [Prof. Jan Peters](https://www.ias.informatik.tu-darmstadt.de/Member/JanPeters).
 
