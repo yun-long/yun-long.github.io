@@ -37,9 +37,9 @@ interests:
 # Education to show in About widget
 education:
   courses:
-    - course: PhD in Robotics
+    - course: PhD Student in Robotics
       institution: University of Zurich, Switzerland
-    - course: Visiting PhD in Robotics
+    - course: Visiting PhD Student in Robotics
       institution: MIT, USA
     - course: MSc in Information Engineering
       institution: TU Darmstadt, Germany
