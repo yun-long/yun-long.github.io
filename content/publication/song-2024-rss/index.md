@@ -29,10 +29,10 @@ publication_types: ['conference']
 publication: In Under Reivew
 publication_short: In Under Review
 
-abstract: This work represents the first demonstration of using differentiable simulation for controlling a real quadruped robot.
+abstract: The first demonstration of using differentiable simulation for controlling a real quadruped robot.
 
 # Summary. An optional shortened abstract.
-summary: This work represents the first demonstration of using differentiable simulation for controlling a real quadruped robot.
+summary: The first demonstration of using differentiable simulation for controlling a real quadruped robot. An exciting paper coming soon. 
 
 tags: []
 

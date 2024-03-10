@@ -128,9 +128,9 @@ Before his PhD, Yunlong received his master’s degree from [TU Darmstadt](https
 
 In his research, Yunlong focuses on creating new control algorithms that leverage the fundamental concepts in optimal control, reinforcement learning, and differentiable physics. 
 He has developed the [Flightmare](https://github.com/uzh-rpg/flightmare) Simulator and the first reinforcement learning [policy](https://youtu.be/0d1fEvTJFtI) that pushes a super agile drone to its maximum performance in the physical world. 
-Recently, he achieved one of the first demonstration of differentiable-simulation-enabled real-world legged locomotion. 
+<!-- Recently, he achieved one of the first demonstration of differentiable-simulation-enabled real-world legged locomotion.  -->
 {style="text-align: justify;"}
 
 
-On a personal level, Yunlong was born and raised in a [small, remote village](https://github.com/yun-long/yun-long.github.io/blob/main/content/authors/admin/home.jpg) in South China, an area with very limited access to proper education due to poverty. He financed his Master's studies in Germany by working part-time at a software company and as a student assistant at the university. This effort made him the only one from his village to achieve an education abroad. He understands the value of accessible education. Yunlong's life goal is to eliminate the eduation barriers that he once faced. 
+On a personal level, Yunlong was born and raised in a [small, remote village](https://github.com/yun-long/yun-long.github.io/blob/main/content/authors/admin/home.jpg) in South China, an area with very limited access to proper education due to poverty. He financed his Master's studies in Germany by working part-time at a software company and as a student assistant at the university. Yunlong deeply understands the value of proper education. His life goal is to eliminate the eduation barriers that he once faced, or more realistically, to help others in getting better education.  
 {style="text-align: justify;"}
