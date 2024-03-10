@@ -122,16 +122,15 @@ highlight_name: true
 ---
 
 Yunlong is currently a PhD student supervised by [Prof. Davide Scaramuzza](https://rpg.ifi.uzh.ch/people_scaramuzza.html) at the [Robotics and Perception Group](https://rpg.ifi.uzh.ch/), which is part of the Department of Informatics, at the [University of Zurich](https://www.uzh.ch/en.html), and the Department of Neuroinformatics, which is a joint institute of both the University of Zurich and [ETH Zurich](https://ethz.ch/en.html). During his PhD, he worked at the [Biomimetic Robotics Lab](https://biomimetics.mit.edu/people) at [MIT](https://www.mit.edu/) with [Prof. Sangbae Kim](https://meche.mit.edu/people/faculty/SANGBAE@MIT.EDU).
-{style="text-align: justify;"}
-
-<!--  -->
 Before his PhD, Yunlong received his master’s degree from [TU Darmstadt](https://www.tu-darmstadt.de/index.en.jsp) under the supervision of [Prof. Jan Peters](https://www.ias.informatik.tu-darmstadt.de/Member/JanPeters).
 {style="text-align: justify;"}
 
 
-Yunlong’s research interests lie at the intersection of optimal control, reinforcement learning, and differentiable physics. 
-He has developed the [Flightmare](https://github.com/uzh-rpg/flightmare) Simulator and the first reinforcement learning [policy](https://youtu.be/0d1fEvTJFtI) that push can a super agile drone to its maximum performance in the physical world. 
+In his research, Yunlong focuses on creating new control algorithms that leverage the fundamental concepts in optimal control, reinforcement learning, and differentiable physics. 
+He has developed the [Flightmare](https://github.com/uzh-rpg/flightmare) Simulator and the first reinforcement learning [policy](https://youtu.be/0d1fEvTJFtI) that pushes a super agile drone to its maximum performance in the physical world. 
+Recently, he achieved one of the first demonstration of differentiable-simulation-enabled real-world legged locomotion. 
+{style="text-align: justify;"}
 
 
-Yunlong was born and raised in a [small, remote village](https://github.com/yun-long/yun-long.github.io/blob/main/content/authors/admin/home.jpg) in South China, an area with very limited access to proper education due to poverty. He financed his Master's studies in Germany by working part-time at a software company and as a student assistant at the university. This effort made him the only one from his village to pursue and achieve an education abroad. He understands the value of accessible education. Yunlong's life goal is to eliminate the eduation barriers that he once faced. 
+On a personal level, Yunlong was born and raised in a [small, remote village](https://github.com/yun-long/yun-long.github.io/blob/main/content/authors/admin/home.jpg) in South China, an area with very limited access to proper education due to poverty. He financed his Master's studies in Germany by working part-time at a software company and as a student assistant at the university. This effort made him the only one from his village to achieve an education abroad. He understands the value of accessible education. Yunlong's life goal is to eliminate the eduation barriers that he once faced. 
 {style="text-align: justify;"}
