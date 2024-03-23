@@ -75,7 +75,7 @@ security:
     getenv:
     - ^HUGO_
     - ^CI$
-    - ^WC_POS_CSS$
+    - ^WC_POST_CSS$
   http:
     mediaTypes: null
     methods:
