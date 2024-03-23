@@ -123,8 +123,8 @@ security:
   funcs:
     getenv:
     - ^HUGO_
+    - ^WC_
     - ^CI$
-    - ^WC_POST_CSS$
   http:
     mediaTypes: null
     methods:
