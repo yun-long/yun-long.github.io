@@ -56,9 +56,29 @@ related:
       weight: 100
     - name: categories
       weight: 70
-security:
-  _merge: deep
 sitemap:
   _merge: deep
 minify:
   _merge: deep
+security:
+  _merge: none
+  enableInlineShortcodes: false
+  exec:
+    allow:
+    - ^(dart-)?sass(-embedded)?$
+    - ^go$
+    - ^npx$
+    - ^postcss$
+    osEnv:
+    - (?i)^((HTTPS?|NO)_PROXY|PATH(EXT)?|APPDATA|TE?MP|TERM|GO\w+|(XDG_CONFIG_)?HOME|USERPROFILE|SSH_AUTH_SOCK|DISPLAY|LANG|SYSTEMDRIVE)$
+  funcs:
+    getenv:
+    - ^HUGO_
+    - ^CI$
+    - ^WC_POS_CSS$
+  http:
+    mediaTypes: null
+    methods:
+    - (?i)GET|POST
+    urls:
+    - .*

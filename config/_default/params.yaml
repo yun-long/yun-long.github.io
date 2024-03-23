@@ -110,7 +110,24 @@ extensions:
     enable: true
 
 # Security
-
 security:
-  # Allow frame for embedding speaker notes in slides
-  allow_frame: true
+  enableInlineShortcodes: false
+  exec:
+    allow:
+    - ^(dart-)?sass(-embedded)?$
+    - ^go$
+    - ^npx$
+    - ^postcss$
+    osEnv:
+    - (?i)^((HTTPS?|NO)_PROXY|PATH(EXT)?|APPDATA|TE?MP|TERM|GO\w+|(XDG_CONFIG_)?HOME|USERPROFILE|SSH_AUTH_SOCK|DISPLAY|LANG|SYSTEMDRIVE)$
+  funcs:
+    getenv:
+    - ^HUGO_
+    - ^CI$
+    - ^WC_POS_CSS$
+  http:
+    mediaTypes: null
+    methods:
+    - (?i)GET|POST
+    urls:
+    - .*
