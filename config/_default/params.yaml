@@ -4,22 +4,20 @@
 # This file is formatted using YAML syntax - learn more at https://learnxinyminutes.com/docs/yaml/
 
 # Appearance
-
 appearance:
+  mode: dark 
   theme_day: minimal
   theme_night: minimal
   font: minimal
   font_size: L
 
 # SEO
-
 marketing:
   seo:
     site_type: Person
     local_business_type: ''
     org_name: ''
-    description: 'A highly-customizable Hugo academic resume theme powered by Hugo Blox Builder.'
-    twitter: 'GetResearchDev'
+    description: 'I am a robotics.'
   analytics:
     google_analytics: ''
     baidu_tongji: ''
@@ -35,14 +33,13 @@ header:
   navbar:
     enable: true
     align: l
-    show_logo: true
+    show_logo: false 
     show_language: false
     show_day_night: true
-    show_search: true
-    highlight_active_link: true
+    show_search: false 
+    highlight_active_link: false 
 
 # Site footer
-
 footer:
   copyright:
     notice: '© {year} Me. This work is licensed under {license}'
@@ -123,8 +120,8 @@ security:
   funcs:
     getenv:
     - ^HUGO_
-    - ^WC_
     - ^CI$
+    - ^WC_
   http:
     mediaTypes: null
     methods:
