@@ -177,7 +177,7 @@ sections:
       text: |-
         {{< gallery album="demo" >}}
     design:
-      view: showcase 
+      view: compact 
       columns: '1'
   # -----------------------------------------------------------------------------------------
  #- block: portfolio
