@@ -73,6 +73,7 @@ hr {
     align-items: center;
     padding: 1.5rem;
     box-sizing: border-box;
+    text-align: left;
 }
 
 .profile-image-container {
