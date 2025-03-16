@@ -8,7 +8,7 @@ html, body {
     background-color: #f4f4f4;
     font-weight: 300;
     letter-spacing: 0.02em;
-    font-size: 15px; /* Reduced from default */
+    font-size: 16px; /* Reduced from default */
 }
 
 h1, h2 {
@@ -226,6 +226,22 @@ hr {
     display: flex;
     align-items: center;
     gap: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    padding: 5px 0;
+}
+
+.project-title:hover {
+    color: #007bff; /* A nice blue color for hover, adjust as needed */
+}
+
+.project-title .toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.project-description {
+    transition: max-height 0.5s ease, opacity 0.5s ease;
+    overflow: hidden;
 }
 
 .toggle-icon {

@@ -54,7 +54,7 @@
                       </a>
                   </div>
                   <div class="project-description">
-                      <div class="video-text-container">
+                      <!-- <div class="video-text-container"> -->
                           <p>
                             Learning pixel-to-action control policies is challenging due to the high-dimensional
                             and partially observable nature of the problem. This work
@@ -84,12 +84,42 @@
                             existing systems.
 
                           </p>
-                          <video class="project-video project-video-small" autoplay loop muted playsinline>
+                          <video class="project-video" autoplay loop muted playsinline>
                               <source src="videos/vision_swarm.mp4" type="video/mp4">
                           </video>
-                      </div>
+                      <!-- </div> -->
                   </div>
               </div>
+
+              <div class="project-item">
+                  <div class="project-header">
+                      <a href="#" class="project-title" onclick="toggleDescription(this)">
+                          Reaching the Limit in Autonomous Drone Racing
+                          <span class="toggle-icon">▼</span>
+                      </a>
+                  </div>
+                  <div class="project-description">
+                      <!-- <div class="video-text-container"> -->
+                          <p>
+                            How can we push a robot to its absolut limits in the physical world?
+                            We developed one of the world fastest autonomous drone and pushed this machine to its maximum performance
+                            in the real world, achieving a peak acceleration greater than 12g and
+                            a peak velocity of 108 km/h.
+                            The key to our success is a neural network policy trained with reinforcement learning.
+                            Our neural network policy achieved superhuman control performance within minutes of training on
+                            a standard workstation. Additinally, our study indicates that the fundamental advantage of
+                            reinforcement learning over optimal control is not that
+                            it optimizes its objective better but that it optimizes a better objective.
+                            RL can directly optimize a task-level objective and can leverage domain randomization
+                            to cope with model uncertainty, allowing the discovery of more robust control responses.
+                          </p>
+                          <video class="project-video" autoplay loop muted playsinline>
+                              <source src="videos/splits.mp4" type="video/mp4">
+                          </video>
+                      <!-- </div> -->
+                  </div>
+              </div>
+
 
               <div class="project-item">
                   <div class="project-header">
@@ -102,10 +132,9 @@
                       <div class="video-text-container">
                           <p>
                               This project presents one of the
-                              first successful applications of differentiable
-                              simulation for real-world quadruped locomotion,
-                              offering a compelling alternative to traditional
-                              RL methods. Differentiable simulation promises
+                              earlist successful applications of differentiable
+                              simulation for real-world quadruped locomotion.
+                              Differentiable simulation promises
                               fast convergence and stable training by computing
                               low-variance first-order gradients using robot
                               dynamics. However, its usage for legged robots is
@@ -126,41 +155,12 @@
               <div class="project-item">
                   <div class="project-header">
                       <a href="#" class="project-title" onclick="toggleDescription(this)">
-                          Reaching the Physical Limits of Drone Racing
-                          <span class="toggle-icon">▼</span>
-                      </a>
-                  </div>
-                  <div class="project-description">
-                      <div class="video-text-container">
-                          <p>
-                            How can we push a robot to its absolut limits in the physical world?
-                            We developed one of the world fastest autonomous drone and pushed this machine to its maximum performance
-                            in the real world, achieving a peak acceleration greater than 12g and
-                            a peak velocity of 108 km/h.
-                            The key to our success is a neural network policy trained with reinforcement learning.
-                            Our neural network policy achieved superhuman control performance within minutes of training on
-                            a standard workstation. Additinally, our study indicates that the fundamental advantage of
-                            reinforcement learning over optimal control is not that
-                            it optimizes its objective better but that it optimizes a better objective.
-                            RL can directly optimize a task-level objective and can leverage domain randomization
-                            to cope with model uncertainty, allowing the discovery of more robust control responses.
-                          </p>
-                          <video class="project-video project-video-small" autoplay loop muted playsinline>
-                              <source src="videos/splits.mp4" type="video/mp4">
-                          </video>
-                      </div>
-                  </div>
-              </div>
-
-              <div class="project-item">
-                  <div class="project-header">
-                      <a href="#" class="project-title" onclick="toggleDescription(this)">
                           Optimal Control for Agile Flight
                           <span class="toggle-icon">▼</span>
                       </a>
                   </div>
                   <div class="project-description">
-                      <div class="video-text-container">
+                      <!-- <div class="video-text-container"> -->
                           <p>
                             This project aims to design an optimal controller for agile drone flight. Model
                             Predictive Control (MPC) provides near optimal performance by leveraging models and numerical
@@ -172,10 +172,10 @@
                             traditionally hard-to-optimize decision variables are represented as high-level policies
                             and learned through policy search. This approach enables MPC to adapt to changing environments.
                           </p>
-                          <video class="project-video project-video-small" autoplay loop muted playsinline>
+                          <video class="project-video" autoplay loop muted playsinline>
                               <source src="videos/highmpc.mp4" type="video/mp4">
                           </video>
-                      </div>
+                      <!-- </div> -->
                   </div>
               </div>
 
