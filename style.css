@@ -270,7 +270,7 @@ hr {
 }
 
 .project-video-small {
-    width: 400px;  /* Adjust size as needed */
+    width: 500px;  /* Adjust size as needed */
     flex-shrink: 0;
 }
 

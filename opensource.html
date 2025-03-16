@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Research Projects - Yunlong Song</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font Awesome for modern icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="profile-image-container">
+                <img src="images/me.jpg" alt="Yunlong Song" class="profile-image">
+            </div>
+            <div class="sidebar-links">
+                <a href="https://scholar.google.com/citations?user=EzAXL9QAAAAJ&hl=en" title="Google Scholar">
+                    <i class="fas fa-graduation-cap"></i>
+                </a>
+                <a href="https://x.com/realyunlong" title="Twitter">
+                    <i class="fab fa-x-twitter"></i>
+                </a>
+                <a href="https://github.com/yun-long" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+            <br>
+            <a href="index.html" title="Home">Home</a>
+            <br>
+            <a href="project.html" title="Projects">Research Projects</a>
+            <br>
+            <a href="opensource.html" title="OpenSource">Open Source</a>
+        </div>
+        <main class="main-content">
+            <section class="open-source">
+                <h2>Open-Source Projects</h2>
+                <div class="project-list">
+                    <div class="project-item">
+                        <div class="project-header">
+                            <a href="https://github.com/uzh-rpg/flightmare" class="project-title" target="_blank">
+                                Flightmare: A Flexible Quadrotor Simulator
+                            </a>
+                        </div>
+                        <div class="project-description">
+                            <p>
+                                Flightmare is a flexible quadrotor simulator
+                                that provides a high-fidelity rendering engine
+                                and a CPU parallized physics engine for training reinforcement
+                                learning control policies for quadrotor applications.
+                            </p>
+                            <div class="project-meta">
+                                <span>C++</span> | <span>Python</span>| <span>Reinforcement Learning</span> | <span>Simulation</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="project-item">
+                        <div class="project-header">
+                            <a href="https://github.com/uzh-rpg/agilicious?tab=readme-ov-file" class="project-title" target="_blank">
+                               Agilicious: Open-source and Open-hardware Agile Quadrotor for Vision-based Flight
+                            </a>
+                        </div>
+                        <div class="project-description">
+                            <p>
+                              Agilicious is a codesigned hardware and
+                              software framework tailored to autonomous, agile
+                              quadrotor flight. It  supports both model-based and
+                              neural network–based controllers. Also, it provides
+                              high thrust-to-weight and torque-to-inertia ratios
+                              for agility, onboard vision sensors, graphics
+                              processing unit (GPU)–accelerated compute hardware
+                              for real-time perception and neural network
+                              inference, a real-time flight controller, and a
+                              versatile software stack.
+                            </p>
+                            <div class="project-meta">
+                                <span>C++</span> | <span>Optimal Control</span> | <span>Robotics</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="project-item">
+                        <div class="project-header">
+                            <a href="https://github.com/uzh-rpg/high_mpc" class="project-title" target="_blank">
+                              Policy Search for Model Predictive Control
+                            </a>
+                        </div>
+                        <div class="project-description">
+                            <p>
+                              A minimal implementation of policy search for model predictive control.
+                            </p>
+                            <div class="project-meta">
+                                <span>Optimal Control</span> | <span>Python</span> | <span>Casadi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="project-item">
+                        <div class="project-header">
+                            <a href="https://github.com/yun-long/Foundations-of-Robotics" class="project-title" target="_blank">
+                              Foundations of Robotics
+                            </a>
+                        </div>
+                        <div class="project-description">
+                            <p>
+                              This repository provides a collection of Online
+                              Lectures and Lecture Notes about Robotics. The design principle of
+                              those notes is to be concise, clear, and
+                              comprehensive, namely, less is more. Whether you're
+                              a beginner or looking to deepen your understanding,
+                              this resource aims to lay a solid foundation in
+                              robotics.
+                            </p>
+                            <div class="project-meta">
+                                <span>Optimal Control</span> | <span>Reinforcement Learning</span> | <span>Deep Learning</span> | <span>Computer Vision</span> | <span>LaTeX</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- <div class="project-item"> -->
+                    <!--     <div class="project-header"> -->
+                    <!--         <a href="https://github.com/yun-long/yun-long.github.io" class="project-title" target="_blank"> -->
+                    <!--             Personal Website -->
+                    <!--         </a> -->
+                    <!--     </div> -->
+                    <!--     <div class="project-description"> -->
+                    <!--         <p> -->
+                    <!--             A minimalist, responsive personal website showcasing research, projects, -->
+                    <!--             and professional journey, built with a focus on clean design and accessibility. -->
+                    <!--         </p> -->
+                    <!--         <div class="project-meta"> -->
+                    <!--             <span>HTML</span> | <span>CSS</span> | <span>JavaScript</span> -->
+                    <!--         </div> -->
+                    <!--     </div> -->
+                    <!-- </div> -->
+
+                </div>
+            </section>
+
+    <script>
+    function toggleDescription(element) {
+        // Prevent default link behavior
+        event.preventDefault();
+
+        // Find the description div
+        const description = element.closest('.project-item').querySelector('.project-description');
+        const toggleIcon = element.querySelector('.toggle-icon');
+
+        // Toggle visibility
+        if (description.style.display === 'none') {
+            description.style.display = 'block';
+            toggleIcon.textContent = '▲';
+        } else {
+            description.style.display = 'none';
+            toggleIcon.textContent = '▼';
+        }
+    }
+
+    // On page load, set all project descriptions to be visible by default
+    document.addEventListener('DOMContentLoaded', function() {
+        const projectDescriptions = document.querySelectorAll('.project-description');
+        const toggleIcons = document.querySelectorAll('.toggle-icon');
+
+        projectDescriptions.forEach(description => {
+            description.style.display = 'block';
+        });
+
+        toggleIcons.forEach(icon => {
+            icon.textContent = '▲';
+        });
+    });
+    </script>
+</body>
+</html>
