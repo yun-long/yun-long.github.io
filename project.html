@@ -24,6 +24,9 @@
                 <a href="https://github.com/yun-long" title="GitHub">
                     <i class="fab fa-github"></i>
                 </a>
+                <a href="https://www.linkedin.com/in/yunlong-song-a80baa124" title="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
             </div>
             <br>
             <a href="index.html" title="Home">Home</a>
@@ -31,181 +34,182 @@
             <a href="project.html" title="Projects">Research Projects</a>
             <br>
             <a href="opensource.html" title="OpenSource">Open-source Code</a>
+            <br>
+            <a href="about.html" title="about">About Me</a>
         </div>
-        <main class="main-content">
+        <div class="main-content">
             <section class="project">
-        <h2>Research Projects</h2>
-        <p>
-          I am passionate about developing algorithms for robots that can learn to perform complex tasks in the real world.
-          Here are some of the projects I have worked on:
-        </p>
-        <div class="project-list">
+            <h2>Research Projects</h2>
+            <p>
+              I am passionate about developing algorithms for robots that can learn to perform complex tasks in the real world.
+              Here are some of the projects I have worked on:
+            </p>
+          <div class="project-list">
 
-            <div class="project-item">
-                <div class="project-header">
-                    <a href="#" class="project-title" onclick="toggleDescription(this)">
-                        Pixel-to-Action Control
-                        <span class="toggle-icon">▼</span>
-                    </a>
-                </div>
-                <div class="project-description">
-                    <div class="video-text-container">
-                        <p>
-                          Learning pixel-to-action control policies is challenging due to the high-dimensional
-                          and partially observable nature of the problem. This work
-                          combines deep learning with first-principle
-                          physics through differentiable simulation to
-                          enable autonomous navigation of multiple
-                          aerial robots through complex environments at
-                          high speed. Our approach optimizes a neural
-                          network control policy directly by
-                          backpropagating loss gradients through the
-                          robot simulation using a simple point-mass
-                          physics model and a depth rendering engine.
-                          Despite this simplicity, our method excels in
-                          challenging tasks for both multi-agent and
-                          single-agent applications with zero-shot
-                          sim-to-real transfer. In multi-agent
-                          scenarios, our system demonstrates
-                          self-organized behavior, enabling autonomous
-                          coordination without communication or
-                          centralized planning - an achievement not
-                          seen in existing traditional or
-                          learning-based methods. In real-world forest
-                          environments, it navigates at speeds up to 20
-                          m/s. All these capabilities are deployed on a
-                          budget-friendly $21 computer, costing less
-                          than 5% of a GPU-equipped board used in
-                          existing systems.
+              <div class="project-item">
+                  <div class="project-header">
+                      <a href="#" class="project-title" onclick="toggleDescription(this)">
+                          Pixel-to-Action Control
+                          <span class="toggle-icon">▼</span>
+                      </a>
+                  </div>
+                  <div class="project-description">
+                      <div class="video-text-container">
+                          <p>
+                            Learning pixel-to-action control policies is challenging due to the high-dimensional
+                            and partially observable nature of the problem. This work
+                            combines deep learning with first-principle
+                            physics through differentiable simulation to
+                            enable autonomous navigation of multiple
+                            aerial robots through complex environments at
+                            high speed. Our approach optimizes a neural
+                            network control policy directly by
+                            backpropagating loss gradients through the
+                            robot simulation using a simple point-mass
+                            physics model and a depth rendering engine.
+                            Despite this simplicity, our method excels in
+                            challenging tasks for both multi-agent and
+                            single-agent applications with zero-shot
+                            sim-to-real transfer. In multi-agent
+                            scenarios, our system demonstrates
+                            self-organized behavior, enabling autonomous
+                            coordination without communication or
+                            centralized planning - an achievement not
+                            seen in existing traditional or
+                            learning-based methods. In real-world forest
+                            environments, it navigates at speeds up to 20
+                            m/s. All these capabilities are deployed on a
+                            budget-friendly $21 computer, costing less
+                            than 5% of a GPU-equipped board used in
+                            existing systems.
 
-                        </p>
-                        <video class="project-video project-video-small" autoplay loop muted playsinline>
-                            <source src="videos/vision_swarm.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                </div>
-            </div>
+                          </p>
+                          <video class="project-video project-video-small" autoplay loop muted playsinline>
+                              <source src="videos/vision_swarm.mp4" type="video/mp4">
+                          </video>
+                      </div>
+                  </div>
+              </div>
 
-            <div class="project-item">
-                <div class="project-header">
-                    <a href="#" class="project-title" onclick="toggleDescription(this)">
-                        Quadruped Locomotion
-                        <span class="toggle-icon">▼</span>
-                    </a>
-                </div>
-                <div class="project-description">
-                    <div class="video-text-container">
-                        <p>
-                            This project presents one of the
-                            first successful applications of differentiable
-                            simulation for real-world quadruped locomotion,
-                            offering a compelling alternative to traditional
-                            RL methods. Differentiable simulation promises
-                            fast convergence and stable training by computing
-                            low-variance first-order gradients using robot
-                            dynamics. However, its usage for legged robots is
-                            still limited to simulation. The main challenge
-                            lies in the complex optimization landscape of
-                            robotic tasks due to discontinuous dynamics. This
-                            work proposes a new differentiable simulation
-                            framework to overcome these challenges.
-                        </p>
-                        <video class="project-video project-video-small" autoplay loop muted playsinline>
-                            <source src="videos/cheetah.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                </div>
-            </div>
+              <div class="project-item">
+                  <div class="project-header">
+                      <a href="#" class="project-title" onclick="toggleDescription(this)">
+                          Quadruped Locomotion
+                          <span class="toggle-icon">▼</span>
+                      </a>
+                  </div>
+                  <div class="project-description">
+                      <div class="video-text-container">
+                          <p>
+                              This project presents one of the
+                              first successful applications of differentiable
+                              simulation for real-world quadruped locomotion,
+                              offering a compelling alternative to traditional
+                              RL methods. Differentiable simulation promises
+                              fast convergence and stable training by computing
+                              low-variance first-order gradients using robot
+                              dynamics. However, its usage for legged robots is
+                              still limited to simulation. The main challenge
+                              lies in the complex optimization landscape of
+                              robotic tasks due to discontinuous dynamics. This
+                              work proposes a new differentiable simulation
+                              framework to overcome these challenges.
+                          </p>
+                          <video class="project-video project-video-small" autoplay loop muted playsinline>
+                              <source src="videos/cheetah.mp4" type="video/mp4">
+                          </video>
+                      </div>
+                  </div>
+              </div>
 
 
-            <div class="project-item">
-                <div class="project-header">
-                    <a href="#" class="project-title" onclick="toggleDescription(this)">
-                        Super-human Performance in Autonomous Racing
-                        <span class="toggle-icon">▼</span>
-                    </a>
-                </div>
-                <div class="project-description">
-                    <div class="video-text-container">
-                        <p>
-                          How can we push a robot to its absolut limits in the physical world?
-                          We developed one of the world fastest autonomous drone and pushed this machine to its maximum performance
-                          in the real world, achieving a peak acceleration greater than 12g and
-                          a peak velocity of 108 km/h.
-                          The key to our success is a neural network policy trained with reinforcement learning.
-                          Our neural network policy achieved superhuman control performance within minutes of training on
-                          a standard workstation. Additinally, our study indicates that the fundamental advantage of
-                          reinforcement learning over optimal control is not that
-                          it optimizes its objective better but that it optimizes a better objective.
-                          RL can directly optimize a task-level objective and can leverage domain randomization
-                          to cope with model uncertainty, allowing the discovery of more robust control responses.
-                        </p>
-                        <video class="project-video project-video-small" autoplay loop muted playsinline>
-                            <source src="videos/splits.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                </div>
-            </div>
+              <div class="project-item">
+                  <div class="project-header">
+                      <a href="#" class="project-title" onclick="toggleDescription(this)">
+                          Reaching the Physical Limits of Drone Racing
+                          <span class="toggle-icon">▼</span>
+                      </a>
+                  </div>
+                  <div class="project-description">
+                      <div class="video-text-container">
+                          <p>
+                            How can we push a robot to its absolut limits in the physical world?
+                            We developed one of the world fastest autonomous drone and pushed this machine to its maximum performance
+                            in the real world, achieving a peak acceleration greater than 12g and
+                            a peak velocity of 108 km/h.
+                            The key to our success is a neural network policy trained with reinforcement learning.
+                            Our neural network policy achieved superhuman control performance within minutes of training on
+                            a standard workstation. Additinally, our study indicates that the fundamental advantage of
+                            reinforcement learning over optimal control is not that
+                            it optimizes its objective better but that it optimizes a better objective.
+                            RL can directly optimize a task-level objective and can leverage domain randomization
+                            to cope with model uncertainty, allowing the discovery of more robust control responses.
+                          </p>
+                          <video class="project-video project-video-small" autoplay loop muted playsinline>
+                              <source src="videos/splits.mp4" type="video/mp4">
+                          </video>
+                      </div>
+                  </div>
+              </div>
 
-            <div class="project-item">
-                <div class="project-header">
-                    <a href="#" class="project-title" onclick="toggleDescription(this)">
-                        Optimal Control for Agile Flight
-                        <span class="toggle-icon">▼</span>
-                    </a>
-                </div>
-                <div class="project-description">
-                    <div class="video-text-container">
-                        <p>
-                          This project aims to design an optimal controller for agile drone flight. Model
-                          Predictive Control (MPC) provides near optimal performance by leveraging models and numerical
-                          optimization. However, a key challenge lies in defining an effective loss function with
-                          well-tuned hyperparameters, which is task-specific and difficult to search.
-                          To address this, we introduce a policy-search-for-model-predictive-control
-                          framework that employs policy search to automatically search high-level decision
-                          variables for MPC. Specifically, we formulate MPC as a parameterized controller, where
-                          traditionally hard-to-optimize decision variables are represented as high-level policies
-                          and learned through policy search. This approach enables MPC to adapt to changing environments.
-                        </p>
-                        <video class="project-video project-video-small" autoplay loop muted playsinline>
-                            <source src="videos/highmpc.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                </div>
-            </div>
+              <div class="project-item">
+                  <div class="project-header">
+                      <a href="#" class="project-title" onclick="toggleDescription(this)">
+                          Optimal Control for Agile Flight
+                          <span class="toggle-icon">▼</span>
+                      </a>
+                  </div>
+                  <div class="project-description">
+                      <div class="video-text-container">
+                          <p>
+                            This project aims to design an optimal controller for agile drone flight. Model
+                            Predictive Control (MPC) provides near optimal performance by leveraging models and numerical
+                            optimization. However, a key challenge lies in defining an effective loss function with
+                            well-tuned hyperparameters, which is task-specific and difficult to search.
+                            To address this, we introduce a policy-search-for-model-predictive-control
+                            framework that employs policy search to automatically search high-level decision
+                            variables for MPC. Specifically, we formulate MPC as a parameterized controller, where
+                            traditionally hard-to-optimize decision variables are represented as high-level policies
+                            and learned through policy search. This approach enables MPC to adapt to changing environments.
+                          </p>
+                          <video class="project-video project-video-small" autoplay loop muted playsinline>
+                              <source src="videos/highmpc.mp4" type="video/mp4">
+                          </video>
+                      </div>
+                  </div>
+              </div>
 
-            <div class="project-item">
-                <div class="project-header">
-                    <a href="#" class="project-title" onclick="toggleDescription(this)">
-                        Real-world Reinforcement Learning for Inverted Pendulum
-                        <span class="toggle-icon">▼</span>
-                    </a>
-                </div>
-                <div class="project-description">
-                    <div class="video-text-container">
-                        <p>
-                          Back to 2018, reinforcement learning for real-world robotic tasks was still in its infancy.
-                          During my master thesis, I developed a model-free reinforcement learning
-                          algorithm for the inverted pendulum task. The goal is to train a neural network policy to
-                          balance the Furuta pendulum in the real world. The policy is trained using Information-Loss-Bounded
-                          Policy Optimization with a reward function that penalizes the distance between the pendulum and
-                          the upright position. After training the policy in simulation, we then fine-tuned it in the real world.
-                          The policy is able to balance the inverted pendulum in the real world, despite the presence of
-                          various disturbances. The Furuta-Pendulum is a rotational inverted pendulum, an
-                          under-actuated system invented by Katsuhisa Furuta and colleagues at Tokyo Institute
-                          of Technology in 1992. Since then, it has become a standard research platform for
-                          demonstrating performance of linear and non-linear control laws.
-                        </p>
-                        <video class="project-video project-video-small" autoplay loop muted playsinline>
-                            <source src="videos/pendulum.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
+              <div class="project-item">
+                  <div class="project-header">
+                      <a href="#" class="project-title" onclick="toggleDescription(this)">
+                          Real-world Reinforcement Learning for Inverted Pendulum
+                          <span class="toggle-icon">▼</span>
+                      </a>
+                  </div>
+                  <div class="project-description">
+                      <div class="video-text-container">
+                          <p>
+                            Back in 2018, reinforcement learning for real-world robotic tasks was still in its infancy.
+                            During my master thesis, I developed a model-free reinforcement learning
+                            algorithm for the inverted pendulum task. The goal is to train a neural network policy to
+                            balance the Furuta pendulum in the real world. The policy is trained using Information-Loss-Bounded
+                            Policy Optimization with a reward function that penalizes the distance between the pendulum and
+                            the upright position. After training the policy in simulation, we then fine-tuned it in the real world.
+                            The policy is able to balance the inverted pendulum in the real world, despite the presence of
+                            various disturbances. The Furuta-Pendulum is a rotational inverted pendulum, an
+                            under-actuated system invented by Katsuhisa Furuta and colleagues at Tokyo Institute
+                            of Technology in 1992. Since then, it has become a standard research platform for
+                            demonstrating performance of linear and non-linear control laws.
+                          </p>
+                          <video class="project-video project-video-small" autoplay loop muted playsinline>
+                              <source src="videos/pendulum.mp4" type="video/mp4">
+                          </video>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        </section>
+    </div>
     <script>
     function toggleDescription(element) {
         // Prevent default link behavior
