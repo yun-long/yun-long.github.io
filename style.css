@@ -390,3 +390,10 @@ hr {
     }
 }
 
+
+.clickable {
+  cursor: pointer;
+  color: #1a0dab; /* Google-style blue */
+  text-decoration: underline;
+}
+
