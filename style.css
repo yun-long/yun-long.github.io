@@ -11,6 +11,11 @@ html, body {
     font-size: 16px;
 }
 
+::selection {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
 h1, h2 {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-weight: 600;
@@ -18,18 +23,22 @@ h1, h2 {
 }
 
 h1 {
-    border-bottom: 2px solid #3498db;
-    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
     margin-top: 0;
-    font-size: 2.2rem; /* Slightly smaller heading */
-    margin-bottom: 1rem;
+    font-size: 2.4rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
 }
 
 h2 {
-    color: #2980b9;
-    margin-top: 20px;
-    font-size: 1.6rem; /* Slightly smaller section headers */
-    margin-bottom: 0.75rem;
+    color: #333;
+    margin-top: 30px;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
 }
 
 a {
@@ -56,7 +65,7 @@ hr {
 .container {
     max-width: 1200px;
     margin: 30px auto;
-    padding: 30px;
+    padding: 30px 60px;
     background-color: transparent;
     border-radius: 10px;
     box-shadow: none;
@@ -78,11 +87,14 @@ hr {
 .sidebar-links a,
 .social-links a {
     text-decoration: none;
-    color: #0066cc;
-    transition: color 0.3s ease;
+    color: #333;
+    transition: color 0.2s ease;
     align-self: flex-start;
     width: 100%;
     text-align: left;
+    font-weight: 500;
+    font-size: 0.95em;
+    letter-spacing: 0.01em;
 }
 
 .profile-image-container {
@@ -117,7 +129,8 @@ hr {
 
 .sidebar-links a:hover,
 .social-links a:hover {
-    color: #004080;
+    color: #000;
+    transform: translateX(2px);
 }
 
 .main-content p {
@@ -150,9 +163,13 @@ hr {
 
 .paper-links a {
     text-decoration: none;
-    color: #27ae60;
+    color: #333;
     margin-right: 10px;
     font-size: 0.9em;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    background-color: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 3px;
 }
 
 .publications ul li.publication-item {
@@ -207,10 +224,16 @@ hr {
 
 .project-item {
     border: 1px solid #e0e0e0;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.project-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
 }
 
 .project-header {
