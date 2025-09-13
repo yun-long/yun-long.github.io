@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Post - Yunlong Song</title>
+    <link rel="stylesheet" href="../style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Highlight.js for code highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    
+    <script>
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        function formatDate(isoDate) {
+            try {
+                const d = new Date(isoDate);
+                return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+            } catch { return isoDate; }
+        }
+
+        async function loadPost() {
+            const slug = getQueryParam('slug');
+            const titleEl = document.getElementById('post-title');
+            const bodyEl = document.getElementById('post-body');
+
+            if (!slug) {
+                titleEl.textContent = 'Post not found';
+                bodyEl.innerHTML = '<p>Missing post slug.</p>';
+                return;
+            }
+
+            try {
+                const manifestRes = await fetch('posts.json', { cache: 'no-cache' });
+                const posts = await manifestRes.json();
+                const post = posts.find(p => p.slug === slug);
+                if (!post) throw new Error('Not found');
+
+                document.title = post.title + ' - Yunlong Song';
+                titleEl.textContent = post.title;
+
+                const contentRes = await fetch(post.content, { cache: 'no-cache' });
+                const html = await contentRes.text();
+                if (!html || html.trim() === '') {
+                    bodyEl.innerHTML = '<p>This post has no content yet. Add your HTML to <code>'+post.content+'</code>.</p>';
+                } else {
+                    bodyEl.innerHTML = html;
+                    if (window.hljs) {
+                        window.hljs.highlightAll();
+                    }
+                    buildTOC();
+                }
+            } catch (e) {
+                titleEl.textContent = 'Post not found';
+                if (location.protocol === 'file:') {
+                    bodyEl.innerHTML = '<p>Unable to load this post when opened directly from the file system. Please run a local server (e.g., <code>python -m http.server</code>) and open this page via <code>http://localhost:8000/blogs/post.html?slug='+slug+'</code>.</p>';
+                } else {
+                    bodyEl.innerHTML = '<p>Unable to load this post.</p>';
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPost);
+
+        function slugify(text) {
+            return text.toString().toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9\-]/g, '')
+                .replace(/\-+/g, '-')
+                .replace(/^\-+|\-+$/g, '');
+        }
+
+        function buildTOC() {
+            const container = document.getElementById('toc');
+            const body = document.getElementById('post-body');
+            if (!container || !body) return;
+
+            const headings = Array.from(body.querySelectorAll('h2, h3'));
+            if (!headings.length) { container.innerHTML = '<div class="toc-empty">No sections</div>'; return; }
+
+            const used = new Set();
+            headings.forEach(h => {
+                if (!h.id) {
+                    let id = slugify(h.textContent.trim());
+                    let i = 2;
+                    while (used.has(id)) { id = id + '-' + i++; }
+                    h.id = id;
+                    used.add(id);
+                }
+            });
+
+            const ul = document.createElement('ul');
+            ul.className = 'toc-list';
+            let currentLi = null;
+            let subUl = null;
+            headings.forEach(h => {
+                const level = h.tagName === 'H2' ? 2 : 3;
+                const a = document.createElement('a');
+                a.href = '#' + h.id;
+                a.textContent = h.textContent;
+                const li = document.createElement('li');
+                li.appendChild(a);
+                if (level === 2) {
+                    ul.appendChild(li);
+                    currentLi = li;
+                    subUl = null;
+                } else if (level === 3 && currentLi) {
+                    if (!subUl) {
+                        subUl = document.createElement('ul');
+                        subUl.className = 'toc-sublist';
+                        currentLi.appendChild(subUl);
+                    }
+                    subUl.appendChild(li);
+                } else {
+                    ul.appendChild(li);
+                }
+            });
+            container.innerHTML = '';
+            container.appendChild(ul);
+        }
+    </script>
+    
+</head>
+<body>
+    <div class="container blog-reading">
+        <aside class="sidebar toc-sidebar">
+            <div class="toc">
+                <div class="toc-title">On this page</div>
+                <nav id="toc"></nav>
+            </div>
+        </aside>
+        <div class="main-content">
+            <div class="blog-post-content">
+                <a href="../blog.html" class="back-to-blog">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Blog
+                </a>
+
+                <div class="blog-post-header">
+                    <h1 class="blog-post-title" id="post-title">Loading…</h1>
+                </div>
+
+                <div class="blog-post-body" id="post-body"></div>
+
+                <div class="blog-navigation">
+                    <a href="../blog.html">← All Posts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+</script>
+</html>

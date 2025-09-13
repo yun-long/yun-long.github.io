@@ -1,0 +1,181 @@
+<div class="note">
+    <em>Favor object composition over class inheritance.</em>
+</div>
+
+<p>As a researcher with a background in machine learning and robotics.
+    Most of my time and effort have been focused on optimizing the <b>benchmark performance</b> of an algorithm
+    for a specific problem for the sake of publishing a paper. 
+    It is a shame that despite that I have been using Python for my research projects for a long time,
+    I never really learn the design pattern for Python. This blog is a record of my learning journey.
+</p>
+
+<p>
+    According to the talk by <a href="https://rhodesmill.org/brandon/" target="_blank" rel="noopener">Brandon Rhodes</a>,
+    there are three stages of everyone's programming journey.
+    <ol>
+        <li>Procedural -- All code in main()</li>
+        <li>Abstraction -- Functions</li>
+        <li>Encapsulation -- Classes</li>
+    </ol>
+    For machine learning researchers, it is totally fine to just stay in the first stage, where you could implement 
+    all you code in main() with some level of abstraction using functions and classes. 
+    You can still achieve great results. However, the most interesting part of programming is the third stage -- Encapsulation.
+    It is the stage where you start to think about the <b>Design</b>.
+</p>
+
+<h2>📌 Definition</h2>
+Let's begin with the definition of design pattern.
+<div class="note">
+    <strong>Design Pattern:</strong> 
+    A design pattern is a general, reusable solution to a commonly occurring problem within a given context in software design.
+    It is a description of a problem that occurs frequently in software design, and a solution to that problem.
+</div>
+
+<h2>📌 The Catalog of Design Patterns</h2>
+According to the book <a href="https://en.wikipedia.org/wiki/Design_Patterns" target="_blank" rel="noopener">Design Patterns: Elements of Reusable Object-Oriented Software</a>,
+there are 23 design patterns in total. However, the book was published in 1994, and some of the patterns are not very useful in modern software development,
+especially for python language. According to Brandon Rhodes and his talk 
+on <a href="https://rhodesmill.org/brandon/slides/2022-11-codedive/slides.html" target="_blank" rel="noopener">The Classical Design Patterns: Where Are They Now?</a>, 
+most of us have been fooled. In his talk, he made the following conclusion:
+
+<ul>
+    <li>6 patterns: useless if you have 1st class functions</li>
+    <li>3 patterns: are anti-patterns that obscure our data</li>
+    <li>4 patterns: decompose big classes, but are obscure</li>
+    <li>1 pattern: ambitious but fatally limited</li>
+    <li>2 patterns: language built-ins</li>
+    <li><b>3 patterns: small but useful</b></li>
+    <li><b>4 patterns: huge and dominate our frameworks</b></li>
+</ul>
+
+
+<h2>📌 Four Huge and Dominate  Patterns in Our Frameworks</h2>
+
+<div class="note">
+    <strong>Composite:</strong> 
+    Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.
+</div>
+
+<strong>Structure</strong>
+    <li><strong>Component</strong> – defines common operations.</li>
+    <li><strong>Leaf</strong> – basic object with real behavior.</li>
+    <li><strong>Composite</strong> – container that holds children and delegates operations.</li>
+
+<p><strong>Python example:</strong> a simple filesystem tree where folders contain files or other folders.</p>
+
+<pre><code class="language-python">class Component:
+    def render(self, indent=0):
+        raise NotImplementedError
+
+class File(Component):
+    def __init__(self, name):
+        self.name = name
+
+    def render(self, indent=0):
+        print(" " * indent + f"- {self.name}")
+
+class Folder(Component):
+    def __init__(self, name):
+        self.name = name
+        self.children = []
+
+    def add(self, *components):
+        self.children.extend(components)
+        return self
+
+    def render(self, indent=0):
+        print(" " * indent + f"+ {self.name}/")
+        for c in self.children:
+            c.render(indent + 2)
+
+# Build a small tree
+root = Folder("project")
+src = Folder("src").add(File("main.py"), File("utils.py"))
+assets = Folder("assets").add(File("logo.png"))
+root.add(src, assets, File("README.md"))
+root.render()
+</code></pre>
+
+<p>Clients call <code>render()</code> without caring whether an object is a <em>File</em> (leaf) or <em>Folder</em> (composite). The composite delegates the work to its children.</p>
+
+
+<div class="note">
+    <strong>Chain of Responsibility:</strong> 
+    Avoid coupling the sender of a request to itsreceiver by giving more than one object a chance to handle the request. Chain the receiving
+    objects and pass the request along the chain until an object handles it.
+</div>
+
+<div class="note">
+    <strong>Command:</strong> 
+    Encapsulate a request as an object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable
+    operations.
+</div>
+
+<div class="note">
+    <strong>Interpreter:</strong> 
+    Given a language, define a represention for its grammar along with
+an interpreter that uses the representation to interpret sentences in the language.
+</div>
+
+<h2>📌 Three Small but Useful Patterns</h2>
+
+<h3>Builder</h3>
+
+<h3>Adapter</h3>
+
+<h3>Flyweight</h3>
+
+
+<h2>📌 The original 23 Design Patterns by Gang of Four</h2>
+<table class="design-patterns">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Design Patterns</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="5"><strong>Creational</strong></td>
+        <td><strong>Singleton:</strong> Ensure a class has only one instance and provide a global point of access to it.</td>
+      </tr>
+      <tr><td><strong>Factory Method:</strong> Define an interface for creating an object, but let subclasses decide which class to instantiate.</td></tr>
+      <tr><td><strong>Abstract Factory:</strong> Provide an interface for creating families of related or dependent objects without specifying their concrete classes.</td></tr>
+      <tr><td><strong>Builder:</strong> Separate the construction of a complex object from its representation so that the same construction process can create different representations.</td></tr>
+      <tr><td><strong>Prototype:</strong> Create new objects by cloning existing objects.</td></tr>
+  
+      <tr>
+        <td rowspan="7"><strong>Structural</strong></td>
+        <td><strong>Adapter:</strong> Convert the interface of a class into another interface clients expect. Adapter lets classes work together that couldn't otherwise because of incompatible interfaces.</td>
+      </tr>
+      <tr><td><strong>Bridge:</strong> Decouple an abstraction from its implementation so that the two can vary independently.</td></tr>
+      <tr><td><strong>Composite:</strong> Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.</td></tr>
+      <tr><td><strong>Decorator:</strong> Attach additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality.</td></tr>
+      <tr><td><strong>Facade:</strong> Provide a unified interface to a set of interfaces in a subsystem. Facade defines a higher-level interface that makes the subsystem easier to use.</td></tr>
+      <tr><td><strong>Flyweight:</strong> Flyweight is a structural design pattern that provides ways to decrease object count thus reducing memory usage by sharing object instances.</td></tr>
+      <tr><td><strong>Proxy:</strong> Provide a surrogate or placeholder for another object to control access to it.</td></tr>
+  
+      <tr>
+        <td rowspan="11"><strong>Behavioral</strong></td>
+        <td><strong>Chain of Responsibility:</strong> Chain the receiving objects and pass the request along the chain until an object handles it.</td>
+      </tr>
+      <tr><td><strong>Command:</strong> Encapsulate a request as an object, thereby allowing for parameterization of clients with different requests, and support undoable operations.</td></tr>
+      <tr><td><strong>Interpreter:</strong> Given a language, define a representation for its grammar along with an interpreter that uses the representation to interpret sentences in the language.</td></tr>
+      <tr><td><strong>Iterator:</strong> Provide a way to access the elements of an object sequentially without exposing its underlying representation.</td></tr>
+      <tr><td><strong>Mediator:</strong> Define an object that encapsulates how a set of objects interact. Mediator promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently.</td></tr>
+      <tr><td><strong>Memento:</strong> Capture and restore an object's internal state without violating encapsulation.</td></tr>
+      <tr><td><strong>Observer:</strong> Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.</td></tr>
+      <tr><td><strong>State:</strong> Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.</td></tr>
+      <tr><td><strong>Strategy:</strong> Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from clients that use it.</td></tr>
+      <tr><td><strong>Template Method:</strong> Define the skeleton of an algorithm in an operation, deferring some steps to subclasses. Template Method lets subclasses redefine certain steps of an algorithm without changing the algorithm's structure.</td></tr>
+      <tr><td><strong>Visitor:</strong> Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements on which it operates.</td></tr>
+    </tbody>
+  </table>
+  
+  
+<h2>References</h2>
+<ul> 
+    <li><a href="https://en.wikipedia.org/wiki/Design_Patterns" target="_blank" rel="noopener">Design Patterns: Elements of Reusable Object-Oriented Software</a></li>
+    <li><a href="https://rhodesmill.org/brandon/slides/2022-11-codedive/slides.html" target="_blank" rel="noopener">The Classical Design Patterns: Where Are They Now?</a></li>
+    <li><a href="https://rhodesmill.org/brandon/" target="_blank" rel="noopener">Brandon Rhodes</a></li>
+</ul>
