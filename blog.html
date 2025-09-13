@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font Awesome for modern icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="profile-image-container">
+                <img src="images/me.jpg" alt="Yunlong Song" class="profile-image">
+            </div>
+            <div class="sidebar-links">
+                <a href="https://scholar.google.com/citations?user=EzAXL9QAAAAJ&hl=en" title="Google Scholar">
+                    <i class="fas fa-graduation-cap"></i>
+                </a>
+                <a href="https://x.com/realyunlong" title="Twitter">
+                    <i class="fab fa-x-twitter"></i>
+                </a>
+                <a href="https://github.com/yun-long" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/yunlong-song-a80baa124" title="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+            </div>
+            <br>
+            <a href="index.html" title="Home">Home</a>
+            <br>
+            <a href="project.html" title="Projects">Research Projects</a>
+            <br>
+            <a href="opensource.html" title="OpenSource">Open-source Code</a>
+            <br>
+            <a href="blog.html" title="blog">Blogs</a>
+            <br>
+            <a href="about.html" title="about">About Me</a>
+        </div>
+        <div class="main-content">
+            <section class="blog">
+                <h2>Blogs</h2>
+                <div class="blog-list">
+                    <!-- Blog posts will be loaded dynamically here -->
+                </div>
+            </section>
+        </div>
+    </div>
+    <script>
+    // Render blog list from manifest and link to dynamic post page
+    function formatDate(isoDate) {
+        try {
+            const d = new Date(isoDate);
+            return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+        } catch { return isoDate; }
+    }
+
+    async function loadBlogList() {
+        const container = document.querySelector('.blog-list');
+        if (!container) return;
+        try {
+            const res = await fetch('blogs/posts.json', { cache: 'no-cache' });
+            const posts = await res.json();
+            posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Clear any existing content and render a simple list
+            container.innerHTML = '';
+            const list = document.createElement('ul');
+            list.className = 'blog-list';
+
+            posts.forEach(post => {
+                const li = document.createElement('li');
+                li.className = 'blog-list-item';
+                li.innerHTML = `
+                    <a class="blog-title" href="blogs/post.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a>
+                    <div class="blog-meta"><time>${formatDate(post.date)}</time></div>
+                    ${post.summary ? `<div class="blog-summary">${post.summary}</div>` : ''}
+                `;
+                list.appendChild(li);
+            });
+
+            container.appendChild(list);
+        } catch (e) {
+            if (location.protocol === 'file:') {
+                container.innerHTML = '<p>Unable to load posts when opened directly from the file system. Please run a local server (e.g., <code>python -m http.server</code>) and open via <code>http://localhost:8000/blog.html</code>.</p>';
+            } else {
+                container.innerHTML = '<p>Unable to load posts right now.</p>';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadBlogList);
+    </script>
+</body>
+</html>

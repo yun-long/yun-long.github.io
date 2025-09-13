@@ -1,0 +1,9 @@
+[
+  {
+    "slug": "python-design-pattern",
+    "title": "Python Design Pattern",
+    "date": "2025-09-13",
+    "summary": "A design pattern is a general, reusable solution to a commonly occurring problem within a given context in software design. It is a description of a problem that occurs frequently in software design, and a solution to that problem.",
+    "content": "content/python-design-pattern.html"
+  }
+]

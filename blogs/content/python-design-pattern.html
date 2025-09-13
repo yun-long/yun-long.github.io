@@ -1,0 +1,933 @@
+<div class="note">
+    <em>Favor object composition over class inheritance.</em>
+</div>
+
+<p>Most researchers are terrible software engineers, including myself.
+They spend most of their time and effort on optimizing the <b>benchmark performance</b> of an algorithm
+for a specific problem for the sake of publishing a paper.
+It is a shame that despite that I have been using Python for my research projects for a long time,
+I never really learn the design pattern for Python. This blog is a record of my learning journey.
+</p>
+
+<p>
+    According to the talk by <a href="https://rhodesmill.org/brandon/" target="_blank" rel="noopener">Brandon Rhodes</a>,
+    there are three stages of everyone's programming journey.
+    <ol>
+        <li>Procedural -- All code in main()</li>
+        <li>Abstraction -- Functions</li>
+        <li>Encapsulation -- Classes</li>
+    </ol>
+    For machine learning researchers, it is totally fine to just stay in the first stage, where you could implement 
+    all you code in main() with some level of abstraction using functions and classes. 
+    You can still achieve great results. However, the most interesting part of programming is the third stage -- Encapsulation.
+    It is the stage where you start to think about the <b>Design</b>.
+</p>
+
+<h2>📌 Definition</h2>
+Let's begin with the definition of design pattern.
+<div class="note">
+    <strong>Design Pattern:</strong> 
+    A design pattern is a general, reusable solution to a commonly occurring problem within a given context in software design.
+    It is a description of a problem that occurs frequently in software design, and a solution to that problem.
+</div>
+
+<h2>📌 The Catalog of Design Patterns</h2>
+According to the book <a href="https://en.wikipedia.org/wiki/Design_Patterns" target="_blank" rel="noopener">Design Patterns: Elements of Reusable Object-Oriented Software</a>,
+there are 23 design patterns in total. However, the book was published in 1994, and some of the patterns are not very useful in modern software development,
+especially for python language. According to Brandon Rhodes and his talk 
+on <a href="https://rhodesmill.org/brandon/slides/2022-11-codedive/slides.html" target="_blank" rel="noopener">The Classical Design Patterns: Where Are They Now?</a>, 
+most of us have been fooled. In his talk, he made the following conclusion:
+
+<ul>
+    <li>6 patterns: useless if you have 1st class functions</li>
+    <li>3 patterns: are anti-patterns that obscure our data</li>
+    <li>4 patterns: decompose big classes, but are obscure</li>
+    <li>1 pattern: ambitious but fatally limited</li>
+    <li>2 patterns: language built-ins</li>
+    <li><b>3 patterns: small but useful</b></li>
+    <li><b>4 patterns: huge and dominate our frameworks</b></li>
+</ul>
+
+<h2>📌 Two Language built-in Design Patterns</h2>
+
+<h3>📏 Iterator</h3> <div class="note">
+    Provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation.
+ </div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Iterator pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#ith); fill: none; }
+      </style>
+      <marker id="ith" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Aggregate and Iterator interfaces -->
+    <rect class="node" x="40" y="20" width="170" height="36" rx="6"/>
+    <text class="label" x="125" y="42" text-anchor="middle">Aggregate <tspan class="muted">(iterable)</tspan></text>
+    <rect class="node" x="250" y="20" width="160" height="36" rx="6"/>
+    <text class="label" x="330" y="42" text-anchor="middle">Iterator</text>
+
+    <!-- Concretes -->
+    <rect class="node" x="40" y="90" width="170" height="36" rx="6"/>
+    <text class="label" x="125" y="112" text-anchor="middle">ConcreteAggregate</text>
+    <rect class="node" x="250" y="90" width="160" height="36" rx="6"/>
+    <text class="label" x="330" y="112" text-anchor="middle">ConcreteIterator</text>
+
+    <!-- Client -->
+    <rect class="node" x="470" y="56" width="120" height="36" rx="6"/>
+    <text class="label" x="530" y="78" text-anchor="middle">Client</text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M210 38 L250 38"/>
+    <path class="arrow" d="M125 56 L125 90"/>
+    <path class="arrow" d="M330 56 L330 90"/>
+    <path class="arrow" d="M410 74 L470 74"/>
+  </svg>
+  <figcaption>Iterator: client asks the aggregate for an iterator and walks items without seeing internal structure.</figcaption>
+</figure>
+
+<p><strong>In short:</strong> hide traversal logic inside an iterator so clients use a uniform loop.</p>
+
+<p><strong>Python example:</strong> a custom iterable with its own iterator.</p>
+
+<pre><code class="language-python">class MyIterator:
+    def __init__(self, items):
+        self._items = list(items)
+        self._i = 0
+    def __iter__(self):
+        return self
+    def __next__(self):
+        if self._i >= len(self._items):
+            raise StopIteration
+        val = self._items[self._i]
+        self._i += 1
+        return val
+
+class MyCollection:
+    def __init__(self, *items):
+        self._items = items
+    def __iter__(self):
+        return MyIterator(self._items)
+
+nums = MyCollection(1, 2, 3)
+print([x for x in nums])  # [1, 2, 3]
+</code></pre>
+
+
+<h3>📏 Visitor</h3> <div class="note">
+    Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements.
+ </div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visitor pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#vish); fill: none; }
+      </style>
+      <marker id="vish" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Visitor and ConcreteVisitors -->
+    <rect class="node" x="40" y="20" width="150" height="36" rx="6"/>
+    <text class="label" x="115" y="42" text-anchor="middle">Visitor</text>
+    <rect class="node" x="40" y="88" width="150" height="32" rx="6"/>
+    <text class="label" x="115" y="108" text-anchor="middle">ConcreteVisitor</text>
+
+    <!-- Element and ConcreteElements -->
+    <rect class="node" x="260" y="20" width="170" height="36" rx="6"/>
+    <text class="label" x="345" y="42" text-anchor="middle">Element</text>
+    <rect class="node" x="260" y="88" width="170" height="32" rx="6"/>
+    <text class="label" x="345" y="108" text-anchor="middle">ConcreteElement A</text>
+    <rect class="node" x="260" y="132" width="170" height="32" rx="6"/>
+    <text class="label" x="345" y="152" text-anchor="middle">ConcreteElement B</text>
+
+    <!-- Object structure -->
+    <rect class="node" x="520" y="20" width="180" height="36" rx="6"/>
+    <text class="label" x="610" y="42" text-anchor="middle">ObjectStructure</text>
+
+    <!-- Arrows: visitor visits elements; structure holds elements -->
+    <path class="arrow" d="M190 104 L260 104"/>
+    <path class="arrow" d="M190 148 L260 148"/>
+    <path class="arrow" d="M520 56 L430 104"/>
+    <path class="arrow" d="M520 56 L430 148"/>
+  </svg>
+  <figcaption>Visitor: elements accept a visitor, which then dispatches to the right <em>visit_X</em> method (double dispatch).</figcaption>
+</figure>
+
+<p><strong>In short:</strong> add new operations over a stable element hierarchy without modifying element classes.</p>
+
+<p><strong>Python example:</strong> compute sizes over a small filesystem-like tree using a visitor.</p>
+
+<pre><code class="language-python">class Visitor:
+    def visit_file(self, file):
+        raise NotImplementedError
+    def visit_folder(self, folder):
+        raise NotImplementedError
+
+class SizeVisitor(Visitor):
+    def __init__(self):
+        self.total = 0
+    def visit_file(self, file):
+        self.total += file.size
+    def visit_folder(self, folder):
+        for child in folder.children:
+            child.accept(self)
+
+class Element:
+    def accept(self, visitor: Visitor):
+        raise NotImplementedError
+
+class File(Element):
+    def __init__(self, name, size):
+        self.name, self.size = name, size
+    def accept(self, visitor):
+        return visitor.visit_file(self)
+
+class Folder(Element):
+    def __init__(self, name, *children):
+        self.name = name
+        self.children = list(children)
+    def accept(self, visitor):
+        return visitor.visit_folder(self)
+
+root = Folder("root",
+    File("a.txt", 10),
+    Folder("docs", File("b.pdf", 50), File("c.md", 5))
+)
+
+v = SizeVisitor()
+root.accept(v)
+print(v.total)  # 65
+</code></pre>
+
+
+
+<h2>📌 Four Huge and Dominate  Patterns in Our Frameworks</h2>
+
+<h3>📏 Composite</h3> <div class="note">
+    Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.
+</div>
+
+<figure class="diagram">
+    <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Composite pattern diagram">
+      <defs>
+        <style>
+          .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+          .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+          .muted { fill: #6b7280; font-size: 11px; }
+          .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#arrowhead); fill: none; }
+        </style>
+        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+        </marker>
+      </defs>
+      <!-- Top: Component -->
+      <rect class="node" x="270" y="16" width="100" height="32" rx="6"/>
+      <text class="label" x="320" y="36" text-anchor="middle">Component</text>
+      <!-- Second row: Composite, Leaf -->
+      <rect class="node" x="140" y="84" width="120" height="40" rx="6"/>
+      <text class="label" x="200" y="104" text-anchor="middle">Composite <tspan class="muted">(Folder)</tspan></text>
+      <rect class="node" x="380" y="84" width="120" height="40" rx="6"/>
+      <text class="label" x="440" y="104" text-anchor="middle">Leaf <tspan class="muted">(File)</tspan></text>
+      <!-- Arrows from Component -->
+      <path class="arrow" d="M320 48 L200 84"/>
+      <path class="arrow" d="M320 48 L440 84"/>
+      <!-- Third row: children of Composite -->
+      <rect class="node" x="80" y="170" width="120" height="36" rx="6"/>
+      <text class="label" x="140" y="190" text-anchor="middle">Composite</text>
+      <rect class="node" x="240" y="170" width="120" height="36" rx="6"/>
+      <text class="label" x="300" y="190" text-anchor="middle">Leaf</text>
+      <path class="arrow" d="M200 124 L140 170"/>
+      <path class="arrow" d="M200 124 L300 170"/>
+    </svg>
+    <figcaption>Composite: clients treat <em>Leaf</em> and <em>Composite</em> uniformly through the common <em>Component</em> interface.</figcaption>
+</figure>
+
+<p><strong>In short:</strong> separate the construction steps from the final object so the same sequence can build different variants.</p>
+<strong>Structure</strong>
+    <li><strong>Component</strong> – defines common operations.</li>
+    <li><strong>Leaf</strong> – basic object with real behavior.</li>
+    <li><strong>Composite</strong> – container that holds children and delegates operations.</li>
+
+<p><strong>Python example:</strong> a simple filesystem tree where folders contain files or other folders.</p>
+
+<pre><code class="language-python">class Component:
+    def render(self, indent=0):
+        raise NotImplementedError
+
+class File(Component):
+    def __init__(self, name):
+        self.name = name
+
+    def render(self, indent=0):
+        print(" " * indent + f"- {self.name}")
+
+class Folder(Component):
+    def __init__(self, name):
+        self.name = name
+        self.children = []
+
+    def add(self, *components):
+        self.children.extend(components)
+        return self
+
+    def render(self, indent=0):
+        print(" " * indent + f"+ {self.name}/")
+        for c in self.children:
+            c.render(indent + 2)
+
+# Build a small tree
+root = Folder("project")
+src = Folder("src").add(File("main.py"), File("utils.py"))
+assets = Folder("assets").add(File("logo.png"))
+root.add(src, assets, File("README.md"))
+root.render()
+</code></pre>
+
+<p>Clients call <code>render()</code> without caring whether an object is a <em>File</em> (leaf) or <em>Folder</em> (composite). The composite delegates the work to its children.</p>
+
+
+<h3>📏 Chain of Responsibility</h3> <div class="note">
+    Avoid coupling the sender of a request to its receiver by giving more than one object a chance to handle the request. Chain the receiving
+    objects and pass the request along the chain until an object handles it.
+</div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 760 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chain of Responsibility diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#arrowhead2); fill: none; }
+        .muted { fill: #6b7280; font-size: 11px; }
+      </style>
+      <marker id="arrowhead2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Incoming request -->
+    <text class="label" x="20" y="36">request</text>
+    <path class="arrow" d="M70 30 L120 30"/>
+
+    <!-- Handlers -->
+    <rect class="node" x="120" y="14" width="160" height="32" rx="6"/>
+    <text class="label" x="200" y="34" text-anchor="middle">Handler A</text>
+
+    <rect class="node" x="320" y="14" width="160" height="32" rx="6"/>
+    <text class="label" x="400" y="34" text-anchor="middle">Handler B</text>
+
+    <rect class="node" x="520" y="14" width="160" height="32" rx="6"/>
+    <text class="label" x="600" y="34" text-anchor="middle">Handler C</text>
+
+    <!-- Pass along arrows -->
+    <path class="arrow" d="M280 30 L320 30"/>
+    <path class="arrow" d="M480 30 L520 30"/>
+
+  </svg>
+  <figcaption>Each handler can process the request or pass it to the next.</figcaption>
+</figure>
+
+<p><strong>In short:</strong> wrap an incompatible object so it looks like the interface your code expects.</p>
+
+<strong>Structure</strong>
+    <li><strong>Handler</strong> – defines an interface for handling requests.</li>
+    <li><strong>Concrete Handler</strong> – implements the successor link.</li>
+    <li><strong>Client</strong> – initiates requests.</li>
+    <li><strong>Request</strong> – the object being handled.</li>
+
+<p><strong>Python example:</strong> a simple logger with multiple handlers.</p>
+
+<pre><code class="language-python">class Handler:
+    def __init__(self, successor=None):
+        self.successor = successor
+
+    def handle(self, request):
+        if self.successor:
+            return self.successor.handle(request)
+        return f"No handler could process: {request}"
+
+class ChatbotHandler(Handler):
+    def handle(self, request):
+        if request == "reset password":
+            return "Chatbot: Reset link sent to email."
+        return super().handle(request)
+
+class JuniorAgentHandler(Handler):
+    def handle(self, request):
+        if request == "refund":
+            return "Junior Agent: Refund request approved."
+        return super().handle(request)
+
+class SeniorAgentHandler(Handler):
+    def handle(self, request):
+        if request == "technical issue":
+            return "Senior Agent: Technical issue resolved."
+        return super().handle(request)
+
+# Build chain: Chatbot → Junior Agent → Senior Agent
+handler_chain = ChatbotHandler(JuniorAgentHandler(SeniorAgentHandler()))
+
+# Test
+print(handler_chain.handle("reset password"))   # Chatbot handles
+print(handler_chain.handle("refund"))           # Junior Agent handles
+print(handler_chain.handle("technical issue"))  # Senior Agent handles
+print(handler_chain.handle("complaint"))        # No handler could process
+</code></pre>
+
+<h3>📏 Command</h3> <div class="note">
+    Encapsulate a request as an object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable
+    operations.
+</div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Command pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#cmdh); fill: none; }
+      </style>
+      <marker id="cmdh" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Client and Invoker -->
+    <rect class="node" x="40" y="24" width="120" height="36" rx="6"/>
+    <text class="label" x="100" y="46" text-anchor="middle">Client</text>
+    <rect class="node" x="200" y="24" width="140" height="36" rx="6"/>
+    <text class="label" x="270" y="46" text-anchor="middle">Invoker</text>
+
+    <!-- Command and Concrete Commands -->
+    <rect class="node" x="380" y="24" width="160" height="36" rx="6"/>
+    <text class="label" x="460" y="46" text-anchor="middle">Command <tspan class="muted">(interface)</tspan></text>
+    <rect class="node" x="380" y="90" width="160" height="32" rx="6"/>
+    <text class="label" x="460" y="110" text-anchor="middle">ConcreteCommand A</text>
+    <rect class="node" x="380" y="138" width="160" height="32" rx="6"/>
+    <text class="label" x="460" y="158" text-anchor="middle">ConcreteCommand B</text>
+
+    <!-- Receiver -->
+    <rect class="node" x="600" y="90" width="140" height="36" rx="6"/>
+    <text class="label" x="670" y="112" text-anchor="middle">Receiver</text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M160 42 L200 42"/>
+    <path class="arrow" d="M340 42 L380 42"/>
+    <path class="arrow" d="M540 106 L600 106"/>
+  </svg>
+  <figcaption>Command: Client tells Invoker which Command to run; Command knows how to call the Receiver.</figcaption>
+</figure>
+
+<p><strong>In short:</strong> share heavy, immutable data (intrinsic state) across many lightweight objects; pass varying details (extrinsic state) at use time.</p>
+
+<strong>Structure</strong>
+    <li><strong>Command</strong> – defines an interface for executing an operation.</li>
+    <li><strong>Concrete Command</strong> – implements the command interface.</li>
+    <li><strong>Invoker</strong> – initiates requests.</li>
+    <li><strong>Receiver</strong> – the object that performs the action.</li>
+
+<p><strong>Python example:</strong> a simple command pattern.</p>
+
+<pre><code class="language-python">## -- Command Interface -- ##
+class Command:
+    def execute(self):
+        raise NotImplementedError
+
+## -- Receiver (does the real work) -- ##
+class Light:
+    def turn_on(self):
+        return "Light is ON"
+
+    def turn_off(self):
+        return "Light is OFF"
+
+## -- Concrete Command -- ##
+class TurnOnLightCommand(Command):
+    def __init__(self, light):
+        self.light = light
+
+    def execute(self):
+        return self.light.turn_on()
+
+class TurnOffLightCommand(Command):
+    def __init__(self, light):
+        self.light = light
+
+    def execute(self):
+        return self.light.turn_off()
+
+## -- Invoker (calls the command) -- ##
+class RemoteControl:
+    def __init__(self):
+        self.commands = []
+
+    def submit(self, command):
+        self.commands.append(command)
+        return command.execute()
+        
+## -- Usage -- ##
+# Receiver
+light = Light()
+# Commands
+turn_on = TurnOnLightCommand(light)
+turn_off = TurnOffLightCommand(light)
+# Invoker
+remote = RemoteControl()
+print(remote.submit(turn_on))   # Light is ON
+print(remote.submit(turn_off))  # Light is OFF
+</code></pre>
+
+
+<h3>📏 Interpreter</h3> <div class="note">
+    Given a language, define a represention for its grammar along with
+an interpreter that uses the representation to interpret sentences in the language.
+</div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 820 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Interpreter pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#inth); fill: none; }
+      </style>
+      <marker id="inth" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- AbstractExpression and derivatives -->
+    <rect class="node" x="60" y="20" width="190" height="36" rx="6"/>
+    <text class="label" x="155" y="42" text-anchor="middle">AbstractExpression</text>
+
+    <rect class="node" x="20" y="88" width="190" height="32" rx="6"/>
+    <text class="label" x="115" y="108" text-anchor="middle">TerminalExpression</text>
+    <rect class="node" x="240" y="88" width="210" height="32" rx="6"/>
+    <text class="label" x="345" y="108" text-anchor="middle">NonTerminalExpression</text>
+
+    <!-- Arrows from abstract to concrete -->
+    <path class="arrow" d="M155 56 L115 88"/>
+    <path class="arrow" d="M155 56 L345 88"/>
+
+    <!-- Example AST on right -->
+    <rect class="node" x="520" y="20" width="200" height="36" rx="6"/>
+    <text class="label" x="620" y="42" text-anchor="middle">Expression Tree</text>
+
+    <rect class="node" x="560" y="88" width="120" height="32" rx="6"/>
+    <text class="label" x="620" y="108" text-anchor="middle">Multiply</text>
+
+    <rect class="node" x="500" y="150" width="120" height="30" rx="6"/>
+    <text class="label" x="560" y="170" text-anchor="middle">Add</text>
+    <rect class="node" x="650" y="150" width="120" height="30" rx="6"/>
+    <text class="label" x="710" y="170" text-anchor="middle">Number(2)</text>
+
+    <rect class="node" x="460" y="208" width="120" height="28" rx="6"/>
+    <text class="label" x="520" y="226" text-anchor="middle">Number(5)</text>
+    <rect class="node" x="615" y="208" width="120" height="28" rx="6"/>
+    <text class="label" x="675" y="226" text-anchor="middle">Number(3)</text>
+
+    <!-- Tree arrows -->
+    <path class="arrow" d="M620 120 L560 150"/>
+    <path class="arrow" d="M620 120 L710 150"/>
+    <path class="arrow" d="M560 180 L520 208"/>
+    <path class="arrow" d="M560 180 L675 208"/>
+  </svg>
+  <figcaption>Interpreter: define a grammar with expressions; build an expression tree and interpret by recursion.</figcaption>
+</figure>
+
+<strong>Python example:</strong>
+<pre><code class="language-python">## -- Abstract Expression -- ##
+class Expression:
+    def interpret(self):
+        raise NotImplementedError
+
+## -- Terminal Expression (basic unit) -- ##
+class Number(Expression):
+    def __init__(self, value):
+        self.value = value
+
+    def interpret(self):
+        return self.value
+
+## -- Non-Terminal Expressions (combine rules) -- ##
+class Add(Expression):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def interpret(self):
+        return self.left.interpret() + self.right.interpret()
+
+
+class Multiply(Expression):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def interpret(self):
+        return self.left.interpret() * self.right.interpret()
+
+
+## -- Example usage -- ##
+if __name__ == "__main__":
+    # Represents: (5 + 3) * 2
+    expression = Multiply(
+        Add(Number(5), Number(3)),
+        Number(2)
+    )
+    print(expression.interpret())  # Output: 16
+</code></pre>
+
+
+<h2>📌 Three Small but Useful Patterns</h2>
+
+<h3>📏 Builder</h3>
+<div class="note"> Separate the construction steps from the final object so the same sequence can build different variants. </div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Builder pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#bh); fill: none; }
+      </style>
+      <marker id="bh" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Director -->
+    <rect class="node" x="40" y="20" width="120" height="36" rx="6"/>
+    <text class="label" x="100" y="42" text-anchor="middle">Director</text>
+
+    <!-- Builder / ConcreteBuilder -->
+    <rect class="node" x="220" y="20" width="180" height="36" rx="6"/>
+    <text class="label" x="310" y="42" text-anchor="middle">Builder <tspan class="muted">(interface)</tspan></text>
+
+    <rect class="node" x="220" y="90" width="180" height="36" rx="6"/>
+    <text class="label" x="310" y="112" text-anchor="middle">ConcreteBuilder</text>
+
+    <!-- Product -->
+    <rect class="node" x="480" y="90" width="160" height="36" rx="6"/>
+    <text class="label" x="560" y="112" text-anchor="middle">Product</text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M160 38 L220 38"/>
+    <path class="arrow" d="M310 56 L310 90"/>
+    <path class="arrow" d="M400 108 L480 108"/>
+  </svg>
+  <figcaption>Builder: a Director orchestrates steps on a Builder to create a Product; different ConcreteBuilders produce different products with the same process.</figcaption>
+</figure>
+
+<strong>Structure</strong>
+    <li><strong>Director</strong> – constructs an object using the Builder interface.</li>
+    <li><strong>Builder</strong> – provides an interface for creating parts of a Product object.</li>
+    <li><strong>Concrete Builder</strong> – implements the Builder interface and builds a Product.</li>
+    <li><strong>Product</strong> – the object being built.</li>
+
+<strong>Python example:</strong>
+<pre><code class="language-python">## -- Product -- ##
+class Car:
+    def __init__(self):
+        self.parts = []
+
+    def add_part(self, part):
+        self.parts.append(part)
+
+    def __str__(self):
+        return f"Car with parts: {', '.join(self.parts)}"
+
+# Builder
+class CarBuilder:
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self._car = Car()
+
+    def add_wheels(self):
+        self._car.add_part("4 wheels")
+        return self
+
+    def add_engine(self):
+        self._car.add_part("engine")
+        return self
+
+    def add_doors(self):
+        self._car.add_part("4 doors")
+        return self
+
+    def build(self):
+        car = self._car
+        self.reset()
+        return car
+
+# Director (defines *what kind* of car to build)
+class Director:
+    def __init__(self, builder: CarBuilder):
+        self._builder = builder
+
+    def build_sports_car(self):
+        return (
+            self._builder.reset()
+            .add_wheels()
+            .add_engine()
+            .add_doors()
+            .build()
+        )
+
+    def build_simple_car(self):
+        return (
+            self._builder.reset()
+            .add_wheels()
+            .add_engine()
+            .build()
+        )
+
+# Usage
+if __name__ == "__main__":
+    builder = CarBuilder()
+    director = Director(builder)
+    sports_car = director.build_sports_car()
+    simple_car = director.build_simple_car()
+    print(sports_car)   # Car with parts: 4 wheels, engine, 4 doors
+    print(simple_car)   # Car with parts: 4 wheels, engine
+</code></pre>
+
+<h3>📏 Adapter</h3>
+<div class="note"> Convert the interface of a class into another interface clients expect. 
+    Adapter lets classes work together that couldn't otherwise because of incompatible interfaces. </div>
+
+<strong>Structure</strong>
+    <li><strong>Target</strong> – the interface clients expect.</li>
+    <li><strong>Adapter</strong> – adapts the Adaptee to the Target interface.</li>
+    <li><strong>Adaptee</strong> – the object with the incompatible interface.</li>
+
+<figure class="diagram">
+  <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Adapter pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#ah); fill: none; }
+        .dashed { stroke-dasharray: 4 4; }
+      </style>
+      <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Client and Target -->
+    <rect class="node" x="40" y="20" width="120" height="36" rx="6"/>
+    <text class="label" x="100" y="42" text-anchor="middle">Client</text>
+
+    <rect class="node" x="200" y="20" width="160" height="36" rx="6"/>
+    <text class="label" x="280" y="42" text-anchor="middle">Target <tspan class="muted">(expected)</tspan></text>
+
+    <!-- Adapter wrapping Adaptee -->
+    <rect class="node" x="200" y="90" width="160" height="36" rx="6"/>
+    <text class="label" x="280" y="112" text-anchor="middle">Adapter</text>
+
+    <rect class="node" x="420" y="90" width="160" height="36" rx="6"/>
+    <text class="label" x="500" y="112" text-anchor="middle">Adaptee <tspan class="muted">(actual)</tspan></text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M160 38 L200 38"/>
+    <path class="arrow dashed" d="M280 56 L280 90"/>
+    <path class="arrow" d="M360 108 L420 108"/>
+  </svg>
+  <figcaption>Adapter: the Adapter exposes the Target interface but forwards calls to an Adaptee with an incompatible interface.</figcaption>
+</figure>
+
+<strong>Python example:</strong>
+<pre><code class="language-python">## -- Target (what the client expects) -- ##
+class Target:
+    def request(self):
+        return "Target: The default request"
+
+## -- Adaptee (has a different interface) -- ##
+class Adaptee:
+    def specific_request(self):
+        return "Adaptee: ʞɹoʍ sdrawkcab"  # returns reversed text for demo
+
+## -- Adapter (makes Adaptee compatible with Target) -- ##
+class Adapter(Target):
+    def __init__(self, adaptee: Adaptee):
+        self.adaptee = adaptee
+
+    def request(self):
+        # Convert Adaptee's output into what Target expects
+        return f"Adapter: (TRANSLATED) {self.adaptee.specific_request()[::-1]}"
+
+
+# Client code
+if __name__ == "__main__":
+    target = Target()
+    print(target.request())  # Target: The default request
+
+    adaptee = Adaptee()
+    print(adaptee.specific_request())  # Adaptee: ʞɹoʍ sdrawkcab
+
+    adapter = Adapter(adaptee)
+    print(adapter.request())  # Adapter: (TRANSLATED) backwards work
+</code></pre>
+
+<h3>📏 Flyweight</h3>
+<div class="note"> Flyweight is a structural design pattern that provides ways to decrease object count thus reducing memory usage by sharing object instances. </div>
+
+<strong>Structure</strong>
+    <li><strong>FlyweightFactory</strong> – creates and manages flyweight objects.</li>
+    <li><strong>Flyweight</strong> – the shared intrinsic state.</li>
+    <li><strong>Client</strong> – the objects with extrinsic state.</li>
+
+
+<figure class="diagram">
+  <svg viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flyweight pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#fh); fill: none; }
+      </style>
+      <marker id="fh" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Factory and shared flyweight -->
+    <rect class="node" x="40" y="20" width="160" height="36" rx="6"/>
+    <text class="label" x="120" y="42" text-anchor="middle">FlyweightFactory</text>
+
+    <rect class="node" x="260" y="20" width="180" height="36" rx="6"/>
+    <text class="label" x="350" y="42" text-anchor="middle">Shared Flyweight <tspan class="muted">(intrinsic)</tspan></text>
+
+    <!-- Clients with extrinsic state -->
+    <rect class="node" x="80" y="120" width="160" height="36" rx="6"/>
+    <text class="label" x="160" y="142" text-anchor="middle">Client A <tspan class="muted">(x)</tspan></text>
+
+    <rect class="node" x="300" y="120" width="160" height="36" rx="6"/>
+    <text class="label" x="380" y="142" text-anchor="middle">Client B <tspan class="muted">(y)</tspan></text>
+
+    <rect class="node" x="520" y="120" width="160" height="36" rx="6"/>
+    <text class="label" x="600" y="142" text-anchor="middle">Client C <tspan class="muted">(z)</tspan></text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M200 38 L260 38"/>
+    <path class="arrow" d="M350 56 L160 120"/>
+    <path class="arrow" d="M350 56 L380 120"/>
+    <path class="arrow" d="M350 56 L600 120"/>
+  </svg>
+  <figcaption>Flyweight: share intrinsic state across many clients while each supplies its own extrinsic state at use time.</figcaption>
+</figure>
+
+<strong>Python example:</strong>
+<pre><code class="language-python">## -- Flyweight -- ##
+class Character:
+    def __init__(self, symbol, font):
+        self.symbol = symbol    # intrinsic (shared)
+        self.font = font        # intrinsic (shared)
+
+    def display(self, position):
+        # position is extrinsic (unique per use)
+        print(f"Character: {self.symbol}, Font: {self.font}, Position: {position}")
+
+## -- Flyweight Factory -- ##
+class CharacterFactory:
+    def __init__(self):
+        self._characters = {}
+
+    def get_character(self, symbol, font):
+        key = (symbol, font)
+        if key not in self._characters:
+            self._characters[key] = Character(symbol, font)
+        return self._characters[key]
+
+# Client code
+if __name__ == "__main__":
+    factory = CharacterFactory()
+
+    # Reuses flyweight objects for repeated chars
+    c1 = factory.get_character("A", "Arial")
+    c2 = factory.get_character("A", "Arial")
+    c3 = factory.get_character("B", "Arial")
+
+    c1.display(1)  # Character: A, Font: Arial, Position: 1
+    c2.display(2)  # Character: A, Font: Arial, Position: 2
+    c3.display(3)  # Character: B, Font: Arial, Position: 3
+
+    # c1 and c2 are the same object (shared flyweight)
+    print(c1 is c2)  # True
+</code></pre>
+
+<h2>📌 The original 23 Design Patterns by Gang of Four</h2>
+<table class="design-patterns">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Design Patterns</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="5"><strong>Creational</strong></td>
+        <td><strong>Singleton:</strong> Ensure a class has only one instance and provide a global point of access to it.</td>
+      </tr>
+      <tr><td><strong>Factory Method:</strong> Define an interface for creating an object, but let subclasses decide which class to instantiate.</td></tr>
+      <tr><td><strong>Abstract Factory:</strong> Provide an interface for creating families of related or dependent objects without specifying their concrete classes.</td></tr>
+      <tr><td><strong>Builder:</strong> Separate the construction of a complex object from its representation so that the same construction process can create different representations.</td></tr>
+      <tr><td><strong>Prototype:</strong> Create new objects by cloning existing objects.</td></tr>
+  
+      <tr>
+        <td rowspan="7"><strong>Structural</strong></td>
+        <td><strong>Adapter:</strong> Convert the interface of a class into another interface clients expect. Adapter lets classes work together that couldn't otherwise because of incompatible interfaces.</td>
+      </tr>
+      <tr><td><strong>Bridge:</strong> Decouple an abstraction from its implementation so that the two can vary independently.</td></tr>
+      <tr><td><strong>Composite:</strong> Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.</td></tr>
+      <tr><td><strong>Decorator:</strong> Attach additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality.</td></tr>
+      <tr><td><strong>Facade:</strong> Provide a unified interface to a set of interfaces in a subsystem. Facade defines a higher-level interface that makes the subsystem easier to use.</td></tr>
+      <tr><td><strong>Flyweight:</strong> Flyweight is a structural design pattern that provides ways to decrease object count thus reducing memory usage by sharing object instances.</td></tr>
+      <tr><td><strong>Proxy:</strong> Provide a surrogate or placeholder for another object to control access to it.</td></tr>
+  
+      <tr>
+        <td rowspan="11"><strong>Behavioral</strong></td>
+        <td><strong>Chain of Responsibility:</strong> Chain the receiving objects and pass the request along the chain until an object handles it.</td>
+      </tr>
+      <tr><td><strong>Command:</strong> Encapsulate a request as an object, thereby allowing for parameterization of clients with different requests, and support undoable operations.</td></tr>
+      <tr><td><strong>Interpreter:</strong> Given a language, define a representation for its grammar along with an interpreter that uses the representation to interpret sentences in the language.</td></tr>
+      <tr><td><strong>Iterator:</strong> Provide a way to access the elements of an object sequentially without exposing its underlying representation.</td></tr>
+      <tr><td><strong>Mediator:</strong> Define an object that encapsulates how a set of objects interact. Mediator promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently.</td></tr>
+      <tr><td><strong>Memento:</strong> Capture and restore an object's internal state without violating encapsulation.</td></tr>
+      <tr><td><strong>Observer:</strong> Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.</td></tr>
+      <tr><td><strong>State:</strong> Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.</td></tr>
+      <tr><td><strong>Strategy:</strong> Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from clients that use it.</td></tr>
+      <tr><td><strong>Template Method:</strong> Define the skeleton of an algorithm in an operation, deferring some steps to subclasses. Template Method lets subclasses redefine certain steps of an algorithm without changing the algorithm's structure.</td></tr>
+      <tr><td><strong>Visitor:</strong> Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements on which it operates.</td></tr>
+    </tbody>
+  </table>
+  
+  
+<h2>References</h2>
+<ul> 
+    <li><a href="https://en.wikipedia.org/wiki/Design_Patterns" target="_blank" rel="noopener">Design Patterns: Elements of Reusable Object-Oriented Software</a></li>
+    <li><a href="https://rhodesmill.org/brandon/slides/2022-11-codedive/slides.html" target="_blank" rel="noopener">The Classical Design Patterns: Where Are They Now?</a></li>
+    <li><a href="https://rhodesmill.org/brandon/" target="_blank" rel="noopener">Brandon Rhodes</a></li>
+</ul>
