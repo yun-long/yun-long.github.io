@@ -43,13 +43,14 @@ h2 {
 }
 
 a {
-    text-decoration: underline;
+    text-decoration: none;
     color: #333;
     transition: color 0.2s ease;
 }
 
 a:hover {
     color: #000;
+    text-decoration: underline;
 }
 
 section {
@@ -670,7 +671,8 @@ hr {
 }
 
 /* Note box for posts */
-.blog-post-body .note {
+.blog-post-body .note,
+.note {
   margin: 1rem 0;
   padding: 12px 14px;
   background: #f0f7ff;           /* light blue background */
@@ -678,7 +680,8 @@ hr {
   border-radius: 6px;
   color: #1f2937;                /* readable dark gray */
 }
-.blog-post-body .note strong {
+.blog-post-body .note strong,
+.note strong {
   color: #1d4ed8;
 }
 
