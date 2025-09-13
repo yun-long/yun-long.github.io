@@ -49,6 +49,7 @@
                     bodyEl.innerHTML = '<p>This post has no content yet. Add your HTML to <code>'+post.content+'</code>.</p>';
                 } else {
                     bodyEl.innerHTML = html;
+                    wrapCodeBlocks();
                     if (window.hljs) {
                         window.hljs.highlightAll();
                     }
@@ -121,6 +122,26 @@
             });
             container.innerHTML = '';
             container.appendChild(ul);
+        }
+
+        function wrapCodeBlocks() {
+            const body = document.getElementById('post-body');
+            if (!body) return;
+            const blocks = Array.from(body.querySelectorAll('pre'));
+            blocks.forEach(pre => {
+                if (pre.closest('details.code-block')) return;
+                const details = document.createElement('details');
+                details.className = 'code-block';
+                const summary = document.createElement('summary');
+                summary.className = 'code-summary';
+                summary.textContent = 'Show code';
+                details.appendChild(summary);
+                pre.parentNode.insertBefore(details, pre);
+                details.appendChild(pre);
+                details.addEventListener('toggle', () => {
+                    summary.textContent = details.open ? 'Hide code' : 'Show code';
+                });
+            });
         }
     </script>
     

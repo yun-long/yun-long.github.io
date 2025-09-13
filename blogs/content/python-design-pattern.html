@@ -51,11 +51,46 @@ most of us have been fooled. In his talk, he made the following conclusion:
 
 <h2>📌 Four Huge and Dominate  Patterns in Our Frameworks</h2>
 
-<div class="note">
-    <strong>Composite:</strong> 
+<h3>📏 Composite</h3> <div class="note">
     Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.
 </div>
 
+<figure class="diagram">
+    <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Composite pattern diagram">
+      <defs>
+        <style>
+          .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+          .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+          .muted { fill: #6b7280; font-size: 11px; }
+          .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#arrowhead); fill: none; }
+        </style>
+        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+        </marker>
+      </defs>
+      <!-- Top: Component -->
+      <rect class="node" x="270" y="16" width="100" height="32" rx="6"/>
+      <text class="label" x="320" y="36" text-anchor="middle">Component</text>
+      <!-- Second row: Composite, Leaf -->
+      <rect class="node" x="140" y="84" width="120" height="40" rx="6"/>
+      <text class="label" x="200" y="104" text-anchor="middle">Composite <tspan class="muted">(Folder)</tspan></text>
+      <rect class="node" x="380" y="84" width="120" height="40" rx="6"/>
+      <text class="label" x="440" y="104" text-anchor="middle">Leaf <tspan class="muted">(File)</tspan></text>
+      <!-- Arrows from Component -->
+      <path class="arrow" d="M320 48 L200 84"/>
+      <path class="arrow" d="M320 48 L440 84"/>
+      <!-- Third row: children of Composite -->
+      <rect class="node" x="80" y="170" width="120" height="36" rx="6"/>
+      <text class="label" x="140" y="190" text-anchor="middle">Composite</text>
+      <rect class="node" x="240" y="170" width="120" height="36" rx="6"/>
+      <text class="label" x="300" y="190" text-anchor="middle">Leaf</text>
+      <path class="arrow" d="M200 124 L140 170"/>
+      <path class="arrow" d="M200 124 L300 170"/>
+    </svg>
+    <figcaption>Composite: clients treat <em>Leaf</em> and <em>Composite</em> uniformly through the common <em>Component</em> interface.</figcaption>
+</figure>
+
+<p><strong>In short:</strong> separate the construction steps from the final object so the same sequence can build different variants.</p>
 <strong>Structure</strong>
     <li><strong>Component</strong> – defines common operations.</li>
     <li><strong>Leaf</strong> – basic object with real behavior.</li>
@@ -99,31 +134,423 @@ root.render()
 <p>Clients call <code>render()</code> without caring whether an object is a <em>File</em> (leaf) or <em>Folder</em> (composite). The composite delegates the work to its children.</p>
 
 
-<div class="note">
-    <strong>Chain of Responsibility:</strong> 
-    Avoid coupling the sender of a request to itsreceiver by giving more than one object a chance to handle the request. Chain the receiving
+<h3>📏 Chain of Responsibility</h3> <div class="note">
+    Avoid coupling the sender of a request to its receiver by giving more than one object a chance to handle the request. Chain the receiving
     objects and pass the request along the chain until an object handles it.
 </div>
 
-<div class="note">
-    <strong>Command:</strong> 
+<figure class="diagram">
+  <svg viewBox="0 0 760 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chain of Responsibility diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#arrowhead2); fill: none; }
+        .muted { fill: #6b7280; font-size: 11px; }
+      </style>
+      <marker id="arrowhead2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Incoming request -->
+    <text class="label" x="20" y="36">request</text>
+    <path class="arrow" d="M70 30 L120 30"/>
+
+    <!-- Handlers -->
+    <rect class="node" x="120" y="14" width="160" height="32" rx="6"/>
+    <text class="label" x="200" y="34" text-anchor="middle">Handler A</text>
+
+    <rect class="node" x="320" y="14" width="160" height="32" rx="6"/>
+    <text class="label" x="400" y="34" text-anchor="middle">Handler B</text>
+
+    <rect class="node" x="520" y="14" width="160" height="32" rx="6"/>
+    <text class="label" x="600" y="34" text-anchor="middle">Handler C</text>
+
+    <!-- Pass along arrows -->
+    <path class="arrow" d="M280 30 L320 30"/>
+    <path class="arrow" d="M480 30 L520 30"/>
+
+  </svg>
+  <figcaption>Each handler can process the request or pass it to the next.</figcaption>
+</figure>
+
+<p><strong>In short:</strong> wrap an incompatible object so it looks like the interface your code expects.</p>
+
+<strong>Structure</strong>
+    <li><strong>Handler</strong> – defines an interface for handling requests.</li>
+    <li><strong>Concrete Handler</strong> – implements the successor link.</li>
+    <li><strong>Client</strong> – initiates requests.</li>
+    <li><strong>Request</strong> – the object being handled.</li>
+
+<p><strong>Python example:</strong> a simple logger with multiple handlers.</p>
+
+<pre><code class="language-python">class Handler:
+    def __init__(self, successor=None):
+        self.successor = successor
+
+    def handle(self, request):
+        if self.successor:
+            return self.successor.handle(request)
+        return f"No handler could process: {request}"
+
+class ChatbotHandler(Handler):
+    def handle(self, request):
+        if request == "reset password":
+            return "Chatbot: Reset link sent to email."
+        return super().handle(request)
+
+class JuniorAgentHandler(Handler):
+    def handle(self, request):
+        if request == "refund":
+            return "Junior Agent: Refund request approved."
+        return super().handle(request)
+
+class SeniorAgentHandler(Handler):
+    def handle(self, request):
+        if request == "technical issue":
+            return "Senior Agent: Technical issue resolved."
+        return super().handle(request)
+
+# Build chain: Chatbot → Junior Agent → Senior Agent
+handler_chain = ChatbotHandler(JuniorAgentHandler(SeniorAgentHandler()))
+
+# Test
+print(handler_chain.handle("reset password"))   # Chatbot handles
+print(handler_chain.handle("refund"))           # Junior Agent handles
+print(handler_chain.handle("technical issue"))  # Senior Agent handles
+print(handler_chain.handle("complaint"))        # No handler could process
+</code></pre>
+
+<h3>📏 Command</h3> <div class="note">
     Encapsulate a request as an object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable
     operations.
 </div>
 
-<div class="note">
-    <strong>Interpreter:</strong> 
+<figure class="diagram">
+  <svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Command pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#cmdh); fill: none; }
+      </style>
+      <marker id="cmdh" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Client and Invoker -->
+    <rect class="node" x="40" y="24" width="120" height="36" rx="6"/>
+    <text class="label" x="100" y="46" text-anchor="middle">Client</text>
+    <rect class="node" x="200" y="24" width="140" height="36" rx="6"/>
+    <text class="label" x="270" y="46" text-anchor="middle">Invoker</text>
+
+    <!-- Command and Concrete Commands -->
+    <rect class="node" x="380" y="24" width="160" height="36" rx="6"/>
+    <text class="label" x="460" y="46" text-anchor="middle">Command <tspan class="muted">(interface)</tspan></text>
+    <rect class="node" x="380" y="90" width="160" height="32" rx="6"/>
+    <text class="label" x="460" y="110" text-anchor="middle">ConcreteCommand A</text>
+    <rect class="node" x="380" y="138" width="160" height="32" rx="6"/>
+    <text class="label" x="460" y="158" text-anchor="middle">ConcreteCommand B</text>
+
+    <!-- Receiver -->
+    <rect class="node" x="600" y="90" width="140" height="36" rx="6"/>
+    <text class="label" x="670" y="112" text-anchor="middle">Receiver</text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M160 42 L200 42"/>
+    <path class="arrow" d="M340 42 L380 42"/>
+    <path class="arrow" d="M540 106 L600 106"/>
+  </svg>
+  <figcaption>Command: Client tells Invoker which Command to run; Command knows how to call the Receiver.</figcaption>
+</figure>
+
+<p><strong>In short:</strong> share heavy, immutable data (intrinsic state) across many lightweight objects; pass varying details (extrinsic state) at use time.</p>
+
+<strong>Structure</strong>
+    <li><strong>Command</strong> – defines an interface for executing an operation.</li>
+    <li><strong>Concrete Command</strong> – implements the command interface.</li>
+    <li><strong>Invoker</strong> – initiates requests.</li>
+    <li><strong>Receiver</strong> – the object that performs the action.</li>
+
+<p><strong>Python example:</strong> a simple command pattern.</p>
+
+<pre><code class="language-python">## -- Command Interface -- ##
+class Command:
+    def execute(self):
+        raise NotImplementedError
+
+## -- Receiver (does the real work) -- ##
+class Light:
+    def turn_on(self):
+        return "Light is ON"
+
+    def turn_off(self):
+        return "Light is OFF"
+
+## -- Concrete Command -- ##
+class TurnOnLightCommand(Command):
+    def __init__(self, light):
+        self.light = light
+
+    def execute(self):
+        return self.light.turn_on()
+
+class TurnOffLightCommand(Command):
+    def __init__(self, light):
+        self.light = light
+
+    def execute(self):
+        return self.light.turn_off()
+
+## -- Invoker (calls the command) -- ##
+class RemoteControl:
+    def __init__(self):
+        self.commands = []
+
+    def submit(self, command):
+        self.commands.append(command)
+        return command.execute()
+        
+## -- Usage -- ##
+# Receiver
+light = Light()
+# Commands
+turn_on = TurnOnLightCommand(light)
+turn_off = TurnOffLightCommand(light)
+# Invoker
+remote = RemoteControl()
+print(remote.submit(turn_on))   # Light is ON
+print(remote.submit(turn_off))  # Light is OFF
+</code></pre>
+
+
+<h3>📏 Interpreter</h3> <div class="note">
     Given a language, define a represention for its grammar along with
 an interpreter that uses the representation to interpret sentences in the language.
 </div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 820 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Interpreter pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#inth); fill: none; }
+      </style>
+      <marker id="inth" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- AbstractExpression and derivatives -->
+    <rect class="node" x="60" y="20" width="190" height="36" rx="6"/>
+    <text class="label" x="155" y="42" text-anchor="middle">AbstractExpression</text>
+
+    <rect class="node" x="20" y="88" width="190" height="32" rx="6"/>
+    <text class="label" x="115" y="108" text-anchor="middle">TerminalExpression</text>
+    <rect class="node" x="240" y="88" width="210" height="32" rx="6"/>
+    <text class="label" x="345" y="108" text-anchor="middle">NonTerminalExpression</text>
+
+    <!-- Arrows from abstract to concrete -->
+    <path class="arrow" d="M155 56 L115 88"/>
+    <path class="arrow" d="M155 56 L345 88"/>
+
+    <!-- Example AST on right -->
+    <rect class="node" x="520" y="20" width="200" height="36" rx="6"/>
+    <text class="label" x="620" y="42" text-anchor="middle">Expression Tree</text>
+
+    <rect class="node" x="560" y="88" width="120" height="32" rx="6"/>
+    <text class="label" x="620" y="108" text-anchor="middle">Multiply</text>
+
+    <rect class="node" x="500" y="150" width="120" height="30" rx="6"/>
+    <text class="label" x="560" y="170" text-anchor="middle">Add</text>
+    <rect class="node" x="650" y="150" width="120" height="30" rx="6"/>
+    <text class="label" x="710" y="170" text-anchor="middle">Number(2)</text>
+
+    <rect class="node" x="460" y="208" width="120" height="28" rx="6"/>
+    <text class="label" x="520" y="226" text-anchor="middle">Number(5)</text>
+    <rect class="node" x="615" y="208" width="120" height="28" rx="6"/>
+    <text class="label" x="675" y="226" text-anchor="middle">Number(3)</text>
+
+    <!-- Tree arrows -->
+    <path class="arrow" d="M620 120 L560 150"/>
+    <path class="arrow" d="M620 120 L710 150"/>
+    <path class="arrow" d="M560 180 L520 208"/>
+    <path class="arrow" d="M560 180 L675 208"/>
+  </svg>
+  <figcaption>Interpreter: define a grammar with expressions; build an expression tree and interpret by recursion.</figcaption>
+</figure>
+
+
+
+<strong>Python example:</strong>
+<pre><code class="language-python">## -- Abstract Expression -- ##
+class Expression:
+    def interpret(self):
+        raise NotImplementedError
+
+## -- Terminal Expression (basic unit) -- ##
+class Number(Expression):
+    def __init__(self, value):
+        self.value = value
+
+    def interpret(self):
+        return self.value
+
+## -- Non-Terminal Expressions (combine rules) -- ##
+class Add(Expression):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def interpret(self):
+        return self.left.interpret() + self.right.interpret()
+
+
+class Multiply(Expression):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def interpret(self):
+        return self.left.interpret() * self.right.interpret()
+
+
+## -- Example usage -- ##
+if __name__ == "__main__":
+    # Represents: (5 + 3) * 2
+    expression = Multiply(
+        Add(Number(5), Number(3)),
+        Number(2)
+    )
+    print(expression.interpret())  # Output: 16
+</code></pre>
 
 <h2>📌 Three Small but Useful Patterns</h2>
 
 <h3>Builder</h3>
 
+<figure class="diagram">
+  <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Builder pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#bh); fill: none; }
+      </style>
+      <marker id="bh" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Director -->
+    <rect class="node" x="40" y="20" width="120" height="36" rx="6"/>
+    <text class="label" x="100" y="42" text-anchor="middle">Director</text>
+
+    <!-- Builder / ConcreteBuilder -->
+    <rect class="node" x="220" y="20" width="180" height="36" rx="6"/>
+    <text class="label" x="310" y="42" text-anchor="middle">Builder <tspan class="muted">(interface)</tspan></text>
+
+    <rect class="node" x="220" y="90" width="180" height="36" rx="6"/>
+    <text class="label" x="310" y="112" text-anchor="middle">ConcreteBuilder</text>
+
+    <!-- Product -->
+    <rect class="node" x="480" y="90" width="160" height="36" rx="6"/>
+    <text class="label" x="560" y="112" text-anchor="middle">Product</text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M160 38 L220 38"/>
+    <path class="arrow" d="M310 56 L310 90"/>
+    <path class="arrow" d="M400 108 L480 108"/>
+  </svg>
+  <figcaption>Builder: a Director orchestrates steps on a Builder to create a Product; different ConcreteBuilders produce different products with the same process.</figcaption>
+</figure>
+
 <h3>Adapter</h3>
 
+<figure class="diagram">
+  <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Adapter pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#ah); fill: none; }
+        .dashed { stroke-dasharray: 4 4; }
+      </style>
+      <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Client and Target -->
+    <rect class="node" x="40" y="20" width="120" height="36" rx="6"/>
+    <text class="label" x="100" y="42" text-anchor="middle">Client</text>
+
+    <rect class="node" x="200" y="20" width="160" height="36" rx="6"/>
+    <text class="label" x="280" y="42" text-anchor="middle">Target <tspan class="muted">(expected)</tspan></text>
+
+    <!-- Adapter wrapping Adaptee -->
+    <rect class="node" x="200" y="90" width="160" height="36" rx="6"/>
+    <text class="label" x="280" y="112" text-anchor="middle">Adapter</text>
+
+    <rect class="node" x="420" y="90" width="160" height="36" rx="6"/>
+    <text class="label" x="500" y="112" text-anchor="middle">Adaptee <tspan class="muted">(actual)</tspan></text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M160 38 L200 38"/>
+    <path class="arrow dashed" d="M280 56 L280 90"/>
+    <path class="arrow" d="M360 108 L420 108"/>
+  </svg>
+  <figcaption>Adapter: the Adapter exposes the Target interface but forwards calls to an Adaptee with an incompatible interface.</figcaption>
+</figure>
+
 <h3>Flyweight</h3>
+
+<figure class="diagram">
+  <svg viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flyweight pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#fh); fill: none; }
+      </style>
+      <marker id="fh" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Factory and shared flyweight -->
+    <rect class="node" x="40" y="20" width="160" height="36" rx="6"/>
+    <text class="label" x="120" y="42" text-anchor="middle">FlyweightFactory</text>
+
+    <rect class="node" x="260" y="20" width="180" height="36" rx="6"/>
+    <text class="label" x="350" y="42" text-anchor="middle">Shared Flyweight <tspan class="muted">(intrinsic)</tspan></text>
+
+    <!-- Clients with extrinsic state -->
+    <rect class="node" x="80" y="120" width="160" height="36" rx="6"/>
+    <text class="label" x="160" y="142" text-anchor="middle">Client A <tspan class="muted">(x)</tspan></text>
+
+    <rect class="node" x="300" y="120" width="160" height="36" rx="6"/>
+    <text class="label" x="380" y="142" text-anchor="middle">Client B <tspan class="muted">(y)</tspan></text>
+
+    <rect class="node" x="520" y="120" width="160" height="36" rx="6"/>
+    <text class="label" x="600" y="142" text-anchor="middle">Client C <tspan class="muted">(z)</tspan></text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M200 38 L260 38"/>
+    <path class="arrow" d="M350 56 L160 120"/>
+    <path class="arrow" d="M350 56 L380 120"/>
+    <path class="arrow" d="M350 56 L600 120"/>
+  </svg>
+  <figcaption>Flyweight: share intrinsic state across many clients while each supplies its own extrinsic state at use time.</figcaption>
+</figure>
 
 
 <h2>📌 The original 23 Design Patterns by Gang of Four</h2>

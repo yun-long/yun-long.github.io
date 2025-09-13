@@ -635,6 +635,32 @@ hr {
 }
 .blog-post-body code { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; }
 
+/* Collapsible code blocks */
+.blog-post-body details.code-block {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fafafa;
+  margin: 12px 0;
+}
+.blog-post-body summary.code-summary {
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  color: #374151;
+  list-style: none;
+}
+.blog-post-body summary.code-summary::-webkit-details-marker { display: none; }
+.blog-post-body details.code-block[open] summary.code-summary {
+  border-bottom: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+.blog-post-body details.code-block pre {
+  margin: 0;
+  border: none; /* container provides the border */
+  border-radius: 0 0 8px 8px;
+}
+
 .blog-post-body blockquote {
     margin: 1.1rem 0;
     padding: 0.6rem 1rem;
@@ -668,6 +694,22 @@ hr {
   padding: 8px 10px;
 }
 .blog-post-body th { background: #f8f9fa; text-align: left; }
+
+/* Diagrams inside posts */
+.blog-post-body .diagram {
+  text-align: center;
+  margin: 16px 0 24px;
+}
+.blog-post-body .diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+.blog-post-body .diagram figcaption {
+  margin-top: 8px;
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+}
 
 .back-to-blog {
   display: inline-flex;
