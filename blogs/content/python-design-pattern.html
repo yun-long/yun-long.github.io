@@ -2,11 +2,11 @@
     <em>Favor object composition over class inheritance.</em>
 </div>
 
-<p>As a researcher with a background in machine learning and robotics.
-    Most of my time and effort have been focused on optimizing the <b>benchmark performance</b> of an algorithm
-    for a specific problem for the sake of publishing a paper. 
-    It is a shame that despite that I have been using Python for my research projects for a long time,
-    I never really learn the design pattern for Python. This blog is a record of my learning journey.
+<p>Most researchers are terrible software engineers, including myself.
+They spend most of their time and effort on optimizing the <b>benchmark performance</b> of an algorithm
+for a specific problem for the sake of publishing a paper.
+It is a shame that despite that I have been using Python for my research projects for a long time,
+I never really learn the design pattern for Python. This blog is a record of my learning journey.
 </p>
 
 <p>
@@ -50,9 +50,168 @@ most of us have been fooled. In his talk, he made the following conclusion:
 
 <h2>📌 Two Language built-in Design Patterns</h2>
 
-<h3>📏 Iterator</h3>
+<h3>📏 Iterator</h3> <div class="note">
+    Provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation.
+ </div>
 
-<h3>📏 Visitor</h3>
+<figure class="diagram">
+  <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Iterator pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#ith); fill: none; }
+      </style>
+      <marker id="ith" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Aggregate and Iterator interfaces -->
+    <rect class="node" x="40" y="20" width="170" height="36" rx="6"/>
+    <text class="label" x="125" y="42" text-anchor="middle">Aggregate <tspan class="muted">(iterable)</tspan></text>
+    <rect class="node" x="250" y="20" width="160" height="36" rx="6"/>
+    <text class="label" x="330" y="42" text-anchor="middle">Iterator</text>
+
+    <!-- Concretes -->
+    <rect class="node" x="40" y="90" width="170" height="36" rx="6"/>
+    <text class="label" x="125" y="112" text-anchor="middle">ConcreteAggregate</text>
+    <rect class="node" x="250" y="90" width="160" height="36" rx="6"/>
+    <text class="label" x="330" y="112" text-anchor="middle">ConcreteIterator</text>
+
+    <!-- Client -->
+    <rect class="node" x="470" y="56" width="120" height="36" rx="6"/>
+    <text class="label" x="530" y="78" text-anchor="middle">Client</text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M210 38 L250 38"/>
+    <path class="arrow" d="M125 56 L125 90"/>
+    <path class="arrow" d="M330 56 L330 90"/>
+    <path class="arrow" d="M410 74 L470 74"/>
+  </svg>
+  <figcaption>Iterator: client asks the aggregate for an iterator and walks items without seeing internal structure.</figcaption>
+</figure>
+
+<p><strong>In short:</strong> hide traversal logic inside an iterator so clients use a uniform loop.</p>
+
+<p><strong>Python example:</strong> a custom iterable with its own iterator.</p>
+
+<pre><code class="language-python">class MyIterator:
+    def __init__(self, items):
+        self._items = list(items)
+        self._i = 0
+    def __iter__(self):
+        return self
+    def __next__(self):
+        if self._i >= len(self._items):
+            raise StopIteration
+        val = self._items[self._i]
+        self._i += 1
+        return val
+
+class MyCollection:
+    def __init__(self, *items):
+        self._items = items
+    def __iter__(self):
+        return MyIterator(self._items)
+
+nums = MyCollection(1, 2, 3)
+print([x for x in nums])  # [1, 2, 3]
+</code></pre>
+
+
+<h3>📏 Visitor</h3> <div class="note">
+    Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements.
+ </div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visitor pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#vish); fill: none; }
+      </style>
+      <marker id="vish" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Visitor and ConcreteVisitors -->
+    <rect class="node" x="40" y="20" width="150" height="36" rx="6"/>
+    <text class="label" x="115" y="42" text-anchor="middle">Visitor</text>
+    <rect class="node" x="40" y="88" width="150" height="32" rx="6"/>
+    <text class="label" x="115" y="108" text-anchor="middle">ConcreteVisitor</text>
+
+    <!-- Element and ConcreteElements -->
+    <rect class="node" x="260" y="20" width="170" height="36" rx="6"/>
+    <text class="label" x="345" y="42" text-anchor="middle">Element</text>
+    <rect class="node" x="260" y="88" width="170" height="32" rx="6"/>
+    <text class="label" x="345" y="108" text-anchor="middle">ConcreteElement A</text>
+    <rect class="node" x="260" y="132" width="170" height="32" rx="6"/>
+    <text class="label" x="345" y="152" text-anchor="middle">ConcreteElement B</text>
+
+    <!-- Object structure -->
+    <rect class="node" x="520" y="20" width="180" height="36" rx="6"/>
+    <text class="label" x="610" y="42" text-anchor="middle">ObjectStructure</text>
+
+    <!-- Arrows: visitor visits elements; structure holds elements -->
+    <path class="arrow" d="M190 104 L260 104"/>
+    <path class="arrow" d="M190 148 L260 148"/>
+    <path class="arrow" d="M520 56 L430 104"/>
+    <path class="arrow" d="M520 56 L430 148"/>
+  </svg>
+  <figcaption>Visitor: elements accept a visitor, which then dispatches to the right <em>visit_X</em> method (double dispatch).</figcaption>
+</figure>
+
+<p><strong>In short:</strong> add new operations over a stable element hierarchy without modifying element classes.</p>
+
+<p><strong>Python example:</strong> compute sizes over a small filesystem-like tree using a visitor.</p>
+
+<pre><code class="language-python">class Visitor:
+    def visit_file(self, file):
+        raise NotImplementedError
+    def visit_folder(self, folder):
+        raise NotImplementedError
+
+class SizeVisitor(Visitor):
+    def __init__(self):
+        self.total = 0
+    def visit_file(self, file):
+        self.total += file.size
+    def visit_folder(self, folder):
+        for child in folder.children:
+            child.accept(self)
+
+class Element:
+    def accept(self, visitor: Visitor):
+        raise NotImplementedError
+
+class File(Element):
+    def __init__(self, name, size):
+        self.name, self.size = name, size
+    def accept(self, visitor):
+        return visitor.visit_file(self)
+
+class Folder(Element):
+    def __init__(self, name, *children):
+        self.name = name
+        self.children = list(children)
+    def accept(self, visitor):
+        return visitor.visit_folder(self)
+
+root = Folder("root",
+    File("a.txt", 10),
+    Folder("docs", File("b.pdf", 50), File("c.md", 5))
+)
+
+v = SizeVisitor()
+root.accept(v)
+print(v.total)  # 65
+</code></pre>
+
 
 
 <h2>📌 Four Huge and Dominate  Patterns in Our Frameworks</h2>
@@ -432,168 +591,6 @@ if __name__ == "__main__":
         Number(2)
     )
     print(expression.interpret())  # Output: 16
-</code></pre>
-
-<h3>📏 Iterator</h3> <div class="note">
-    Provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation.
- </div>
-
-<figure class="diagram">
-  <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Iterator pattern diagram">
-    <defs>
-      <style>
-        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
-        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
-        .muted { fill: #6b7280; font-size: 11px; }
-        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#ith); fill: none; }
-      </style>
-      <marker id="ith" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
-      </marker>
-    </defs>
-
-    <!-- Aggregate and Iterator interfaces -->
-    <rect class="node" x="40" y="20" width="170" height="36" rx="6"/>
-    <text class="label" x="125" y="42" text-anchor="middle">Aggregate <tspan class="muted">(iterable)</tspan></text>
-    <rect class="node" x="250" y="20" width="160" height="36" rx="6"/>
-    <text class="label" x="330" y="42" text-anchor="middle">Iterator</text>
-
-    <!-- Concretes -->
-    <rect class="node" x="40" y="90" width="170" height="36" rx="6"/>
-    <text class="label" x="125" y="112" text-anchor="middle">ConcreteAggregate</text>
-    <rect class="node" x="250" y="90" width="160" height="36" rx="6"/>
-    <text class="label" x="330" y="112" text-anchor="middle">ConcreteIterator</text>
-
-    <!-- Client -->
-    <rect class="node" x="470" y="56" width="120" height="36" rx="6"/>
-    <text class="label" x="530" y="78" text-anchor="middle">Client</text>
-
-    <!-- Arrows -->
-    <path class="arrow" d="M210 38 L250 38"/>
-    <path class="arrow" d="M125 56 L125 90"/>
-    <path class="arrow" d="M330 56 L330 90"/>
-    <path class="arrow" d="M410 74 L470 74"/>
-  </svg>
-  <figcaption>Iterator: client asks the aggregate for an iterator and walks items without seeing internal structure.</figcaption>
-</figure>
-
-<p><strong>In short:</strong> hide traversal logic inside an iterator so clients use a uniform loop.</p>
-
-<p><strong>Python example:</strong> a custom iterable with its own iterator.</p>
-
-<pre><code class="language-python">class MyIterator:
-    def __init__(self, items):
-        self._items = list(items)
-        self._i = 0
-    def __iter__(self):
-        return self
-    def __next__(self):
-        if self._i >= len(self._items):
-            raise StopIteration
-        val = self._items[self._i]
-        self._i += 1
-        return val
-
-class MyCollection:
-    def __init__(self, *items):
-        self._items = items
-    def __iter__(self):
-        return MyIterator(self._items)
-
-nums = MyCollection(1, 2, 3)
-print([x for x in nums])  # [1, 2, 3]
-</code></pre>
-
-
-<h3>📏 Visitor</h3> <div class="note">
-    Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements.
- </div>
-
-<figure class="diagram">
-  <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visitor pattern diagram">
-    <defs>
-      <style>
-        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
-        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
-        .muted { fill: #6b7280; font-size: 11px; }
-        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#vish); fill: none; }
-      </style>
-      <marker id="vish" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
-      </marker>
-    </defs>
-
-    <!-- Visitor and ConcreteVisitors -->
-    <rect class="node" x="40" y="20" width="150" height="36" rx="6"/>
-    <text class="label" x="115" y="42" text-anchor="middle">Visitor</text>
-    <rect class="node" x="40" y="88" width="150" height="32" rx="6"/>
-    <text class="label" x="115" y="108" text-anchor="middle">ConcreteVisitor</text>
-
-    <!-- Element and ConcreteElements -->
-    <rect class="node" x="260" y="20" width="170" height="36" rx="6"/>
-    <text class="label" x="345" y="42" text-anchor="middle">Element</text>
-    <rect class="node" x="260" y="88" width="170" height="32" rx="6"/>
-    <text class="label" x="345" y="108" text-anchor="middle">ConcreteElement A</text>
-    <rect class="node" x="260" y="132" width="170" height="32" rx="6"/>
-    <text class="label" x="345" y="152" text-anchor="middle">ConcreteElement B</text>
-
-    <!-- Object structure -->
-    <rect class="node" x="520" y="20" width="180" height="36" rx="6"/>
-    <text class="label" x="610" y="42" text-anchor="middle">ObjectStructure</text>
-
-    <!-- Arrows: visitor visits elements; structure holds elements -->
-    <path class="arrow" d="M190 104 L260 104"/>
-    <path class="arrow" d="M190 148 L260 148"/>
-    <path class="arrow" d="M520 56 L430 104"/>
-    <path class="arrow" d="M520 56 L430 148"/>
-  </svg>
-  <figcaption>Visitor: elements accept a visitor, which then dispatches to the right <em>visit_X</em> method (double dispatch).</figcaption>
-</figure>
-
-<p><strong>In short:</strong> add new operations over a stable element hierarchy without modifying element classes.</p>
-
-<p><strong>Python example:</strong> compute sizes over a small filesystem-like tree using a visitor.</p>
-
-<pre><code class="language-python">class Visitor:
-    def visit_file(self, file):
-        raise NotImplementedError
-    def visit_folder(self, folder):
-        raise NotImplementedError
-
-class SizeVisitor(Visitor):
-    def __init__(self):
-        self.total = 0
-    def visit_file(self, file):
-        self.total += file.size
-    def visit_folder(self, folder):
-        for child in folder.children:
-            child.accept(self)
-
-class Element:
-    def accept(self, visitor: Visitor):
-        raise NotImplementedError
-
-class File(Element):
-    def __init__(self, name, size):
-        self.name, self.size = name, size
-    def accept(self, visitor):
-        return visitor.visit_file(self)
-
-class Folder(Element):
-    def __init__(self, name, *children):
-        self.name = name
-        self.children = list(children)
-    def accept(self, visitor):
-        return visitor.visit_folder(self)
-
-root = Folder("root",
-    File("a.txt", 10),
-    Folder("docs", File("b.pdf", 50), File("c.md", 5))
-)
-
-v = SizeVisitor()
-root.accept(v)
-print(v.total)  # 65
 </code></pre>
 
 
