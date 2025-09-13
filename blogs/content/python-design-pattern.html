@@ -48,6 +48,12 @@ most of us have been fooled. In his talk, he made the following conclusion:
     <li><b>4 patterns: huge and dominate our frameworks</b></li>
 </ul>
 
+<h2>📌 Two Language built-in Design Patterns</h2>
+
+<h3>📏 Iterator</h3>
+
+<h3>📏 Visitor</h3>
+
 
 <h2>📌 Four Huge and Dominate  Patterns in Our Frameworks</h2>
 
@@ -385,8 +391,6 @@ an interpreter that uses the representation to interpret sentences in the langua
   <figcaption>Interpreter: define a grammar with expressions; build an expression tree and interpret by recursion.</figcaption>
 </figure>
 
-
-
 <strong>Python example:</strong>
 <pre><code class="language-python">## -- Abstract Expression -- ##
 class Expression:
@@ -430,9 +434,173 @@ if __name__ == "__main__":
     print(expression.interpret())  # Output: 16
 </code></pre>
 
+<h3>📏 Iterator</h3> <div class="note">
+    Provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation.
+ </div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Iterator pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#ith); fill: none; }
+      </style>
+      <marker id="ith" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Aggregate and Iterator interfaces -->
+    <rect class="node" x="40" y="20" width="170" height="36" rx="6"/>
+    <text class="label" x="125" y="42" text-anchor="middle">Aggregate <tspan class="muted">(iterable)</tspan></text>
+    <rect class="node" x="250" y="20" width="160" height="36" rx="6"/>
+    <text class="label" x="330" y="42" text-anchor="middle">Iterator</text>
+
+    <!-- Concretes -->
+    <rect class="node" x="40" y="90" width="170" height="36" rx="6"/>
+    <text class="label" x="125" y="112" text-anchor="middle">ConcreteAggregate</text>
+    <rect class="node" x="250" y="90" width="160" height="36" rx="6"/>
+    <text class="label" x="330" y="112" text-anchor="middle">ConcreteIterator</text>
+
+    <!-- Client -->
+    <rect class="node" x="470" y="56" width="120" height="36" rx="6"/>
+    <text class="label" x="530" y="78" text-anchor="middle">Client</text>
+
+    <!-- Arrows -->
+    <path class="arrow" d="M210 38 L250 38"/>
+    <path class="arrow" d="M125 56 L125 90"/>
+    <path class="arrow" d="M330 56 L330 90"/>
+    <path class="arrow" d="M410 74 L470 74"/>
+  </svg>
+  <figcaption>Iterator: client asks the aggregate for an iterator and walks items without seeing internal structure.</figcaption>
+</figure>
+
+<p><strong>In short:</strong> hide traversal logic inside an iterator so clients use a uniform loop.</p>
+
+<p><strong>Python example:</strong> a custom iterable with its own iterator.</p>
+
+<pre><code class="language-python">class MyIterator:
+    def __init__(self, items):
+        self._items = list(items)
+        self._i = 0
+    def __iter__(self):
+        return self
+    def __next__(self):
+        if self._i >= len(self._items):
+            raise StopIteration
+        val = self._items[self._i]
+        self._i += 1
+        return val
+
+class MyCollection:
+    def __init__(self, *items):
+        self._items = items
+    def __iter__(self):
+        return MyIterator(self._items)
+
+nums = MyCollection(1, 2, 3)
+print([x for x in nums])  # [1, 2, 3]
+</code></pre>
+
+
+<h3>📏 Visitor</h3> <div class="note">
+    Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements.
+ </div>
+
+<figure class="diagram">
+  <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visitor pattern diagram">
+    <defs>
+      <style>
+        .node { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+        .label { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #111827; }
+        .muted { fill: #6b7280; font-size: 11px; }
+        .arrow { stroke: #9ca3af; stroke-width: 1.4; marker-end: url(#vish); fill: none; }
+      </style>
+      <marker id="vish" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+        <polygon points="0 0, 8 4, 0 8" fill="#9ca3af"></polygon>
+      </marker>
+    </defs>
+
+    <!-- Visitor and ConcreteVisitors -->
+    <rect class="node" x="40" y="20" width="150" height="36" rx="6"/>
+    <text class="label" x="115" y="42" text-anchor="middle">Visitor</text>
+    <rect class="node" x="40" y="88" width="150" height="32" rx="6"/>
+    <text class="label" x="115" y="108" text-anchor="middle">ConcreteVisitor</text>
+
+    <!-- Element and ConcreteElements -->
+    <rect class="node" x="260" y="20" width="170" height="36" rx="6"/>
+    <text class="label" x="345" y="42" text-anchor="middle">Element</text>
+    <rect class="node" x="260" y="88" width="170" height="32" rx="6"/>
+    <text class="label" x="345" y="108" text-anchor="middle">ConcreteElement A</text>
+    <rect class="node" x="260" y="132" width="170" height="32" rx="6"/>
+    <text class="label" x="345" y="152" text-anchor="middle">ConcreteElement B</text>
+
+    <!-- Object structure -->
+    <rect class="node" x="520" y="20" width="180" height="36" rx="6"/>
+    <text class="label" x="610" y="42" text-anchor="middle">ObjectStructure</text>
+
+    <!-- Arrows: visitor visits elements; structure holds elements -->
+    <path class="arrow" d="M190 104 L260 104"/>
+    <path class="arrow" d="M190 148 L260 148"/>
+    <path class="arrow" d="M520 56 L430 104"/>
+    <path class="arrow" d="M520 56 L430 148"/>
+  </svg>
+  <figcaption>Visitor: elements accept a visitor, which then dispatches to the right <em>visit_X</em> method (double dispatch).</figcaption>
+</figure>
+
+<p><strong>In short:</strong> add new operations over a stable element hierarchy without modifying element classes.</p>
+
+<p><strong>Python example:</strong> compute sizes over a small filesystem-like tree using a visitor.</p>
+
+<pre><code class="language-python">class Visitor:
+    def visit_file(self, file):
+        raise NotImplementedError
+    def visit_folder(self, folder):
+        raise NotImplementedError
+
+class SizeVisitor(Visitor):
+    def __init__(self):
+        self.total = 0
+    def visit_file(self, file):
+        self.total += file.size
+    def visit_folder(self, folder):
+        for child in folder.children:
+            child.accept(self)
+
+class Element:
+    def accept(self, visitor: Visitor):
+        raise NotImplementedError
+
+class File(Element):
+    def __init__(self, name, size):
+        self.name, self.size = name, size
+    def accept(self, visitor):
+        return visitor.visit_file(self)
+
+class Folder(Element):
+    def __init__(self, name, *children):
+        self.name = name
+        self.children = list(children)
+    def accept(self, visitor):
+        return visitor.visit_folder(self)
+
+root = Folder("root",
+    File("a.txt", 10),
+    Folder("docs", File("b.pdf", 50), File("c.md", 5))
+)
+
+v = SizeVisitor()
+root.accept(v)
+print(v.total)  # 65
+</code></pre>
+
+
 <h2>📌 Three Small but Useful Patterns</h2>
 
-<h3>Builder</h3>
+<h3>📏 Builder</h3>
+<div class="note"> Separate the construction steps from the final object so the same sequence can build different variants. </div>
 
 <figure class="diagram">
   <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Builder pattern diagram">
@@ -471,7 +639,89 @@ if __name__ == "__main__":
   <figcaption>Builder: a Director orchestrates steps on a Builder to create a Product; different ConcreteBuilders produce different products with the same process.</figcaption>
 </figure>
 
-<h3>Adapter</h3>
+<strong>Structure</strong>
+    <li><strong>Director</strong> – constructs an object using the Builder interface.</li>
+    <li><strong>Builder</strong> – provides an interface for creating parts of a Product object.</li>
+    <li><strong>Concrete Builder</strong> – implements the Builder interface and builds a Product.</li>
+    <li><strong>Product</strong> – the object being built.</li>
+
+<strong>Python example:</strong>
+<pre><code class="language-python">## -- Product -- ##
+class Car:
+    def __init__(self):
+        self.parts = []
+
+    def add_part(self, part):
+        self.parts.append(part)
+
+    def __str__(self):
+        return f"Car with parts: {', '.join(self.parts)}"
+
+# Builder
+class CarBuilder:
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self._car = Car()
+
+    def add_wheels(self):
+        self._car.add_part("4 wheels")
+        return self
+
+    def add_engine(self):
+        self._car.add_part("engine")
+        return self
+
+    def add_doors(self):
+        self._car.add_part("4 doors")
+        return self
+
+    def build(self):
+        car = self._car
+        self.reset()
+        return car
+
+# Director (defines *what kind* of car to build)
+class Director:
+    def __init__(self, builder: CarBuilder):
+        self._builder = builder
+
+    def build_sports_car(self):
+        return (
+            self._builder.reset()
+            .add_wheels()
+            .add_engine()
+            .add_doors()
+            .build()
+        )
+
+    def build_simple_car(self):
+        return (
+            self._builder.reset()
+            .add_wheels()
+            .add_engine()
+            .build()
+        )
+
+# Usage
+if __name__ == "__main__":
+    builder = CarBuilder()
+    director = Director(builder)
+    sports_car = director.build_sports_car()
+    simple_car = director.build_simple_car()
+    print(sports_car)   # Car with parts: 4 wheels, engine, 4 doors
+    print(simple_car)   # Car with parts: 4 wheels, engine
+</code></pre>
+
+<h3>📏 Adapter</h3>
+<div class="note"> Convert the interface of a class into another interface clients expect. 
+    Adapter lets classes work together that couldn't otherwise because of incompatible interfaces. </div>
+
+<strong>Structure</strong>
+    <li><strong>Target</strong> – the interface clients expect.</li>
+    <li><strong>Adapter</strong> – adapts the Adaptee to the Target interface.</li>
+    <li><strong>Adaptee</strong> – the object with the incompatible interface.</li>
 
 <figure class="diagram">
   <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Adapter pattern diagram">
@@ -510,7 +760,47 @@ if __name__ == "__main__":
   <figcaption>Adapter: the Adapter exposes the Target interface but forwards calls to an Adaptee with an incompatible interface.</figcaption>
 </figure>
 
-<h3>Flyweight</h3>
+<strong>Python example:</strong>
+<pre><code class="language-python">## -- Target (what the client expects) -- ##
+class Target:
+    def request(self):
+        return "Target: The default request"
+
+## -- Adaptee (has a different interface) -- ##
+class Adaptee:
+    def specific_request(self):
+        return "Adaptee: ʞɹoʍ sdrawkcab"  # returns reversed text for demo
+
+## -- Adapter (makes Adaptee compatible with Target) -- ##
+class Adapter(Target):
+    def __init__(self, adaptee: Adaptee):
+        self.adaptee = adaptee
+
+    def request(self):
+        # Convert Adaptee's output into what Target expects
+        return f"Adapter: (TRANSLATED) {self.adaptee.specific_request()[::-1]}"
+
+
+# Client code
+if __name__ == "__main__":
+    target = Target()
+    print(target.request())  # Target: The default request
+
+    adaptee = Adaptee()
+    print(adaptee.specific_request())  # Adaptee: ʞɹoʍ sdrawkcab
+
+    adapter = Adapter(adaptee)
+    print(adapter.request())  # Adapter: (TRANSLATED) backwards work
+</code></pre>
+
+<h3>📏 Flyweight</h3>
+<div class="note"> Flyweight is a structural design pattern that provides ways to decrease object count thus reducing memory usage by sharing object instances. </div>
+
+<strong>Structure</strong>
+    <li><strong>FlyweightFactory</strong> – creates and manages flyweight objects.</li>
+    <li><strong>Flyweight</strong> – the shared intrinsic state.</li>
+    <li><strong>Client</strong> – the objects with extrinsic state.</li>
+
 
 <figure class="diagram">
   <svg viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flyweight pattern diagram">
@@ -552,6 +842,44 @@ if __name__ == "__main__":
   <figcaption>Flyweight: share intrinsic state across many clients while each supplies its own extrinsic state at use time.</figcaption>
 </figure>
 
+<strong>Python example:</strong>
+<pre><code class="language-python">## -- Flyweight -- ##
+class Character:
+    def __init__(self, symbol, font):
+        self.symbol = symbol    # intrinsic (shared)
+        self.font = font        # intrinsic (shared)
+
+    def display(self, position):
+        # position is extrinsic (unique per use)
+        print(f"Character: {self.symbol}, Font: {self.font}, Position: {position}")
+
+## -- Flyweight Factory -- ##
+class CharacterFactory:
+    def __init__(self):
+        self._characters = {}
+
+    def get_character(self, symbol, font):
+        key = (symbol, font)
+        if key not in self._characters:
+            self._characters[key] = Character(symbol, font)
+        return self._characters[key]
+
+# Client code
+if __name__ == "__main__":
+    factory = CharacterFactory()
+
+    # Reuses flyweight objects for repeated chars
+    c1 = factory.get_character("A", "Arial")
+    c2 = factory.get_character("A", "Arial")
+    c3 = factory.get_character("B", "Arial")
+
+    c1.display(1)  # Character: A, Font: Arial, Position: 1
+    c2.display(2)  # Character: A, Font: Arial, Position: 2
+    c3.display(3)  # Character: B, Font: Arial, Position: 3
+
+    # c1 and c2 are the same object (shared flyweight)
+    print(c1 is c2)  # True
+</code></pre>
 
 <h2>📌 The original 23 Design Patterns by Gang of Four</h2>
 <table class="design-patterns">
