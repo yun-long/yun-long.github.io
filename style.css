@@ -288,7 +288,7 @@ hr {
     flex-grow: 1;
 }
 
-.publication-details strong {
+.publication-details > strong {
     color: var(--color-text-strong);
     font-size: 1.02rem;
     line-height: 1.4;
@@ -316,11 +316,13 @@ hr {
 }
 
 .publication-venue-links {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    display: block;
     margin-top: 4px;
-    flex-wrap: wrap;
+    white-space: nowrap;
+}
+
+.publication-venue-links .paper-links {
+    margin-left: 15px;
 }
 
 .projects .project-list {
