@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One probability path, two descriptions</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+html,body{height:auto;background:transparent;margin:0}body{font-family:var(--font-sans);font-size:13px;color:var(--color-text)}*{box-sizing:border-box}.figure{padding:6px 3px}.controls{display:grid;gap:10px;margin-bottom:14px}label{display:flex;flex-wrap:wrap;align-items:center;gap:8px}select{font:inherit;background:var(--color-bg);color:var(--color-text);border:1px solid var(--color-border-strong);padding:6px;max-width:100%}input{accent-color:#216b87;width:min(240px,43vw)}output{font-variant-numeric:tabular-nums;min-width:35px}.readouts{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin:12px 0}.readouts div{border-top:1px solid var(--color-border);padding-top:6px}.readouts span{display:block;color:var(--color-text-muted);font-size:12px}.readouts output{font-size:16px}.chart{display:block;width:100%;overflow:visible}.chart text{font:12px var(--font-sans);fill:var(--color-text)}.legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:12px;margin:10px 0}.legend span{display:flex;align-items:center;gap:6px}.swatch{display:inline-block;width:22px;border-top:3px solid #216b87}.swatch.dashed{border-top:2px dashed #ab622b}.status{font-size:12px;color:var(--color-text-muted);margin:8px 0;line-height:1.5}.chart .axis{stroke:var(--color-border-strong)}.chart .grid{stroke:var(--color-border);stroke-width:.6}.chart .probe{stroke:#777;stroke-dasharray:3 4}.chart .density{stroke:#216b87;fill:#216b87;fill-opacity:.07;stroke-width:2}.chart .direct{stroke:#216b87;fill:none;stroke-width:3.5}.chart .converted{stroke:#ab622b;fill:none;stroke-width:1.8;stroke-dasharray:7 5}.chart .point{fill:var(--color-bg);stroke:#216b87;stroke-width:2}
+</style>
+</head>
+<body>
+<div class="figure">
+<div class="controls">
+<label for="schedule">Path <select id="schedule"><option value="linear">Linear: a = s, b = 1 − s</option><option value="vp">Variance-preserving: a = sin(πs/2), b = cos(πs/2)</option></select></label>
+<label for="time">Generation time s <output id="time-value" for="time">0.50</output><input id="time" type="range" min="5" max="95" value="50" step="1"></label>
+<label for="probe">Probe position y <output id="probe-value" for="probe">1.00</output><input id="probe" type="range" min="-350" max="350" value="100" step="5"></label>
+</div>
+<svg id="density" class="chart" viewBox="0 0 640 185" role="img" aria-label="Density along the selected noise-to-data path"></svg>
+<div class="legend"><span><i class="swatch"></i>Velocity from endpoint averages</span><span><i class="swatch dashed"></i>Velocity converted from score</span></div>
+<svg id="velocity" class="chart" viewBox="0 0 640 205" role="img" aria-label="Two equivalent calculations of the velocity field"></svg>
+<div class="readouts">
+<div><span>Score at probe</span><output id="score-value"></output></div>
+<div><span>Mean noise at probe</span><output id="noise-value"></output></div>
+<div><span>Velocity from endpoints</span><output id="direct-value"></output></div>
+<div><span>Velocity from score</span><output id="converted-value"></output></div>
+</div>
+<p class="status" id="status" aria-live="polite"></p>
+</div>
+<script src="generative-models-math.js"></script>
+<script>
+'use strict';
+const ns='http://www.w3.org/2000/svg';
+const time=document.getElementById('time');
+const probe=document.getElementById('probe');
+const mode=document.getElementById('schedule');
+function element(tag,attrs,text){const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
+function draw(svg,values,key,ymin,ymax,label,probeValue,s,pathMode){
+  svg.replaceChildren();
+  const height=Number(svg.getAttribute('viewBox').split(' ')[3]);
+  const left=48,right=624,top=26,bottom=height-35;
+  const px=x=>left+(x+4)/8*(right-left);
+  const py=y=>bottom-(y-ymin)/(ymax-ymin)*(bottom-top);
+  svg.append(element('title',{},label));
+  svg.append(element('text',{x:left,y:14},label));
+  for(let j=0;j<=4;j++){const y=ymin+(ymax-ymin)*j/4;svg.append(element('line',{x1:left,x2:right,y1:py(y),y2:py(y),class:'grid'}));svg.append(element('text',{x:left-8,y:py(y)+4,'text-anchor':'end'},Math.abs(ymax)>2?y.toFixed(1):y.toFixed(2)));}
+  for(const x of [-4,-2,0,2,4])svg.append(element('text',{x:px(x),y:bottom+17,'text-anchor':'middle'},String(x)));
+  svg.append(element('text',{x:right,y:height-2,'text-anchor':'end'},'Data coordinate y'));
+  svg.append(element('line',{x1:left,x2:right,y1:bottom,y2:bottom,class:'axis'}));
+  if(ymin<0)svg.append(element('line',{x1:left,x2:right,y1:py(0),y2:py(0),class:'axis'}));
+  const line=field=>values.map((p,i)=>(i?'L':'M')+px(p.x).toFixed(2)+','+py(p[field]).toFixed(2)).join(' ');
+  if(key==='density')svg.append(element('path',{d:line(key)+` L ${right},${bottom} L ${left},${bottom} Z`,class:'density'}));
+  else {svg.append(element('path',{d:line('velocity'),class:'direct'}));svg.append(element('path',{d:line('fromScore'),class:'converted'}));}
+  const f=GenerativePath.fields(probeValue,s,pathMode);
+  svg.append(element('line',{x1:px(probeValue),x2:px(probeValue),y1:top,y2:bottom,class:'probe'}));
+  svg.append(element('circle',{cx:px(probeValue),cy:py(f[key]),r:4,class:'point'}));
+}
+function render(){
+ const s=Number(time.value)/100,y=Number(probe.value)/100,pathMode=mode.value;
+ document.getElementById('time-value').value=s.toFixed(2);
+ document.getElementById('probe-value').value=y.toFixed(2);
+ const values=Array.from({length:241},(_,i)=>{const x=-4+i/30;return {x,...GenerativePath.fields(x,s,pathMode)};});
+ const range=Math.max(1,...values.map(v=>Math.abs(v.velocity)))*1.12;
+ draw(document.getElementById('density'),values,'density',0,.65,'Density pₛ(y)',y,s,pathMode);
+ draw(document.getElementById('velocity'),values,'velocity',-range,range,'Velocity uₛ(y): data units per unit s',y,s,pathMode);
+ const f=GenerativePath.fields(y,s,pathMode);
+ for(const [id,key] of [['score-value','score'],['noise-value','noiseMean'],['direct-value','velocity'],['converted-value','fromScore']])document.getElementById(id).value=f[key].toFixed(4);
+ const {a,b}=GenerativePath.schedule(s,pathMode);
+ document.getElementById('status').textContent=`a = ${a.toFixed(3)}, b = ${b.toFixed(3)}. The two velocity curves overlap. ${pathMode==='vp'?'Variance-preserving means a² + b² = 1; the data distribution itself need not have unit variance.':'The linear schedule changes both the signal and noise amplitudes at constant rates.'}`;
+}
+for(const control of [time,probe,mode])control.addEventListener('input',render);
+render();
+</script>
+</body>
+</html>

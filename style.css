@@ -801,6 +801,26 @@ hr {
 }
 .blog-post-body .data-visual { height: 390px; }
 .blog-post-body .transport-visual { height: 650px; }
+.blog-post-body .generative-visual { height: 780px; }
+.blog-post-body .model-roadmap {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  list-style: none;
+  padding: 0;
+  margin: 24px 0;
+}
+.blog-post-body .model-roadmap li {
+  border-top: 2px solid var(--color-border-strong);
+  padding-top: 10px;
+}
+.blog-post-body .model-roadmap strong { display: block; }
+.blog-post-body .model-roadmap span { font-size: 0.9em; }
+.blog-post-body .note-table-scroll { overflow-x: auto; }
+@media (max-width: 480px) {
+  .blog-post-body .model-roadmap { grid-template-columns: 1fr; gap: 4px; }
+  .blog-post-body .generative-visual { height: 730px; }
+}
 .blog-post-body .flow-figure figcaption {
   color: var(--color-text-muted);
   font-size: 0.9em;

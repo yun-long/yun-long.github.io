@@ -1,5 +1,13 @@
 [
   {
+    "slug": "generative-models",
+    "title": "Generative models: VAE, diffusion, and flow matching",
+    "date": "2026-09-20",
+    "summary": "From latent-variable likelihoods and variational bounds to denoising, scores, and velocity fields: a step-by-step derivation of the connections.",
+    "content": "content/generative-models.html",
+    "math": true
+  },
+  {
     "slug": "flow-matching",
     "title": "Flow matching",
     "date": "2026-09-20",
