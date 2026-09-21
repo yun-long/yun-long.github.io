@@ -1,9 +1,9 @@
 [
   {
     "slug": "flow-matching",
-    "title": "Flow matching for generative control",
+    "title": "Flow matching: from data distributions to velocity fields",
     "date": "2026-09-20",
-    "summary": "From a data distribution to a flow model: noise transport, velocity targets, and flow matching, with interactive examples and connections to action-chunk control.",
+    "summary": "Modeling a data distribution through noise transport, probability paths, and velocity regression, with interactive examples and a closing application to control.",
     "content": "content/flow-matching.html",
     "math": true
   }

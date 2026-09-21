@@ -1,28 +1,26 @@
-# Flow matching for generative control
+# Flow matching: from data distributions to velocity fields
 
 Written by Codex
 
 ![Whiteboard derivation of flow matching.](../../images/flow-matching-overview.jpg)
 
-Robot controllers can be designed using control theory, trajectory optimization, imitation learning, reinforcement learning, or combinations of these approaches. These methods draw on different sources of information: models of the system dynamics, objectives and constraints, demonstrations, or rewards from interaction. In this note, we focus on imitation learning: given observations and demonstrated action chunks, how can we learn a policy that produces appropriate action sequences for a new observation?
-
-We formulate the learning problem as modeling a data distribution $p_{\mathrm{data}}(x)$ from examples $\mathcal D=\{x_i\}_{i=1}^N$. Here $x$ represents an action chunk. To simplify the derivation, we fix the observation and leave its conditioning implicit in all distributions and vector fields below. Flow matching gives us a way to learn and sample this distribution.
+Given samples from an unknown distribution $p_{\mathrm{data}}$, how can we learn a model that generates new samples from that distribution? Flow matching approaches this problem by learning a velocity field that transports a simple noise distribution into the data distribution.
 
 ## 1. What are we trying to model?
 
-Each example $x\in\mathbb R^d$ is an action chunk, flattened into a vector. A horizon of $H$ actions with $d_u$ coordinates per action gives $d=Hd_u$. We write
+Let $x\in\mathbb R^d$ denote a data sample. Given a dataset, our goal is to learn a model distribution that approximates the unknown data distribution:
 
 $$
 \mathcal D=\{x_i\}_{i=1}^N,\qquad x_i\sim p_{\mathrm{data}},\qquad p_\theta(x)\approx p_{\mathrm{data}}(x).
 $$
 
-We have examples, not an evaluable formula for the density. The goal is to learn a model that can produce new samples with the same distributional structure. The notation suppresses observation inputs; a robot policy still uses them during training and inference.
+We can sample from the dataset, but cannot evaluate the underlying density. A useful model must capture how probability is distributed across the data space, so that it can generate new samples with the same structure.
 
-**Why a distribution?** At a fixed observation, a squared-error point predictor has the population optimum $\mathbb E[X]$. If the action distribution has separated modes, this mean can fall between valid behaviors. Sampling from a distribution can preserve those alternatives while modeling the actions within a chunk jointly.
+**What must the model capture?** Consider data concentrated in two separated clusters. Their mean can lie in a region with almost no samples. Matching the mean alone misses the structure; the model needs to capture the modes, their relative probability, and the variation within each mode.
 
 [Interactive figure: Data samples, a Gaussian baseline, and the toy data density](../figures/flow-matching.html?view=data)
 
-  A scalar illustration of $p_{\mathrm{data}}(x)$. Tick marks are data samples. The actual policy models an entire action chunk jointly; this plot illustrates multimodality in one dimension. Reveal the toy density to compare it with a single Gaussian.
+  A scalar illustration of $p_{\mathrm{data}}(x)$. Tick marks are data samples. This plot illustrates multimodality in one dimension. Reveal the toy density to compare it with a single Gaussian.
 
 Use a two-mode distribution as a running example:
 
@@ -57,7 +55,7 @@ $$
 \frac{dZ_s}{ds}=v_\theta(Z_s,s),\qquad Z_0\sim p_0,\qquad \hat x=Z_1.
 $$
 
-**Two different times:** $t$ indexes robot execution; $s\in[0,1]$ indexes sample generation. Every flow step refines the entire action chunk. The observation stays fixed during this solve, and the flow velocity is not itself a physical robot velocity command.
+Flow time $s\in[0,1]$ parameterizes the transformation: start with noise at $s=0$, then follow the field to $s=1$. At each step, evaluate the velocity at the current position. Both the position and the field can change along the path.
 
 Write $q_s^\theta=\operatorname{Law}(Z_s)$. Our endpoint goal is $q_1^\theta=p_\theta\approx p_{\mathrm{data}}$. We now have a sampler, but no training target for its velocity.
 
@@ -73,7 +71,7 @@ At $s=0$, this gives the noise distribution; at $s=1$, it gives the data distrib
 
 [Interactive figure: Reference density and comparison of training interpolation with ODE paths](../figures/flow-matching.html?view=transport)
 
-  Move flow time from 0 to 1. The upper curve is the exact toy $p_s(x)$. Below it, compare training interpolation with the ODE of the exact marginal velocity. These are paths through data space during generation, not robot trajectories through physical space. No neural network is trained in this figure.
+  Move flow time from 0 to 1. The upper curve is the exact toy $p_s(x)$. Below it, compare training interpolation with the ODE of the exact marginal velocity. Each curve traces a sample through data space during generation. No neural network is trained in this figure.
 
 Keep the distinction: $p_s$ is our chosen reference path; $q_s^\theta$ is what the learned ODE produces. Also, the law of interpolated samples is generally different from the density mixture $(1-s)p_0+s\,p_{\mathrm{data}}$.
 
@@ -151,7 +149,7 @@ $$
 \end{aligned}
 $$
 
-In practice, sample $x_1$ from $\mathcal D$ and estimate the expectation with minibatches. The squared norm sums over all coordinates of the chunk; a mean reduction differs by a constant scale.
+In practice, sample $x_1$ from $\mathcal D$ and estimate the expectation with minibatches. The squared norm sums over all coordinates of the data vector; a mean reduction differs by a constant scale.
 
 Let $Y=X_1-X_0$, $v=v_\theta(X_s,s)$, and $u=\mathbb E[Y\mid X_s,s]$. Squared-error decomposition gives
 
@@ -163,9 +161,9 @@ $$
 
 The cross term vanishes because $\mathbb E[Y-u\mid X_s,s]=0$. The two losses therefore have the same expected gradient. At the unrestricted population optimum, the network predicts the desired marginal velocity. Finite data, capacity, and optimization introduce approximation error.
 
-Here, *conditional flow matching* refers to conditioning training paths on the endpoint $x_1$. This is separate from the observation conditioning we have left implicit. See [π₀](https://www.physicalintelligence.company/download/pi0.pdf) for an action-chunk policy using observation-conditioned flow matching.
+Here, *conditional flow matching* refers to conditioning training paths on the data endpoint $x_1$. These simple endpoint-specific labels train the marginal field that is used for generation.
 
-## 8. From the sampler to a controller
+## 8. Training and sampling
 
 - **Train:** sample $x_1$ from the dataset, independent noise $x_0$, and flow time $s$. Form $x_s=(1-s)x_0+sx_1$. Predict $v_\theta(x_s,s)$, regress against $x_1-x_0$, and update $\theta$.
 
@@ -175,8 +173,8 @@ $$
 z_{k+1}=z_k+\frac1K\,v_\theta\!\left(z_k,\frac{k}{K}\right),\qquad k=0,\ldots,K-1,\qquad \hat x=z_K.
 $$
 
-For control, reshape $\hat x$ into $H$ actions. At robot timestep $t$, the current observation supplies the implicit conditioning for this solve. A controller can execute a prefix of length $H_{\mathrm{exec}}\le H$, collect a new observation, and generate another chunk. Execution horizon, prediction horizon, and the number of flow steps $K$ are separate choices.
-
-Training needs no ODE solve. Inference uses fresh noise and the observation, but not a data endpoint. Learning the demonstration distribution does not by itself establish closed-loop control performance.
+Training needs no ODE solve. Generation starts from fresh noise and integrates the learned field without access to a data endpoint. Finite solver steps introduce numerical error in addition to the error in the learned field.
 
 **Limits to keep straight.** Straight training paths do not imply straight generated paths or accurate one-step sampling. Independent noise–data pairing is not globally optimal transport. The linear objective also appears in [rectified flow](https://arxiv.org/html/2209.03003v1#S2). Exact transport into a singular data distribution can require an endpoint limit; small terminal noise avoids the singular conditional endpoint.
+
+**Application to control.** To generate an action $a$ from an observation $o$, model $p_\theta(a\mid o)$ and condition the velocity field on the observation: $v_\theta(x,s;o)$. During training, interpolate between noise and a demonstrated action while holding its associated observation fixed. At robot timestep $t$, integrate from fresh noise with the current observation $o_t$ fixed to obtain an action, or a sequence of actions. Execute, observe again, and repeat. The flow time $s$ is distinct from robot time $t$. [π₀](https://www.physicalintelligence.company/download/pi0.pdf) applies this idea to generating action sequences.
