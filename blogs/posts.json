@@ -1,7 +1,7 @@
 [
   {
     "slug": "impedance-control",
-    "title": "What the hack is Impedance Control?",
+    "title": "What the heck is Impedance Control?",
     "date": "2026-09-20",
     "summary": "From a physical mass\u2013spring\u2013damper to virtual mechanics: deriving impedance control, understanding contact forces, and connecting the idea to robot arms.",
     "content": "content/impedance-control.html",
