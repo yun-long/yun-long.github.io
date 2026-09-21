@@ -4,14 +4,14 @@ Written by Codex
 
 ![Whiteboard derivation of flow matching.](../../images/flow-matching-overview.jpg)
 
-Given samples from an unknown distribution $p_{\mathrm{data}}$, how can we learn a model that generates new samples from that distribution? Flow matching approaches this problem by learning a velocity field that transports a simple noise distribution into the data distribution.
+Given samples from an unknown distribution $p_{\mathrm{data}}$, how can we learn a model that generates new samples from that distribution? Start with maximum likelihood, represent the model by a learned transformation, and build that transformation continuously. This will explain where velocity comes from and why flow matching trains it with a regression objective.
 
 ## 1. What are we trying to model?
 
 Let $x\in\mathbb R^d$ denote a data sample. Given a dataset, our goal is to learn a model distribution that approximates the unknown data distribution:
 
 $$
-\mathcal D=\{x_i\}_{i=1}^N,\qquad x_i\sim p_{\mathrm{data}},\qquad p_\theta(x)\approx p_{\mathrm{data}}(x).
+\mathcal D=\{x_i\}_{i=1}^N,\qquad x_i\overset{\mathrm{iid}}\sim p_{\mathrm{data}},\qquad p_\theta(x)\approx p_{\mathrm{data}}(x).
 $$
 
 We can sample from the dataset, but cannot evaluate the underlying density. A useful model must capture how probability is distributed across the data space, so that it can generate new samples with the same structure.
@@ -30,36 +30,156 @@ $$
 
 The analytic density is known only in this toy example. For real data, we must infer its structure from the samples.
 
-## 2. Define the model through a sampler
+### Start with maximum likelihood
 
-Transform an easy random variable into a data sample:
-
-$$
-Z_0\sim p_0=\mathcal N(0,I_d),\qquad
-\hat x=T_\theta(Z_0),\qquad p_\theta=(T_\theta)_\#p_0.
-$$
-
-The pushforward symbol $\#$ means: draw noise, transform it, and consider the distribution of the outputs. For any region $B$ of data space,
+How should we fit $p_\theta$ to the examples? A standard objective is to maximize their likelihood, or equivalently minimize the average negative log-likelihood:
 
 $$
-\Pr(\hat x\in B)=\int_{\{z:T_\theta(z)\in B\}}p_0(z)\,dz.
+\begin{aligned}
+ \theta^*&=\arg\max_\theta\prod_{i=1}^N p_\theta(x_i),\\
+ \mathcal L_{\mathrm{NLL}}(\theta)&=-\frac1N\sum_{i=1}^N\log p_\theta(x_i).
+\end{aligned}
 $$
 
-A transformation therefore defines a probability distribution without directly predicting density values. Different noise draws provide randomness among possible outputs. The remaining question is how to represent and train $T_\theta$. The [MIT flow and diffusion notes](https://arxiv.org/html/2506.02070v1#S1) develop this sampling viewpoint.
+The model must assign density to the observed examples while keeping its total probability equal to one. We need only the samples $x_i$, not the values $p_{\mathrm{data}}(x_i)$. But we do need to evaluate the *model* density $p_\theta(x_i)$. This leaves two design questions: how do we represent a normalized distribution, and how do we compute its density?
 
-## 3. Build the transformation from small moves
+## 2. Represent the model with a learned map
 
-A neural network $v_\theta(x,s)\in\mathbb R^d$ specifies the velocity at position $x$ and flow time $s$. Generate a sample with an ODE:
+To generate new samples, we need a sampling procedure. Resampling $\mathcal D$ only returns stored examples. **One approach is to start from a distribution we already know how to sample, then learn a transformation that gives those samples the structure of the data.**
+
+### Why introduce a random input?
+
+A deterministic transformation returns the same output when given the same input. To obtain varied samples from a fixed model, supply a random input:
 
 $$
-\frac{dZ_s}{ds}=v_\theta(Z_s,s),\qquad Z_0\sim p_0,\qquad \hat x=Z_1.
+\underbrace{Z_0\sim p_0}_{\text{easy to sample}}
+\quad\xrightarrow{\quad G_\theta\quad}\quad
+\underbrace{\hat x=G_\theta(Z_0)\sim p_\theta}_{\text{learned sample distribution}}.
 $$
 
-Flow time $s\in[0,1]$ parameterizes the transformation: start with noise at $s=0$, then follow the field to $s=1$. At each step, evaluate the velocity at the current position. Both the position and the field can change along the path.
+$Z_0$ is the source of randomness. A particular draw $z_0\in\mathbb R^d$ has the same dimension as $x$; it is the starting point of a generated sample. The letter $z$ distinguishes the model's sampling process from the data examples. It does not imply a separate, lower-dimensional representation.
 
-Write $q_s^\theta=\operatorname{Law}(Z_s)$. Our endpoint goal is $q_1^\theta=p_\theta\approx p_{\mathrm{data}}$. We now have a sampler, but no training target for its velocity.
+### Why choose a Gaussian?
 
-## 4. Choose a distribution path we can sample
+We choose the base distribution $p_0$. The data distribution remains unknown. A convenient choice is
+
+$$
+p_0=\mathcal N(0,I_d),\qquad (Z_0)_j\overset{\mathrm{iid}}\sim\mathcal N(0,1).
+$$
+
+This is easy to sample coordinate by coordinate, has a known smooth density, and makes the interpolated conditional distributions later in the note available in closed form. Zero mean and identity covariance give a simple standardized starting point. They impose no Gaussian or independence assumption on the output distribution: the learned transformation can introduce dependencies and multiple modes.
+
+Flow matching also permits other suitable base distributions. Gaussian noise is a convenient design choice, not a requirement of the framework. In our toy example, the starting density has one mode while the target has two; learning the transformation is what bridges that difference.
+
+### The map defines the model distribution
+
+The probability of any output region is the input probability that $G_\theta$ maps into it. This induced distribution is written $p_\theta=(G_\theta)_\#p_0$, where $\#$ denotes the *pushforward*. Sampling is straightforward: draw noise, then apply the map. Evaluating the density of a given data point requires another step.
+
+## 3. Compute the density by change of variables
+
+For the normalizing-flow construction, restrict $G_\theta:\mathbb R^d\to\mathbb R^d$ to a differentiable, invertible map with nonsingular Jacobian. A data point $x$ then has a unique input $z=G_\theta^{-1}(x)$. Let $J_{G_\theta}(z)=\partial G_\theta(z)/\partial z$.
+
+The Jacobian determinant measures local volume change. A small input region of volume $dz$ becomes a region of volume $dx=|\det J_{G_\theta}(z)|\,dz$. Its probability mass stays the same:
+
+$$
+\begin{aligned}
+ p_\theta(x)\,dx&=p_0(z)\,dz,\\
+ p_\theta(x)&=\frac{p_0(z)}{|\det J_{G_\theta}(z)|},\qquad z=G_\theta^{-1}(x),\\
+ \log p_\theta(x)&=\log p_0(z)-\log|\det J_{G_\theta}(z)|.
+\end{aligned}
+$$
+
+**A one-dimensional check:** if $x=2z$, an interval doubles in width, so its density halves: $p_\theta(x)=p_0(x/2)/2$. Compression does the reverse. The determinant accounts for this redistribution of density.
+
+Substitute the last line into our likelihood objective:
+
+$$
+\mathcal L_{\mathrm{NLL}}(\theta)=\frac1N\sum_{i=1}^N
+\left[-\log p_0(z_i)+\log|\det J_{G_\theta}(z_i)|\right],
+\qquad z_i=G_\theta^{-1}(x_i).
+$$
+
+This exposes the computational requirements: invert the map and evaluate its volume change at every training example. A generic neural network has no convenient inverse, and a dense Jacobian determinant can be costly in high dimensions. Discrete normalizing flows choose special architectures to make these operations tractable. We will instead build the map from small, continuous transformations.
+
+## 4. Velocity emerges from a changing map
+
+Replace a single transformation with a smooth family of invertible maps $G_{\theta,s}$, indexed by $s\in[0,1]$. Start at the identity and end at the generator:
+
+$$
+G_{\theta,0}(z)=z,\qquad G_{\theta,1}(z)=G_\theta(z),
+\qquad Z_s=G_{\theta,s}(Z_0).
+$$
+
+For one fixed noise draw $Z_0=z_0$, the point $G_{\theta,s}(z_0)$ traces a path as $s$ changes. Its derivative tells us how far and in which direction it moves per unit flow time. **This derivative is the velocity.** We want to express it using the current position $x$, so recover its starting point with $z_0=G_{\theta,s}^{-1}(x)$:
+
+$$
+\begin{aligned}
+ v_\theta(x,s)&:=\left.\frac{\partial G_{\theta,s}(z)}{\partial s}
+ \right|_{z=G_{\theta,s}^{-1}(x)},\\
+ \frac{dZ_s}{ds}&=v_\theta(Z_s,s).
+\end{aligned}
+$$
+
+For a small increment $\Delta s$, this says $Z_{s+\Delta s}\approx Z_s+\Delta s\,v_\theta(Z_s,s)$. Flow time is a parameter of the transformation; the velocity describes motion through data space.
+
+Now reverse the construction: **parameterize $v_\theta(x,s)$ with a neural network and define the map by integrating it.** We do not need to implement a separate network for $G_\theta$ or evaluate the inverse in the definition above. The ODE constructs the transformation:
+
+$$
+\frac{dZ_s}{ds}=v_\theta(Z_s,s),\qquad Z_0\sim p_0,
+\qquad G_\theta(Z_0)=Z_1.
+$$
+
+For a sufficiently regular field whose solutions exist uniquely over the interval, the flow is invertible: integrating backward recovers the starting point. This is a *continuous normalizing flow*. Write $q_s^\theta=\operatorname{Law}(Z_s)$ for its evolving distribution; $q_0^\theta=p_0$ and $q_1^\theta=p_\theta$.
+
+## 5. What does likelihood training cost now?
+
+Continuous motion gives a local version of change of variables. During a short step, the map is approximately $x\mapsto x+\Delta s\,v_\theta(x,s)$, with Jacobian $I+\Delta s\,J_{v_\theta}$. Since $\log\det(I+\Delta s\,J)\approx\Delta s\,\operatorname{tr}(J)$, the log-density along a moving sample obeys
+
+$$
+\begin{aligned}
+ \frac{d}{ds}\log q_s^\theta(Z_s)&=-\nabla_x\cdot v_\theta(Z_s,s),\\
+ \nabla_x\cdot v_\theta(x,s)&=\operatorname{tr}J_{v_\theta}(x,s)
+ =\sum_{j=1}^d\frac{\partial v_{\theta,j}(x,s)}{\partial x_j}.
+\end{aligned}
+$$
+
+The divergence measures local expansion: positive divergence spreads probability over more volume and decreases density. Integrating from noise to data gives the continuous change-of-variables formula:
+
+$$
+\log p_\theta(x)=\log p_0(z_0)
+ -\int_0^1\nabla_x\cdot v_\theta(z_s,s)\,ds,
+ \qquad z_1=x.
+$$
+
+Here $z_s$ follows the learned ODE and ends at the observed point $x$. To train by maximum likelihood, we must:
+
+- Integrate backward from $z_1=x$ to recover $z_0$.
+
+- Evaluate or estimate the divergence along that trajectory and accumulate its integral.
+
+- Differentiate the resulting loss through the ODE solution to update $\theta$.
+
+This replaces a full-map determinant with an integrated Jacobian trace, but training still requires numerical solves and derivative calculations. [Neural ODEs](https://arxiv.org/html/1806.07366v5#S4) establish this density formula; [FFJORD](https://arxiv.org/html/1810.01367v2) uses stochastic trace estimation to reduce its cost. The expense here comes from likelihood training of this flexible continuous model; maximum likelihood is not inherently expensive for every model.
+
+## 6. Train the motion directly
+
+Our goal is still to generate samples distributed like the data. What if we could specify intermediate distributions leading from noise to data, together with a velocity that transports them? Then we could supervise the network at intermediate points directly.
+
+Call this chosen distribution path $p_s$, with $p_0$ equal to the base distribution and $p_1=p_{\mathrm{data}}$. Let $u_s(x)$ be a velocity field that generates that path. Flow matching fits the model field to this target:
+
+$$
+\mathcal L_{\mathrm{FM}}(\theta)
+ =\mathbb E_{\substack{s\sim\mathcal U(0,1)\\x\sim p_s}}
+ \left[\|v_\theta(x,s)-u_s(x)\|^2\right].
+$$
+
+If the fields match and the flow is well defined, starting at the same $p_0$ produces the same evolving distribution and hence the desired endpoint. **Flow matching changes the training objective; it keeps the ODE generator.** This loss is not an algebraic rewriting of maximum likelihood, and the two objectives need not select the same model with finite capacity.
+
+We have two remaining problems: construct samples from $p_s$, and obtain a usable target $u_s$. The next steps solve both using data samples and noise, without evaluating $p_{\mathrm{data}}(x)$.
+
+## 7. Choose a distribution path we can sample
+
+Use $X_s$ for a constructed training sample, and $Z_s$ for a sample following the model ODE. These live in the same space but need not follow the same trajectories.
 
 Draw a data endpoint $X_1\sim p_{\mathrm{data}}$ and independent noise $X_0\sim p_0$. Interpolate:
 
@@ -75,7 +195,7 @@ At $s=0$, this gives the noise distribution; at $s=1$, it gives the data distrib
 
 Keep the distinction: $p_s$ is our chosen reference path; $q_s^\theta$ is what the learned ODE produces. Also, the law of interpolated samples is generally different from the density mixture $(1-s)p_0+s\,p_{\mathrm{data}}$.
 
-## 5. A velocity target from one data endpoint
+## 8. A velocity target from one data endpoint
 
 Differentiate the training path while holding both endpoints fixed:
 
@@ -83,7 +203,7 @@ $$
 \dot X_s=X_1-X_0.
 $$
 
-This gives an immediately available velocity label. Equivalently, fix a data endpoint $X_1=x_1$. Its conditional path and velocity are
+This gives an immediately available velocity label. With our chosen Gaussian base, fix a data endpoint $X_1=x_1$. Its conditional path and velocity are
 
 $$
 \begin{aligned}
@@ -96,7 +216,7 @@ Obtain the second line by solving $x=(1-s)x_0+sx_1$ for $x_0$, then substituting
 
 At inference the destination $x_1$ is unknown. We need a single velocity depending on the current position and flow time, without access to that endpoint.
 
-## 6. Combine the endpoint-conditioned velocities
+## 9. Combine the endpoint-conditioned velocities
 
 Average over endpoints compatible with being at $x$ at flow time $s$. Bayes' rule gives their weights:
 
@@ -136,7 +256,7 @@ $$
 
 Independent training lines can cross. ODE paths under a sufficiently regular single-valued field cannot cross at the same time. The model needs to reproduce the distributions, not each training line.
 
-## 7. Learn the field without evaluating the average
+## 10. Learn the field without evaluating the average
 
 The ideal loss regresses onto $u_s(x)$, but its posterior integral is intractable. Instead, draw $X_1\sim p_{\mathrm{data}}$, independent $X_0\sim p_0$, and $s\sim\mathcal U(0,1)$, then use the endpoint difference:
 
@@ -163,7 +283,7 @@ The cross term vanishes because $\mathbb E[Y-u\mid X_s,s]=0$. The two losses the
 
 Here, *conditional flow matching* refers to conditioning training paths on the data endpoint $x_1$. These simple endpoint-specific labels train the marginal field that is used for generation.
 
-## 8. Training and sampling
+## 11. Training and sampling
 
 - **Train:** sample $x_1$ from the dataset, independent noise $x_0$, and flow time $s$. Form $x_s=(1-s)x_0+sx_1$. Predict $v_\theta(x_s,s)$, regress against $x_1-x_0$, and update $\theta$.
 
@@ -173,7 +293,7 @@ $$
 z_{k+1}=z_k+\frac1K\,v_\theta\!\left(z_k,\frac{k}{K}\right),\qquad k=0,\ldots,K-1,\qquad \hat x=z_K.
 $$
 
-Training needs no ODE solve. Generation starts from fresh noise and integrates the learned field without access to a data endpoint. Finite solver steps introduce numerical error in addition to the error in the learned field.
+Unlike the likelihood route above, this training step needs neither an ODE solve nor a divergence calculation: its position and velocity label are available directly from the two endpoints. Generation starts from fresh noise and integrates the learned field without access to a data endpoint. Finite solver steps introduce numerical error in addition to the error in the learned field.
 
 **Limits to keep straight.** Straight training paths do not imply straight generated paths or accurate one-step sampling. Independent noise–data pairing is not globally optimal transport. The linear objective also appears in [rectified flow](https://arxiv.org/html/2209.03003v1#S2). Exact transport into a singular data distribution can require an endpoint limit; small terminal noise avoids the singular conditional endpoint.
 
