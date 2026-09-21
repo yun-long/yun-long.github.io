@@ -881,6 +881,67 @@ hr {
 .blog-post-body .model-roadmap strong { display: block; }
 .blog-post-body .model-roadmap span { font-size: 0.9em; }
 .blog-post-body .note-table-scroll { overflow-x: auto; }
+.blog-post-body .model-diagram { margin: 24px 0; }
+.blog-post-body .model-lane {
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border);
+}
+.blog-post-body .model-lane-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-bottom: 14px;
+  font-family: var(--font-sans);
+}
+.blog-post-body .model-lane-heading > span {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+.blog-post-body .model-chain {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1.8fr) 28px minmax(0, 1fr);
+  align-items: center;
+}
+.blog-post-body .model-chain-long {
+  grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1.2fr) 28px minmax(0, 1.2fr) 28px minmax(0, 1fr);
+}
+.blog-post-body .model-node {
+  min-width: 0;
+  padding: 12px 8px;
+  border: 1px solid var(--color-border-strong);
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+}
+.blog-post-body .model-node strong,
+.blog-post-body .model-node span { display: block; }
+.blog-post-body .model-node span { margin-top: 5px; }
+.blog-post-body .model-operation { background: var(--color-surface); }
+.blog-post-body .model-arrow {
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+.blog-post-body .model-lane-note {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  text-align: left;
+  hyphens: none;
+}
+.blog-post-body .model-diagram figcaption {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+@media (max-width: 540px) {
+  .blog-post-body .model-chain,
+  .blog-post-body .model-chain-long { grid-template-columns: minmax(0, 1fr); }
+  .blog-post-body .model-arrow { transform: rotate(90deg); padding: 3px 0; }
+  .blog-post-body .model-node { padding: 9px 12px; }
+}
 @media (max-width: 480px) {
   .blog-post-body .model-roadmap { grid-template-columns: 1fr; gap: 4px; }
   .blog-post-body .generative-visual { height: 730px; }

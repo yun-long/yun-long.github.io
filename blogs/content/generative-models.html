@@ -7,6 +7,95 @@
   <li><strong>Flow matching</strong><span>Learn motion along a probability path.</span></li>
 </ol>
 
+<h2 id="visual-overview">The big picture: three ways to generate a sample</h2>
+<p>All three start from an easy source of randomness. The diagrams below compare a standard single-latent VAE, a DDPM, and an ODE trained with flow matching. These are representative constructions; the number of network evaluations is not what defines the model family.</p>
+<figure class="model-diagram" aria-label="Generation diagrams for a VAE, diffusion, and flow matching">
+  <div class="model-lane">
+    <div class="model-lane-heading"><strong>VAE</strong><span>Decode a latent code</span></div>
+    <div class="model-chain">
+      <div class="model-node"><strong>Prior code</strong><span>\(z\sim p(z)\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node model-operation"><strong>Decoder</strong><span>\(p_\theta(x\mid z)\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node"><strong>Sample</strong><span>\(x\)</span></div>
+    </div>
+    <p class="model-lane-note">One decoder evaluation for a standard feedforward decoder, then sample its output distribution. The encoder is used during training.</p>
+  </div>
+  <div class="model-lane">
+    <div class="model-lane-heading"><strong>Diffusion · DDPM</strong><span>Repeatedly denoise</span></div>
+    <div class="model-chain model-chain-long">
+      <div class="model-node"><strong>Noise</strong><span>\(x_T\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node model-operation"><strong>Reverse step</strong><span>\(x_{T-1}\)</span></div>
+      <div class="model-arrow" aria-hidden="true">⋯→</div>
+      <div class="model-node model-operation"><strong>Reverse step</strong><span>\(x_1\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node"><strong>Sample</strong><span>\(x_0\)</span></div>
+    </div>
+    <p class="model-lane-note">A time-conditioned network is reused across reverse steps. Standard DDPM sampling includes random transitions; diffusion also supports deterministic samplers.</p>
+  </div>
+  <div class="model-lane">
+    <div class="model-lane-heading"><strong>Flow matching</strong><span>Integrate a learned velocity</span></div>
+    <div class="model-chain">
+      <div class="model-node"><strong>Noise</strong><span>\(Z_0\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node model-operation"><strong>ODE solver</strong><span>\(\dot Z_s=v_\theta(Z_s,s)\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node"><strong>Sample</strong><span>\(Z_1\)</span></div>
+    </div>
+    <p class="model-lane-note">The solver generally evaluates the velocity network many times. The ODE trajectory is deterministic once the initial noise is drawn.</p>
+  </div>
+  <figcaption>Generation runs from noise to data in every row. Diffusion indices decrease; flow time increases. A single ODE-solver box still contains multiple numerical steps.</figcaption>
+</figure>
+
+<h3 id="one-step-analogy">Is a VAE a one-step diffusion model?</h3>
+<p><strong>The useful connection is “diffusion as a structured hierarchical VAE.”</strong> A standard VAE learns an encoder \(q_\phi(z\mid x)\) and a decoder. A DDPM uses a prescribed Gaussian noising chain as its encoder and learns reverse transitions. Both admit the same variational-bound construction. See <a href="https://arxiv.org/abs/1312.6114">VAE</a>, <a href="https://arxiv.org/html/2006.11239v2">DDPM</a>, and <a href="https://arxiv.org/abs/2107.00630">Variational Diffusion Models</a>.</p>
+<div class="equation">\[\begin{aligned}
+\text{One latent:}\quad &amp;p_\theta(x,z)=p(z)p_\theta(x\mid z),\\
+\text{Latent hierarchy:}\quad &amp;p_\theta(x_{0:T})=p(x_T)\prod_{k=1}^{T}p_\theta(x_{k-1}\mid x_k).
+\end{aligned}\]</div>
+<p>Setting \(T=1\) in the second construction gives a one-latent model and a VAE-form bound. But its noising encoder is still constrained; a general VAE learns its representation, which can have a different dimension from the data. <strong>“One decoder pass” describes computation, not equivalence to a diffusion model.</strong></p>
+<p>Why introduce many noise levels? If a single corruption step removes almost all information, reversing it requires modeling nearly the entire data distribution at once. Small corruption steps make local reverse transitions easier to approximate. Simply deleting a trained diffusion model's intermediate steps does not make it a VAE.</p>
+
+<h3 id="training-diagrams">Where does the training signal come from?</h3>
+<figure class="model-diagram" aria-label="How each method constructs its training inputs and targets">
+  <div class="model-lane">
+    <div class="model-lane-heading"><strong>VAE</strong><span>Learn the latent representation</span></div>
+    <div class="model-chain">
+      <div class="model-node"><strong>Data</strong><span>\(x\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node model-operation"><strong>Learned encoder</strong><span>\(q_\phi(z\mid x)\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node"><strong>Latent sample</strong><span>\(z\)</span></div>
+    </div>
+    <p class="model-lane-note"><strong>Supervision:</strong> decode \(z\), score the original \(x\) under the decoder likelihood, and penalize encoder–prior KL. Train encoder and decoder jointly.</p>
+  </div>
+  <div class="model-lane">
+    <div class="model-lane-heading"><strong>Diffusion · noise prediction</strong><span>Choose a noise level</span></div>
+    <div class="model-chain">
+      <div class="model-node"><strong>Data + noise</strong><span>\(x_0,\epsilon,k\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node model-operation"><strong>Fixed corruption</strong><span>Gaussian noising</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node"><strong>Noisy input</strong><span>\(x_k\)</span></div>
+    </div>
+    <p class="model-lane-note"><strong>Supervision:</strong> give \((x_k,k)\) to the network and regress its noise prediction onto the known \(\epsilon\). Sampling one noise level suffices for a training example.</p>
+  </div>
+  <div class="model-lane">
+    <div class="model-lane-heading"><strong>Flow matching · linear path</strong><span>Choose a point along a path</span></div>
+    <div class="model-chain">
+      <div class="model-node"><strong>Data + noise</strong><span>\(X,\epsilon,s\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node model-operation"><strong>Interpolation</strong><span>\((1-s)\epsilon+sX\)</span></div>
+      <div class="model-arrow" aria-hidden="true">→</div>
+      <div class="model-node"><strong>Path input</strong><span>\(Y_s\)</span></div>
+    </div>
+    <p class="model-lane-note"><strong>Supervision:</strong> give \((Y_s,s)\) to the network and regress its velocity onto the known derivative \(X-\epsilon\). No ODE solve is needed to construct this training example.</p>
+  </div>
+  <figcaption>The training construction supplies information that is unavailable when generating a new sample: a known data example, and for the last two rows, its sampled noise.</figcaption>
+</figure>
+<p><strong>The diffusion–flow-matching bridge is score ↔ velocity.</strong> For compatible Gaussian probability paths, the exact score can be converted into the corresponding transport velocity. Diffusion can therefore generate with a probability flow ODE; flow matching trains a velocity field directly and permits other paths. “Random versus deterministic” does not cleanly separate the families. The <a href="https://arxiv.org/abs/2011.13456">score-SDE paper</a> and <a href="https://arxiv.org/abs/2210.02747">flow-matching paper</a> develop this connection; <a href="#shared-field">Section 10</a> derives the conversion and its conditions.</p>
+
 <h2 id="likelihood">1. Model the data distribution</h2>
 <p>Let \(\mathcal D=\{x_i\}_{i=1}^N\) contain independent samples from \(p_{\mathrm{data}}\), with \(x_i\in\mathbb R^d\). We want a normalized model \(p_\theta\) that assigns probability where the data occur and can generate new examples. Maximum likelihood gives a starting objective:</p>
 <div class="equation">\[\min_\theta\mathcal L_{\mathrm{NLL}}(\theta),\qquad
@@ -36,7 +125,7 @@ p_\theta(x)=\int p(z)p_\theta(x\mid z)\,dz.\]</div>
 <h3 id="reparameterization">Turn sampling into a differentiable computation</h3>
 <p>For a diagonal Gaussian encoder, write the sample in terms of parameter-free noise:</p>
 <div class="equation">\[q_\phi(z\mid x)=\mathcal N(\mu_\phi(x),\operatorname{diag}\sigma_\phi^2(x)),
-\qquad z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon,quad\epsilon\sim\mathcal N(0,I).\]</div>
+\qquad z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon,\quad\epsilon\sim\mathcal N(0,I).\]</div>
 <p>For a fixed draw of \(\epsilon\), gradients flow through \(z\) into the encoder. If \(p_\theta(x\mid z)=\mathcal N(g_\theta(z),\sigma_x^2I)\) with fixed variance, its negative log-likelihood is \(\|x-g_\theta(z)\|^2/(2\sigma_x^2)\) plus a constant. This explains where a reconstruction MSE comes from; it depends on the decoder likelihood. <a href="https://arxiv.org/abs/1401.4082">Stochastic backpropagation</a> independently developed this route to training deep latent-variable models.</p>
 
 <h2 id="hierarchical-vae">4. Replace one latent variable with a noising hierarchy</h2>
