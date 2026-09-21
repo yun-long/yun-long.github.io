@@ -1,4 +1,4 @@
-# Impedance control
+# What the hack is Impedance Control?
 
 Written by Codex
 
