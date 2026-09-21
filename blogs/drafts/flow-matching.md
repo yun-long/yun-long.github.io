@@ -4,7 +4,9 @@ Written by Codex
 
 ![Whiteboard derivation of flow matching.](../../images/flow-matching-overview.jpg)
 
-Given samples from an unknown distribution $p_{\mathrm{data}}$, how can we learn a model that generates new samples from that distribution? Start with maximum likelihood, represent the model by a learned transformation, and build that transformation continuously. This will explain where velocity comes from and why flow matching trains it with a regression objective.
+The central goal of generative modeling is to learn the underlying data distribution from observed samples. Once learned, this distribution can be used for different purposes, including generating new data.
+
+Start with maximum likelihood, represent the distribution through a learned transformation, and build that transformation continuously. This will explain where velocity comes from and why flow matching trains it with a regression objective.
 
 ## 1. What are we trying to model?
 
@@ -14,7 +16,7 @@ $$
 \mathcal D=\{x_i\}_{i=1}^N,\qquad x_i\overset{\mathrm{iid}}\sim p_{\mathrm{data}},\qquad p_\theta(x)\approx p_{\mathrm{data}}(x).
 $$
 
-We can sample from the dataset, but cannot evaluate the underlying density. A useful model must capture how probability is distributed across the data space, so that it can generate new samples with the same structure.
+We can sample from the dataset, but cannot evaluate the underlying density. A useful model must capture how probability is distributed across the data space: which regions are likely, how much variation they contain, and how different features depend on one another.
 
 **What must the model capture?** Consider data concentrated in two separated clusters. Their mean can lie in a region with almost no samples. Matching the mean alone misses the structure; the model needs to capture the modes, their relative probability, and the variation within each mode.
 

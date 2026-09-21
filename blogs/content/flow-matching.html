@@ -7,12 +7,13 @@
   <figcaption>Whiteboard notes: from modeling \(p_{\mathrm{data}}\) to conditional flow matching. Click the figure to view it full size.</figcaption>
 </figure>
 
-<p class="note-lead">Given samples from an unknown distribution \(p_{\mathrm{data}}\), how can we learn a model that generates new samples from that distribution? Start with maximum likelihood, represent the model by a learned transformation, and build that transformation continuously. This will explain where velocity comes from and why flow matching trains it with a regression objective.</p>
+<p class="note-lead">The central goal of generative modeling is to learn the underlying data distribution from observed samples. Once learned, this distribution can be used for different purposes, including generating new data.</p>
+<p>Start with maximum likelihood, represent the distribution through a learned transformation, and build that transformation continuously. This will explain where velocity comes from and why flow matching trains it with a regression objective.</p>
 
 <h2 id="data-distribution">1. What are we trying to model?</h2>
 <p>Let \(x\in\mathbb R^d\) denote a data sample. Given a dataset, our goal is to learn a model distribution that approximates the unknown data distribution:</p>
 <div class="equation">\[\mathcal D=\{x_i\}_{i=1}^N,\qquad x_i\overset{\mathrm{iid}}\sim p_{\mathrm{data}},\qquad p_\theta(x)\approx p_{\mathrm{data}}(x).\]</div>
-<p>We can sample from the dataset, but cannot evaluate the underlying density. A useful model must capture how probability is distributed across the data space, so that it can generate new samples with the same structure.</p>
+<p>We can sample from the dataset, but cannot evaluate the underlying density. A useful model must capture how probability is distributed across the data space: which regions are likely, how much variation they contain, and how different features depend on one another.</p>
 <p><strong>What must the model capture?</strong> Consider data concentrated in two separated clusters. Their mean can lie in a region with almost no samples. Matching the mean alone misses the structure; the model needs to capture the modes, their relative probability, and the variation within each mode.</p>
 <figure class="flow-figure">
   <iframe src="figures/flow-matching.html?view=data" title="Data samples, a Gaussian baseline, and the toy data density" class="flow-visual data-visual" loading="eager"></iframe>
