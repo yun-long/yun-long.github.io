@@ -1,4 +1,4 @@
-# Flow matching: from data distributions to velocity fields
+# Flow matching
 
 Written by Codex
 

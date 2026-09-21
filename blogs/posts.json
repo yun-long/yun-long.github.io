@@ -1,7 +1,7 @@
 [
   {
     "slug": "flow-matching",
-    "title": "Flow matching: from data distributions to velocity fields",
+    "title": "Flow matching",
     "date": "2026-09-20",
     "summary": "Modeling a data distribution through noise transport, probability paths, and velocity regression, with interactive examples and a closing application to control.",
     "content": "content/flow-matching.html",
