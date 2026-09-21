@@ -647,42 +647,104 @@ hr {
   color: var(--color-link-hover);
 }
 
-/* --- Blog List (simple) --- */
+/* Distill AI introduction and notes */
+.blog p { text-align: left; hyphens: none; }
+.distill-intro { padding-top: 6px; }
+.distill-intro h1 {
+  margin: 0 0 14px;
+  font-size: clamp(2.3rem, 4vw, 3rem);
+  letter-spacing: -0.035em;
+}
+.blog .distill-lead {
+  margin: 0 0 14px;
+  font-size: 1.35rem;
+  line-height: 1.4;
+}
+.blog .blog-intro {
+  color: var(--color-text-muted);
+  max-width: 66ch;
+  margin: 0 0 28px;
+  line-height: 1.75;
+}
+.distill-interests {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 16px;
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.distill-interests h2 {
+  margin: 2px 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+.interest-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+.blog .interest-connection {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+.distill-notes-title {
+  margin: 32px 0 0;
+  font-size: 1.4rem;
+}
 .blog-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 .blog-list-item {
-  padding: 10px 0;
+  padding: 22px 0;
 }
 .blog-list-item + .blog-list-item {
-  margin-top: 8px;
+  border-top: 1px solid var(--color-border);
 }
+.blog-list-item h3 { margin: 6px 0 8px; line-height: 1.35; }
 .blog-list .blog-title {
-  font-size: 1.05rem;
+  font-size: 1.35rem;
   font-weight: 600;
   text-decoration: none;
-  color: #111;
+  color: var(--color-text);
 }
 .blog-list .blog-title:hover {
-  color: #007bff;
+  color: var(--color-link-hover);
   text-decoration: underline;
 }
 .blog-list .blog-meta {
-  display: inline;
-  color: #6b7280;
-  font-size: 0.9rem;
-  margin-left: 8px;
-}
-.blog-list .blog-meta::before {
-  content: "· ";
-  color: #9ca3af;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
 }
 .blog-list .blog-summary {
-  color: #555;
-  margin-top: 4px;
+  color: var(--color-text-muted);
+  max-width: 66ch;
+  margin: 0;
   font-size: 0.95rem;
+  line-height: 1.65;
+}
+.blog-list .blog-title:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 4px;
+}
+@media (max-width: 480px) {
+  .distill-interests { grid-template-columns: 1fr; gap: 10px; }
+  .distill-notes-title { margin-top: 26px; }
+  .blog-list .blog-title { font-size: 1.2rem; }
 }
 
 /* Reading view: show TOC sidebar and content */

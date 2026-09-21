@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Distill AI - Yunlong Song</title>
-    <link rel="stylesheet" href="style.css?v=20260505-7">
+    <link rel="stylesheet" href="style.css?v=20260920-distill-layout">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Font Awesome for modern icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -38,14 +38,38 @@
             <br>
             <a href="blog.html" title="Distill AI">Distill AI</a>
         </div>
-        <div class="main-content">
-            <section class="blog">
-                <h2>Distill AI</h2>
-                <div class="blog-list">
+        <main class="main-content">
+            <section class="blog" aria-labelledby="distill-title">
+                <header class="distill-intro">
+                    <h1 id="distill-title">Distill AI</h1>
+                    <p class="distill-lead">AI is the teacher; I’m the student.</p>
+                    <p class="blog-intro">I first explain an idea in my own words, then ask AI to identify gaps in my understanding and offer clearer explanations. I think of this exchange as a kind of <em>on-policy distillation</em>, where my own reasoning guides what we explore next.</p>
+                    <p class="blog-intro">These notes are mostly written by AI, guided by my questions and evolving understanding. They help me build a holistic view of different subjects and the connections between them. For me, this is a new way of learning—through conversation, reflection, and notes I can return to.</p>
+                </header>
+                <div class="distill-interests" aria-labelledby="interests-title">
+                    <h2 id="interests-title">My interests</h2>
+                    <div>
+                        <ul class="interest-list">
+                            <li>Robotics</li>
+                            <li>Dexterous manipulation</li>
+                            <li>Reinforcement learning</li>
+                            <li>Generative models</li>
+                            <li>Multimodal foundation models</li>
+                            <li>Post-training</li>
+                            <li>Optimization</li>
+                            <li>Kinematics</li>
+                            <li>Control theory</li>
+                            <li>Geometric vision algorithms</li>
+                        </ul>
+                        <p class="interest-connection">And the connections between them.</p>
+                    </div>
+                </div>
+                <h2 class="distill-notes-title" id="notes-title">Notes</h2>
+                <div id="notes-list" aria-labelledby="notes-title">
                     <!-- Blog posts will be loaded dynamically here -->
                 </div>
             </section>
-        </div>
+        </main>
     </div>
     <script>
     // Render blog list from manifest and link to dynamic post page
@@ -57,7 +81,7 @@
     }
 
     async function loadBlogList() {
-        const container = document.querySelector('.blog-list');
+        const container = document.getElementById('notes-list');
         if (!container) return;
         try {
             const res = await fetch('blogs/posts.json', { cache: 'no-cache' });
@@ -73,9 +97,11 @@
                 const li = document.createElement('li');
                 li.className = 'blog-list-item';
                 li.innerHTML = `
-                    <a class="blog-title" href="blogs/post.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a>
-                    <div class="blog-meta"><time>${formatDate(post.date)}</time></div>
-                    ${post.summary ? `<div class="blog-summary">${post.summary}</div>` : ''}
+                    <article>
+                        <div class="blog-meta"><time datetime="${post.date}">${formatDate(post.date)}</time></div>
+                        <h3><a class="blog-title" href="blogs/post.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a></h3>
+                        ${post.summary ? `<p class="blog-summary">${post.summary}</p>` : ''}
+                    </article>
                 `;
                 list.appendChild(li);
             });
