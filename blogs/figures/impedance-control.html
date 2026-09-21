@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explore a mass–spring–damper</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+html,body{height:auto;margin:0;background:transparent}body{font:13px var(--font-sans);color:var(--color-text)}*{box-sizing:border-box}.figure{padding:8px 3px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}label{display:block;line-height:1.6}input[type=range]{display:block;width:100%;margin:5px 0;accent-color:#216b87}output{font-variant-numeric:tabular-nums}select,button{font:inherit;background:var(--color-bg);border:1px solid var(--color-border-strong);color:var(--color-text);padding:6px;max-width:100%}select{display:block;width:100%;margin-top:5px}button{cursor:pointer;padding:7px 12px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #216b87;outline-offset:2px}.timeline{display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;margin:12px 0}.chart{display:block;width:100%;overflow:visible}.chart text{fill:var(--color-text);font:12px var(--font-sans)}.readout{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}.readout span{display:block;color:var(--color-text-muted);font-size:12px}.readout output{font-size:15px}.status{font-size:12px;line-height:1.6;color:var(--color-text-muted);margin:8px 0}.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin:8px 0;font-size:12px}.legend span{display:flex;align-items:center;gap:6px}.line{width:20px;border-top:2px solid #216b87;display:inline-block}.dashed{border-color:#ab622b;border-top-style:dashed}.grid{stroke:var(--color-border);stroke-width:.6}.axis{stroke:var(--color-border-strong)}.motion{fill:none;stroke:#216b87;stroke-width:2.5}.equilibrium{stroke:#ab622b;stroke-width:1.5;stroke-dasharray:5 4}.cursor{stroke:#777;stroke-dasharray:3 4}.mechanics{fill:none;stroke:#555;stroke-width:2}.force{stroke:#ab622b;stroke-width:2}.mass{fill:var(--color-surface);stroke:#216b87;stroke-width:2}.point{fill:var(--color-bg);stroke:#216b87;stroke-width:2}@media(max-width:420px){.controls{gap:10px 14px}.readout{grid-template-columns:1fr 1fr}.timeline{gap:10px}}
+</style>
+</head>
+<body>
+<div class="figure">
+<div class="controls">
+<label for="mass">Mass m: <output id="mass-value">2.0 kg</output><input id="mass" type="range" min="0.5" max="5" step="0.1" value="2"></label>
+<label for="stiffness">Stiffness K: <output id="stiffness-value">200 N/m</output><input id="stiffness" type="range" min="50" max="600" step="10" value="200"></label>
+<label for="damping">Damping D: <output id="damping-value">20 N·s/m</output><input id="damping" type="range" min="0" max="120" step="1" value="20"></label>
+<label for="experiment">Experiment<select id="experiment"><option value="step">Apply a constant 10 N force</option><option value="release">Release from 5 cm; no force</option></select></label>
+</div>
+<div class="timeline"><label for="time">Time t: <output id="time-value">0.00 s</output><input id="time" type="range" min="0" max="6" step="0.01" value="0"></label><button id="play" type="button">Play</button></div>
+<svg id="mechanism" class="chart" viewBox="0 0 640 170" role="img" aria-label="Spring and damper connected in parallel to a moving mass"></svg>
+<div class="legend"><span><i class="line"></i>Displacement e(t)</span><span><i class="line dashed"></i>Static equilibrium F/K</span></div>
+<svg id="response" class="chart" viewBox="0 0 640 230" role="img" aria-label="Displacement in centimeters versus time in seconds"></svg>
+<div class="readout">
+<div><span>Displacement</span><output id="position-value"></output></div>
+<div><span>Velocity</span><output id="velocity-value"></output></div>
+<div><span>Acceleration</span><output id="acceleration-value"></output></div>
+<div><span>External force</span><output id="force-value"></output></div>
+<div><span>Spring force</span><output id="spring-value"></output></div>
+<div><span>Damper force</span><output id="damper-value"></output></div>
+</div>
+<p id="status" class="status" aria-live="polite"></p>
+</div>
+<script src="impedance-control-math.js"></script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg';
+const time=$('time'),play=$('play');
+let p,points,extent,playing=false,lastTime=0,animation=0;
+function node(tag,attrs,text){const e=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);if(text!==undefined)e.textContent=text;return e;}
+function line(svg,x1,y1,x2,y2,cls){svg.append(node('line',{x1,y1,x2,y2,class:cls}));}
+function text(svg,x,y,value,anchor='start'){svg.append(node('text',{x,y,'text-anchor':anchor},value));}
+function stop(){playing=false;play.textContent='Play';cancelAnimationFrame(animation);}
+function build(){
+ stop();
+ p={m:Number($('mass').value),k:Number($('stiffness').value),d:Number($('damping').value),mode:$('experiment').value};
+ $('mass-value').value=p.m.toFixed(1)+' kg';$('stiffness-value').value=p.k+' N/m';$('damping-value').value=p.d+' N·s/m';
+ points=Array.from({length:601},(_,i)=>({t:i/100,...ImpedanceModel.state(i/100,p)}));
+ extent=Math.max(.06,...points.map(q=>Math.abs(q.e)));
+ const {zeta,omega,equilibrium}=ImpedanceModel.parameters(p);
+ const kind=zeta===0?'undamped':zeta<.999?'underdamped':zeta<=1.001?'near critical damping':'overdamped';
+ $('status').textContent=`ζ = ${zeta.toFixed(2)} (${kind}); ωₙ = ${omega.toFixed(2)} rad/s; static equilibrium = ${(equilibrium*100).toFixed(2)} cm. All forces are signed along the positive x direction. With D = 0, the equilibrium line need not be reached as a settled state.`;
+ draw();
+}
+function draw(){
+ const t=Number(time.value),s=ImpedanceModel.state(t,p),{equilibrium}=ImpedanceModel.parameters(p);
+ $('time-value').value=t.toFixed(2)+' s';
+ for(const [id,v,unit] of [['position-value',100*s.e,'cm'],['velocity-value',100*s.v,'cm/s'],['acceleration-value',s.a,'m/s²'],['force-value',s.force,'N'],['spring-value',s.spring,'N'],['damper-value',s.damper,'N']])$(id).value=v.toFixed(2)+' '+unit;
+ const svg=$('mechanism');svg.replaceChildren();
+ svg.append(node('title',{},'Mass connected to a fixed support by a spring and damper in parallel'));
+ const center=320+120*s.e/extent,left=center-35;
+ line(svg,45,24,45,119,'mechanics');for(let y=28;y<120;y+=13)line(svg,32,y+8,45,y,'axis');
+ line(svg,45,49,70,49,'mechanics');
+ let spring='M 70 49';for(let i=1;i<=12;i++)spring+=` L ${70+(left-95)*i/12} ${i===12?49:(i%2?40:58)}`;
+ spring+=` L ${left} 49`;svg.append(node('path',{d:spring,class:'mechanics'}));
+ text(svg,(70+left)/2,29,'Spring K','middle');
+ line(svg,45,96,100,96,'mechanics');
+ svg.append(node('path',{d:'M 151 83 L 100 83 L 100 109 L 151 109 M 135 86 L 135 106',class:'mechanics'}));
+ line(svg,135,96,left,96,'mechanics');text(svg,(70+left)/2,133,'Damper D','middle');
+ svg.append(node('rect',{x:left,y:30,width:70,height:85,rx:3,class:'mass'}));text(svg,center,78,'m','middle');
+ line(svg,320,137,320,155,'cursor');text(svg,320,168,'x = x_d','middle');
+ line(svg,center,120,center,140,'axis');text(svg,center+8,151,'x(t)');
+ if(s.force>0){line(svg,center+35,66,center+115,66,'force');svg.append(node('path',{d:`M ${center+107} 60 L ${center+115} 66 L ${center+107} 72`,class:'force',fill:'none'}));text(svg,center+75,51,'10 N','middle');}
+ text(svg,550,146,'+x →');
+ const plot=$('response');plot.replaceChildren();plot.append(node('title',{},'Exact displacement response over six seconds'));
+ const lo=Math.min(-.005,...points.map(q=>q.e))*100,hi=Math.max(.01,...points.map(q=>q.e))*100;
+ const pad=Math.max(1,(hi-lo)*.1),ymin=lo-pad,ymax=hi+pad;
+ const px=t=>48+t/6*570,py=e=>194-(e*100-ymin)/(ymax-ymin)*162;
+ text(plot,48,16,'Displacement e (cm)');
+ for(let i=0;i<=4;i++){const y=ymin+(ymax-ymin)*i/4;line(plot,48,py(y/100),618,py(y/100),'grid');text(plot,40,py(y/100)+4,y.toFixed(1),'end');}
+ for(let i=0;i<=6;i++)text(plot,px(i),213,String(i),'middle');text(plot,618,228,'Time t (s)','end');
+ line(plot,48,194,618,194,'axis');line(plot,48,py(equilibrium),618,py(equilibrium),'equilibrium');
+ plot.append(node('path',{d:points.map((q,i)=>(i?'L':'M')+px(q.t).toFixed(2)+','+py(q.e).toFixed(2)).join(' '),class:'motion'}));
+ line(plot,px(t),32,px(t),194,'cursor');plot.append(node('circle',{cx:px(t),cy:py(s.e),r:4,class:'point'}));
+}
+function tick(now){if(!playing)return;const next=Math.min(6,Number(time.value)+(now-lastTime)/1000);lastTime=now;time.value=next;draw();if(next>=6)stop();else animation=requestAnimationFrame(tick);}
+play.addEventListener('click',()=>{if(playing){stop();return;}if(Number(time.value)>=6)time.value=0;playing=true;play.textContent='Pause';lastTime=performance.now();animation=requestAnimationFrame(tick);});
+time.addEventListener('input',()=>{stop();draw();});
+for(const id of ['mass','stiffness','damping','experiment'])$(id).addEventListener('input',build);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+build();
+</script>
+</body>
+</html>

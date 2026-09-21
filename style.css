@@ -864,6 +864,8 @@ hr {
 .blog-post-body .data-visual { height: 390px; }
 .blog-post-body .transport-visual { height: 650px; }
 .blog-post-body .generative-visual { height: 780px; }
+.blog-post-body .impedance-visual { height: 850px; }
+.blog-post-body .impedance-arm-visual { height: 1230px; }
 .blog-post-body .model-roadmap {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

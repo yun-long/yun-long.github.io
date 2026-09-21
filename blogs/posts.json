@@ -1,5 +1,13 @@
 [
   {
+    "slug": "impedance-control",
+    "title": "Impedance control",
+    "date": "2026-09-20",
+    "summary": "From a physical mass\u2013spring\u2013damper to virtual mechanics: deriving impedance control, understanding contact forces, and connecting the idea to robot arms.",
+    "content": "content/impedance-control.html",
+    "math": true
+  },
+  {
     "slug": "generative-models",
     "title": "Generative models: VAE, diffusion, and flow matching",
     "date": "2026-09-20",

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planar arm impedance control</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+html,body{margin:0;height:auto;background:transparent}body{font:13px var(--font-sans);color:var(--color-text)}*{box-sizing:border-box}.figure{padding:8px 3px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:9px 20px}label{display:block;line-height:1.5}input[type=range]{width:100%;display:block;accent-color:#216b87;margin:5px 0}output{font-variant-numeric:tabular-nums}select,button{font:inherit;border:1px solid var(--color-border-strong);background:var(--color-bg);color:var(--color-text);padding:6px;max-width:100%}select{width:100%;display:block;margin-top:5px}button{cursor:pointer;padding:7px 14px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #216b87;outline-offset:2px}.timeline{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin:12px 0}.chart{display:block;width:100%;overflow:visible}.chart text{font:12px var(--font-sans);fill:var(--color-text)}.grid{stroke:var(--color-border);stroke-width:.6}.axis{stroke:var(--color-border-strong);stroke-width:1}.arm{stroke:#216b87;stroke-width:9;stroke-linecap:round}.ghost{stroke:#9a9486;stroke-width:3;stroke-dasharray:5 5;fill:none}.joint{fill:var(--color-bg);stroke:#216b87;stroke-width:2}.trail{stroke:#216b87;stroke-width:1.5;fill:none;opacity:.45}.reference{stroke:#777;stroke-width:2;fill:none}.command{stroke:#216b87;stroke-width:2;fill:none}.external{stroke:#ab622b;stroke-width:2;fill:none}.error-x{stroke:#216b87;stroke-width:2;fill:none}.error-y{stroke:#ab622b;stroke-width:2;stroke-dasharray:6 4;fill:none}.cursor{stroke:#777;stroke-dasharray:3 4}.legend{display:flex;flex-wrap:wrap;gap:7px 18px;font-size:12px;margin:8px 0}.legend span{display:flex;align-items:center;gap:6px}.swatch{width:20px;border-top:2px solid #216b87}.orange{border-color:#ab622b}.gray{border-color:#9a9486;border-top-style:dashed}.readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}.readouts span{display:block;color:var(--color-text-muted);font-size:12px}.readouts output{font-size:14px}.status{font-size:12px;line-height:1.5;color:var(--color-text-muted);margin:8px 0}@media(max-width:420px){.controls{gap:8px 12px}.readouts{grid-template-columns:1fr 1fr}.timeline{grid-template-columns:1fr auto auto;gap:6px}}
+</style>
+</head>
+<body><div class="figure">
+<div class="controls">
+<label for="target-x">Target x: <output id="target-x-value"></output><input id="target-x" type="range" min=".35" max=".75" step=".01" value=".65"></label>
+<label for="target-y">Target y: <output id="target-y-value"></output><input id="target-y" type="range" min="-.10" max=".45" step=".01" value=".25"></label>
+<label for="kx">Stiffness Kₓ: <output id="kx-value"></output><input id="kx" type="range" min="20" max="200" step="10" value="80"></label>
+<label for="ky">Stiffness Kᵧ: <output id="ky-value"></output><input id="ky" type="range" min="20" max="200" step="10" value="40"></label>
+<label for="damping">Damping D: <output id="damping-value"></output><input id="damping" type="range" min="1" max="20" step="1" value="8"></label>
+<label for="force">Push magnitude: <output id="force-value"></output><input id="force" type="range" min="0" max="5" step=".5" value="3"></label>
+<label for="experiment">Experiment<select id="experiment"><option value="pulse">Push from 0.5 to 2.5 s, then release</option><option value="hold">Push from 0.5 s and hold</option><option value="target">Move to target; no external push</option></select></label>
+<label for="direction">Push direction<select id="direction"><option value="down">Downward (−y)</option><option value="right">Rightward (+x)</option></select></label>
+</div>
+<div class="timeline"><label for="time">Time: <output id="time-value"></output><input id="time" type="range" min="0" max="6" step=".01" value="1.5"></label><button id="play" type="button">Play</button><button id="restart" type="button">Restart</button></div>
+<div class="legend"><span><i class="swatch"></i>Arm / controller force</span><span><i class="swatch orange"></i>External force</span><span><i class="swatch gray"></i>Target pose</span></div>
+<svg id="workspace" class="chart" viewBox="0 0 560 440" role="img" aria-label="Two-link arm with a target marker, external push, and controller force"></svg>
+<div class="legend"><span><i class="swatch"></i>x error</span><span><i class="swatch orange" style="border-top-style:dashed"></i>y error</span></div>
+<svg id="errors" class="chart" viewBox="0 0 640 180" role="img" aria-label="Hand position error in centimeters versus time"></svg>
+<div class="readouts">
+<div><span>Hand (x, y), m</span><output id="hand"></output></div>
+<div><span>Error (x, y), cm</span><output id="error"></output></div>
+<div><span>Joint angles, degrees</span><output id="angles"></output></div>
+<div><span>Controller force (x, y), N</span><output id="command"></output></div>
+<div><span>External force (x, y), N</span><output id="external"></output></div>
+<div><span>Motor torques (τ₁, τ₂), N·m</span><output id="torques"></output></div>
+</div>
+<p id="status" class="status" aria-live="polite"></p>
+<p class="status">Every experiment starts from the same resting pose at (0.65, 0.25) m. Parameter changes recompute that experiment. Force arrows share a scale that shrinks for large forces; numeric values are shown above.</p>
+</div>
+<script src="impedance-arm-math.js"></script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg',time=$('time'),play=$('play');
+let p,points,playing=false,animation=0,lastTime=0;
+function node(tag,attrs,text){const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
+function line(svg,x1,y1,x2,y2,cls){svg.append(node('line',{x1,y1,x2,y2,class:cls}));}
+function text(svg,x,y,s,anchor='start'){svg.append(node('text',{x,y,'text-anchor':anchor},s));}
+function stop(){playing=false;play.textContent='Play';cancelAnimationFrame(animation);}
+function build(reset=true){
+ stop();p={tx:Number($('target-x').value),ty:Number($('target-y').value),kx:Number($('kx').value),ky:Number($('ky').value),damping:Number($('damping').value),force:Number($('force').value),experiment:$('experiment').value,direction:$('direction').value};
+ for(const [id,value,unit] of [['target-x',p.tx.toFixed(2),'m'],['target-y',p.ty.toFixed(2),'m'],['kx',p.kx,'N/m'],['ky',p.ky,'N/m'],['damping',p.damping,'N·s/m'],['force',p.force.toFixed(1),'N']])$(id+'-value').value=value+' '+unit;
+ points=ImpedanceArm.simulate(p);if(reset)time.value=0;draw();
+}
+function arrow(svg,origin,f,scale,cls){
+ const dx=f[0]*scale,dy=-f[1]*scale,length=Math.hypot(dx,dy);if(length<1)return;
+ const end=[origin[0]+dx,origin[1]+dy],u=[dx/length,dy/length];
+ line(svg,...origin,...end,cls);svg.append(node('path',{d:`M ${end[0]-8*u[0]+4*u[1]} ${end[1]-8*u[1]-4*u[0]} L ${end[0]} ${end[1]} L ${end[0]-8*u[0]-4*u[1]} ${end[1]-8*u[1]+4*u[0]}`,class:cls}));
+}
+function draw(){
+ const index=Math.min(points.length-1,Math.round(Number(time.value)*100)),o=points[index],t=o.t;
+ $('time-value').value=t.toFixed(2)+' s';
+ const pair=(v,d=2)=>v.map(n=>(Math.abs(n)<.5*10**(-d)?0:n).toFixed(d)).join(', ');
+ $('hand').value=pair(o.x);$('error').value=pair(o.e.map(n=>100*n));$('angles').value=pair(o.y.slice(0,2).map(n=>n*180/Math.PI),1);$('command').value=pair(o.command);$('external').value=pair(o.force);$('torques').value=pair(o.tau);
+ const equilibriumRadius=Math.hypot(p.tx+o.force[0]/p.kx,p.ty+o.force[1]/p.ky);
+ const reachable=equilibriumRadius<=ImpedanceArm.l1+ImpedanceArm.l2&&equilibriumRadius>=Math.abs(ImpedanceArm.l1-ImpedanceArm.l2);
+ $('status').textContent=!reachable?'The predicted loaded equilibrium is outside the arm’s reach; the simple force–displacement relation cannot be achieved here.':Math.hypot(...o.force)>0?'Push active: the hand yields while the virtual spring pulls toward the cross.':'No external push: damping dissipates motion as the hand returns to its target.';
+ const svg=$('workspace');svg.replaceChildren();svg.append(node('title',{},'Actual two-link arm and the equilibrium target pose in a horizontal plane'));
+ const px=x=>217.5+250*x,py=y=>222.5-250*y,pos=v=>[px(v[0]),py(v[1])];
+ for(const x of [-.5,0,.5,1]){line(svg,px(x),35,px(x),410,x===0?'axis':'grid');text(svg,px(x),427,String(x),'middle');}
+ for(const y of [-.5,0,.5]){line(svg,55,py(y),505,py(y),y===0?'axis':'grid');text(svg,46,py(y)+4,String(y),'end');}
+ text(svg,505,439,'x (m)','end');text(svg,55,20,'y (m) · horizontal plane');
+ const target=ImpedanceArm.geometry(ImpedanceArm.inverse(p.tx,p.ty));
+ svg.append(node('polyline',{points:[[0,0],target.elbow,target.x].map(v=>pos(v).join(',')).join(' '),class:'ghost'}));
+ svg.append(node('path',{d:points.slice(0,index+1).map((v,i)=>(i?'L':'M')+pos(v.x).join(',')).join(' '),class:'trail'}));
+ line(svg,...pos([0,0]),...pos(o.elbow),'arm');line(svg,...pos(o.elbow),...pos(o.x),'arm');
+ for(const v of [[0,0],o.elbow,o.x])svg.append(node('circle',{cx:px(v[0]),cy:py(v[1]),r:6,class:'joint'}));
+ const xd=pos([p.tx,p.ty]);line(svg,xd[0]-7,xd[1],xd[0]+7,xd[1],'reference');line(svg,xd[0],xd[1]-7,xd[0],xd[1]+7,'reference');
+ text(svg,xd[0]+10,xd[1]-12,'target');
+ text(svg,px(0)-10,py(0)+22,'base','end');
+ const scale=Math.min(13,80/Math.max(1,Math.hypot(...o.command),Math.hypot(...o.force)));
+ arrow(svg,pos(o.x),o.command,scale,'command');arrow(svg,pos(o.x),o.force,scale,'external');
+ const chart=$('errors');chart.replaceChildren();chart.append(node('title',{},'Endpoint x and y errors over six seconds'));
+ const bound=Math.max(2,Math.ceil(Math.max(...points.flatMap(v=>v.e.map(n=>Math.abs(n)*100)))*1.15));
+ const ex=t=>48+t/6*568,ey=cm=>80-cm/bound*53;
+ for(const y of [-bound,0,bound]){line(chart,48,ey(y),616,ey(y),y===0?'axis':'grid');text(chart,40,ey(y)+4,y.toFixed(0),'end');}
+ text(chart,48,15,'Hand error (cm)');
+ for(const k of [0,1,2,3,4,5,6])text(chart,ex(k),153,String(k),'middle');text(chart,616,177,'Time (s)','end');
+ for(let j=0;j<2;j++)chart.append(node('path',{d:points.map((v,i)=>(i?'L':'M')+ex(v.t).toFixed(2)+','+ey(v.e[j]*100).toFixed(2)).join(' '),class:j?'error-y':'error-x'}));
+ line(chart,ex(t),27,ex(t),133,'cursor');
+}
+function tick(now){if(!playing)return;const t=Math.min(6,Number(time.value)+(now-lastTime)/1000);lastTime=now;time.value=t;draw();if(t>=6)stop();else animation=requestAnimationFrame(tick);}
+play.addEventListener('click',()=>{if(playing){stop();return;}if(Number(time.value)>=6)time.value=0;playing=true;play.textContent='Pause';lastTime=performance.now();animation=requestAnimationFrame(tick);});
+$('restart').addEventListener('click',()=>{stop();time.value=0;draw();});time.addEventListener('input',()=>{stop();draw();});
+for(const id of ['target-x','target-y','kx','ky','damping','force','experiment','direction'])$(id).addEventListener('input',()=>build());
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});build(false);
+</script>
+</body></html>

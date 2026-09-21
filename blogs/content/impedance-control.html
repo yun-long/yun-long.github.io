@@ -1,0 +1,186 @@
+<p class="codex-watermark">Written by Codex</p>
+
+<figure class="flow-figure">
+  <a href="../images/impedance-control-overview.jpg" target="_blank" rel="noopener">
+    <img src="../images/impedance-control-overview.jpg" alt="Whiteboard notes showing robot dynamics, tracking error, desired joint impedance, and the control law with model compensation, acceleration feedforward, spring, and damping terms, alongside a mass–spring–damper derivation." width="4032" height="3024" fetchpriority="high">
+  </a>
+  <figcaption>Whiteboard notes: from a mass–spring–damper to joint-space impedance control. Click the figure to view it full size.</figcaption>
+</figure>
+
+<p class="note-lead">A mass attached to a spring and damper already knows how to respond to a push: it moves, resists displacement, and dissipates motion. Impedance control starts by choosing this kind of mechanical response, then uses feedback to make a robot exhibit it.</p>
+<p>The progression here is physical system → desired behavior → feedback law → contact with an environment. Start in one dimension, where every force and sign can be checked, before moving to a robot arm.</p>
+
+<h2 id="physical-system">1. Start with a real mass, spring, and damper</h2>
+<p>Consider a mass \(m\) sliding horizontally without friction. A spring and damper connect it to a fixed support. Let \(x_d\) be the mass position at which the spring is unstretched, \(x\) its current position, and \(e=x-x_d\) its displacement. Positive force points in the positive \(x\) direction.</p>
+<p>The spring pulls back toward its rest position. The damper opposes velocity:</p>
+<div class="equation">\[f_{\mathrm{spring}}=-Ke,\qquad f_{\mathrm{damper}}=-D\dot{x}.\]</div>
+<p>Here \(K&gt;0\) is stiffness in \(\mathrm{N/m}\), and \(D\ge0\) is damping in \(\mathrm{N\,s/m}\). The spring stores energy when displaced; the damper dissipates energy when moving. Neither term requires a controller: these are physical component laws.</p>
+<p>Let \(f_{\mathrm{ext}}\) be the force applied <em>to the mass</em> from outside. Newton's law adds the forces:</p>
+<div class="equation">\[\begin{aligned}
+m\ddot{x}&amp;=f_{\mathrm{ext}}-D\dot{x}-K(x-x_d),\\
+\boxed{m\ddot{e}+D\dot{e}+Ke}&amp;=\boxed{f_{\mathrm{ext}}}.
+\end{aligned}\]</div>
+<p>The second line uses a fixed \(x_d\), so \(\dot e=\dot x\) and \(\ddot e=\ddot x\). It specifies the entire dynamic response to an external force.</p>
+
+<h2 id="parameters">2. Understand what each parameter changes</h2>
+<p><strong>Stiffness sets the displacement under a sustained load.</strong> With a constant force \(F\) and positive damping, the system settles to</p>
+<div class="equation">\[\dot e=\ddot e=0\quad\Longrightarrow\quad e_\infty=\frac{F}{K}.\]</div>
+<p>For example, \(F=10\,\mathrm N\) and \(K=200\,\mathrm{N/m}\) give \(e_\infty=0.05\,\mathrm m\). Doubling stiffness halves the displacement. Damping and mass do not change this static equilibrium.</p>
+<p><strong>Mass sets the initial acceleration.</strong> If the mass starts at rest at \(x_d\), immediately after applying the force, spring and damping forces are both zero. Therefore \(\ddot e(0^+)=F/m\).</p>
+<p><strong>Damping determines how motion dies out.</strong> The spring alone can exchange energy with the moving mass indefinitely. Damping removes that energy. The characteristic equation and its useful parameters are</p>
+<div class="equation">\[m r^2+Dr+K=0,\qquad
+\omega_n=\sqrt{K/m},\qquad\zeta=\frac{D}{2\sqrt{mK}}.\]</div>
+<div class="note-table-scroll"><table>
+<thead><tr><th scope="col">Damping ratio</th><th scope="col">Response in this ideal system</th></tr></thead>
+<tbody>
+<tr><td>\(\zeta=0\)</td><td>Undamped oscillation; generally no settling.</td></tr>
+<tr><td>\(0&lt;\zeta&lt;1\)</td><td>Oscillations decay; a force step produces overshoot.</td></tr>
+<tr><td>\(\zeta=1\)</td><td>Critical damping; boundary between oscillatory and nonoscillatory responses.</td></tr>
+<tr><td>\(\zeta&gt;1\)</td><td>Overdamped; a step from rest approaches equilibrium without overshoot, with a slow mode that becomes slower as damping grows.</td></tr>
+</tbody></table></div>
+<p>To choose damping from a target ratio, use \(D=2\zeta\sqrt{mK}\). This scalar rule assumes the model above; coupled robot dynamics require more care.</p>
+<figure class="flow-figure" id="mass-spring-explorer">
+<iframe src="figures/impedance-control.html" title="Interactive mass–spring–damper response to a force step or release" class="flow-visual impedance-visual" loading="lazy"></iframe>
+<figcaption>Change one parameter at a time. A force step starts from rest and applies \(10\,\mathrm N\); release starts from a \(5\,\mathrm{cm}\) displacement with no external force. Scrub time to inspect the motion and force balance. The schematic rescales its displacement for visibility; the plot reports centimeters. This is an ideal scalar model, not a hardware simulation.</figcaption>
+</figure>
+<p><strong>Try three experiments.</strong> Increase \(K\) to reduce the loaded equilibrium displacement. Increase \(m\) to reduce initial acceleration. Increase \(D\) from zero to see persistent oscillation become a decaying response. Holding the other parameters fixed changes \(\zeta\) as well, so these effects are coupled.</p>
+
+<h2 id="impedance">3. Why call this an impedance?</h2>
+<p>Mechanical impedance describes the relationship between applied force and resulting motion. For the linear system above, with a fixed reference and zero initial conditions, let \(s\) be the Laplace variable. Force divided by velocity gives</p>
+<div class="equation">\[Z(s)=\frac{F_{\mathrm{ext}}(s)}{V(s)}
+=ms+D+\frac{K}{s}.\]</div>
+<p>The mass, damper, and spring contribute different frequency-dependent responses. The related displacement response is</p>
+<div class="equation">\[\frac{E(s)}{F_{\mathrm{ext}}(s)}=\frac1{ms^2+Ds+K},\]</div>
+<p>where \(E(s)\) is the transform of displacement error. Thus stiffness is only one part of impedance. A robot can yield under a sustained force yet react quite differently to a sudden impact, depending on its inertia and damping.</p>
+
+<h2 id="motivation">4. Why would we want a robot to behave this way?</h2>
+<p>During contact, the environment constrains motion. A peg encounters a hole edge; a finger touches an object earlier than expected. If the controller strongly resists every position error, a small geometric mismatch can produce a large contact force.</p>
+<p>The mass–spring–damper model offers a behavior we can specify: the robot pulls toward a reference, yields under load by a chosen amount, and damps the resulting motion. <strong>We choose how force and motion relate during interaction.</strong> This is the motivation for impedance control, developed in <a href="https://newmanlab.mit.edu/wp-content/uploads/2017/09/1985-impedance-control-an-approach-to-manipulation-part-I-theory.pdf">Hogan's foundational work</a> and illustrated in <a href="https://manipulation.mit.edu/force.html">MIT's manipulation notes</a>.</p>
+<p>The reference \(x_d\) is now an equilibrium position the controller prefers. Contact may prevent the robot from reaching it, and a nonzero displacement can be the intended response.</p>
+
+<h2 id="virtual-mechanics">5. Replace the physical spring and damper with feedback</h2>
+<p>Remove the real spring and damper. Suppose an actuator can command force \(u\) on the same mass:</p>
+<div class="equation">\[m\ddot{x}=u+f_{\mathrm{ext}}.\]</div>
+<p>We want the closed-loop equation to look like the physical system. Choose</p>
+<div class="equation">\[u=-K(x-x_d)-D\dot{x}.\]</div>
+<p>Substitution gives exactly</p>
+<div class="equation">\[m\ddot{x}+D\dot{x}+K(x-x_d)=f_{\mathrm{ext}}.\]</div>
+<p>The actuator creates a <em>virtual</em> spring and damper using measured position and velocity. This is PD feedback with a mechanical interpretation. It shapes stiffness and damping while retaining the physical mass \(m\); it is often called stiffness control, or an impedance controller without inertia shaping.</p>
+<p><strong>External force sensing is not required for this ideal implementation.</strong> The force enters the plant physically, and the controller responds to the resulting motion. Gravity, friction, actuator dynamics, and measurement errors were excluded from this simple model; compensating or accounting for them is part of a real implementation.</p>
+
+<h2 id="moving-reference">6. A moving reference needs a careful derivation</h2>
+<p>Let \(x_d(t)\) move, and keep \(e=x-x_d\). We may want the same force-to-error dynamics:</p>
+<div class="equation">\[m\ddot e+D\dot e+Ke=f_{\mathrm{ext}}.\]</div>
+<p>Since \(\ddot x=\ddot e+\ddot x_d\), the force law that realizes this target is</p>
+<div class="equation">\[u=m\ddot x_d-D(\dot x-\dot x_d)-K(x-x_d).\]</div>
+<p>The acceleration feedforward supplies the force needed to move the reference trajectory. Omitting it gives \(m\ddot e+D\dot e+Ke=f_{\mathrm{ext}}-m\ddot x_d\). The spring–damper intuition still helps, but the exact target equation has changed.</p>
+
+<h2 id="inertia-shaping">7. What if we also want to choose the apparent mass?</h2>
+<p>Now prescribe a desired impedance with \(M_d&gt;0\), \(D_d&gt;0\), and \(K_d&gt;0\):</p>
+<div class="equation">\[M_d\ddot e+D_d\dot e+K_de=f_{\mathrm{ext}}.\]</div>
+<p>Solve for the required acceleration and substitute it into \(u=m\ddot x-f_{\mathrm{ext}}\):</p>
+<div class="equation">\[\begin{aligned}
+\ddot x&amp;=\ddot x_d+\frac{f_{\mathrm{ext}}-D_d\dot e-K_de}{M_d},\\
+u&amp;=m\ddot x_d-\frac{m}{M_d}(D_d\dot e+K_de)
++\left(\frac{m}{M_d}-1\right)f_{\mathrm{ext}}.
+\end{aligned}\]</div>
+<p>In this ideal scalar realization, changing apparent inertia requires knowledge of \(m\) and measured or estimated external force. When \(M_d=m\), the force-feedback term disappears and we recover the preceding controller. Choosing gains alone does not independently choose all three mechanical parameters.</p>
+
+<h2 id="contact">8. Contact force is determined by both robot and environment</h2>
+<p>Let a compliant wall begin at \(x_w\). When the robot penetrates its surface, model the environmental reaction as \(f_{\mathrm{ext}}=-K_e(x-x_w)\), with \(K_e&gt;0\). Take a fixed reference \(x_d&gt;x_w\), and assume contact remains active.</p>
+<p>At equilibrium, the robot's virtual spring force balances the wall force:</p>
+<div class="equation">\[\begin{aligned}
+K(x_d-x)&amp;=K_e(x-x_w),\\
+x_*&amp;=\frac{Kx_d+K_ex_w}{K+K_e},\\
+F_{\mathrm{contact}}&amp;=\frac{KK_e}{K+K_e}(x_d-x_w).
+\end{aligned}\]</div>
+<p>Here \(F_{\mathrm{contact}}\) is the positive force the robot applies to the wall; the wall applies its negative to the robot. The effective static stiffness is the series combination of robot and environment stiffnesses.</p>
+<p>For a very stiff wall, \(x_*\approx x_w\) and \(F_{\mathrm{contact}}\approx K(x_d-x_w)\). A \(5\,\mathrm{mm}\) offset produces approximately \(1\,\mathrm N\) at \(K=200\,\mathrm{N/m}\), or \(10\,\mathrm N\) at \(K=2000\,\mathrm{N/m}\).</p>
+<p>This is why reference placement and stiffness both matter. Impedance control does not automatically regulate a specified contact force; the force also depends on environmental geometry and compliance. Damping affects the contact transient, but vanishes from this static balance.</p>
+
+<h2 id="robot-arm">9. Lift the virtual spring into a robot arm</h2>
+<p>For joint coordinates \(q\), write the robot dynamics as</p>
+<div class="equation">\[M(q)\ddot q+C(q,\dot q)\dot q+g(q)
+=\tau+J(q)^\top F_{\mathrm{ext}}.\]</div>
+<p>Here \(x=h(q)\in\mathbb R^3\) is the end-effector position, \(\dot x=J(q)\dot q\), and \(F_{\mathrm{ext}}\) is an external translational force expressed in the same frame as \(x\). A simple gravity-compensated Cartesian spring–damper controller for fixed \(x_d\) is</p>
+<div class="equation">\[\begin{aligned}
+F_{\mathrm{cmd}}&amp;=-K(x-x_d)-D\dot x,\\
+\tau&amp;=g(q)+J(q)^\top F_{\mathrm{cmd}}.
+\end{aligned}\]</div>
+<p>The Jacobian transpose converts task-space force into joint torque. The power identity explains why: \(F_{\mathrm{cmd}}^\top\dot x=(J^\top F_{\mathrm{cmd}})^\top\dot q\). See <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/11-5-force-control/">Modern Robotics</a> for this force–torque mapping.</p>
+<p>Positive-definite matrices \(K\) and \(D\) allow different responses in different directions. A peg-insertion controller, for example, may permit more lateral motion while maintaining stronger guidance along another axis.</p>
+<p>The arm's inertia remains coupled and configuration-dependent. This torque law does not by itself realize an arbitrary constant Cartesian \(M_d\). Orientation control also needs a suitable rotational error representation, and redundant joints need an additional posture objective; these are extensions of the scalar intuition.</p>
+
+<h3 id="planar-arm">A two-link arm in a horizontal plane</h3>
+<p>Make the mapping concrete with two revolute joints. Let \(q_1\) be the first link's angle from the positive horizontal axis and \(q_2\) the second link's angle relative to the first. For lengths \(l_1,l_2\), the hand position \(\mathbf x=[x,y]^\top\) is</p>
+<div class="equation">\[\mathbf x(q)=\begin{bmatrix}
+l_1\cos q_1+l_2\cos(q_1+q_2)\\
+l_1\sin q_1+l_2\sin(q_1+q_2)
+\end{bmatrix}.\]</div>
+<p>Differentiate with respect to the joint angles to obtain the Jacobian:</p>
+<div class="equation">\[J(q)=\begin{bmatrix}
+-l_1\sin q_1-l_2\sin(q_1+q_2)&amp;-l_2\sin(q_1+q_2)\\
+l_1\cos q_1+l_2\cos(q_1+q_2)&amp;l_2\cos(q_1+q_2)
+\end{bmatrix}.\]</div>
+<p>Choose \(K=\operatorname{diag}(K_x,K_y)\) and \(D=dI\). The simulation evaluates the following sequence at every integration step:</p>
+<div class="equation">\[\begin{aligned}
+\mathbf e&amp;=\mathbf x(q)-\mathbf x_d,\qquad \dot{\mathbf x}=J(q)\dot q,\\
+F_{\mathrm{cmd}}&amp;=-K\mathbf e-d\dot{\mathbf x},\\
+\tau&amp;=J(q)^\top F_{\mathrm{cmd}},\\
+\ddot q&amp;=M(q)^{-1}\!\left[\tau+J(q)^\top F_{\mathrm{ext}}-C(q,\dot q)\dot q\right].
+\end{aligned}\]</div>
+<p>The arm moves in a horizontal plane, so gravity contributes no joint torque. The hand moves because the applied torques accelerate the links. The dashed target pose is only a reference; it does not determine the simulated joint trajectory.</p>
+<figure class="flow-figure" id="arm-explorer">
+<iframe src="figures/impedance-arm.html" title="Interactive two-link arm with Cartesian impedance control and external pushes" class="flow-visual impedance-arm-visual" loading="lazy"></iframe>
+<figcaption>Solid links show the simulated arm; dashed links show a pose at the desired hand position. The cross marks the target, the blue arrow is the controller force, and the orange arrow is the external force applied to the hand. Adjust the target and gains, choose a push or a target-only experiment, then play or scrub time. The curves show horizontal and vertical hand errors.</figcaption>
+</figure>
+<p><strong>Start with a downward push.</strong> Select “Push from 0.5 s and hold” and inspect the end of the rollout. Once the nonsingular arm settles, \(J^\top(F_{\mathrm{cmd}}+F_{\mathrm{ext}})=0\) implies</p>
+<div class="equation">\[\mathbf x_* -\mathbf x_d=K^{-1}F_{\mathrm{ext}}.
+\qquad F_{\mathrm{ext}}=\begin{bmatrix}0\\-3\end{bmatrix}\mathrm N,\quad K_y=40\,\mathrm{N/m}
+\ \Longrightarrow\ y_*-y_d=-0.075\,\mathrm m.\]</div>
+<p>Increase \(K_y\) to \(120\,\mathrm{N/m}\): the predicted vertical offset becomes \(-2.5\,\mathrm{cm}\). Changing \(K_x\) instead does not change this vertical equilibrium offset, although the coupled arm can have a different transient. The default push-and-release experiment removes the force at \(2.5\,\mathrm s\), allowing the hand to return toward its target.</p>
+<p>This equilibrium relation assumes the displaced target is reachable and the Jacobian has full rank. Near a fully extended arm, or when the required equilibrium lies outside its workspace, the robot cannot realize an arbitrary Cartesian displacement.</p>
+<p><strong>Then move the target.</strong> Select the experiment without an external push and change the target coordinates. Observe how a Cartesian error produces two motor torques. The arm's trajectory reflects its coupled inertia and need not be a straight line between hand positions.</p>
+<details class="derivation">
+<summary>Model and numerical details</summary>
+<p>The two uniform rods have lengths \(l_1=0.60\,\mathrm m\), \(l_2=0.45\,\mathrm m\) and masses \(m_1=1.0\,\mathrm{kg}\), \(m_2=0.7\,\mathrm{kg}\). Their center-of-mass distances are \(c_i=l_i/2\), and their planar inertias are \(I_i=m_il_i^2/12\). Define</p>
+<div class="equation">\[\begin{aligned}
+A&amp;=I_1+I_2+m_1c_1^2+m_2(l_1^2+c_2^2),\\
+B&amp;=m_2l_1c_2,\qquad H=I_2+m_2c_2^2.
+\end{aligned}\]</div>
+<p>The simulated inertia matrix and Coriolis/centrifugal vector are</p>
+<div class="equation">\[\begin{aligned}
+M(q)&amp;=\begin{bmatrix}A+2B\cos q_2&amp;H+B\cos q_2\\H+B\cos q_2&amp;H\end{bmatrix},\\
+C(q,\dot q)\dot q&amp;=B\sin q_2\begin{bmatrix}-2\dot q_1\dot q_2-\dot q_2^2\\\dot q_1^2\end{bmatrix}.
+\end{aligned}\]</div>
+<p>These follow from the rigid-body kinetic energy using the <a href="https://underactuated.mit.edu/multibody.html">Lagrangian manipulator equations</a>. Every rollout starts at rest with the hand at \((0.65,0.25)\,\mathrm m\), using the branch with \(q_2&gt;0\). Integration uses fourth-order Runge–Kutta with a \(1\,\mathrm{ms}\) step. The model includes joint inertia and coupling, but assumes ideal torque actuation and omits friction, joint limits, and collision geometry. The push is a prescribed external force, not a simulated wall contact.</p>
+</details>
+
+<h2 id="energy">10. The energy interpretation explains the damping</h2>
+<p>Return to the fixed-reference scalar system. Its stored energy is</p>
+<div class="equation">\[\mathcal H=\tfrac12m\dot e^2+\tfrac12Ke^2.\]</div>
+<p>Differentiate and substitute the equation of motion:</p>
+<div class="equation">\[\dot{\mathcal H}
+=\dot e(m\ddot e+Ke)
+=f_{\mathrm{ext}}\dot e-D\dot e^2.\]</div>
+<p>External force supplies power \(f_{\mathrm{ext}}\dot e\); damping removes power \(D\dot e^2\). The ideal system is passive at its force–velocity interface. With no external input and \(D&gt;0\), it dissipates energy and converges to the spring equilibrium.</p>
+<p>This explains why fixed spring–damper behavior is useful for interaction. It does not establish stability for every digital implementation. Delays, inner control loops, and filtering affect achievable impedance, as analyzed in <a href="https://arxiv.org/abs/1406.4047">robot impedance control and passivity analysis</a>. Moving the reference or changing stiffness can also inject energy; the fixed-reference argument must then be extended.</p>
+
+<h2 id="admittance">11. Impedance and admittance use different controller interfaces</h2>
+<p>The same desired mechanical equation can be implemented in different ways:</p>
+<div class="note-table-scroll"><table>
+<thead><tr><th scope="col">Typical implementation</th><th scope="col">Controller computation</th></tr></thead>
+<tbody>
+<tr><td>Impedance</td><td>Measure motion; compute force or torque commands that create the desired mechanical response.</td></tr>
+<tr><td>Admittance</td><td>Measure external force; integrate a virtual mechanical model to generate a motion reference for an inner tracking controller.</td></tr>
+</tbody></table></div>
+<p>These are common architectural distinctions. The equation alone does not identify the implementation. In either case, the realized interaction depends on the robot and its inner control loops.</p>
+
+<h2 id="check-understanding">12. Check the physical picture</h2>
+<ol class="compact-steps">
+<li><strong>A constant force creates a steady offset.</strong> Its size is \(F/K\), not a failure to implement the chosen impedance.</li>
+<li><strong>Damping does not change that offset.</strong> It changes how the system reaches it.</li>
+<li><strong>A PD controller can create a virtual spring and damper.</strong> The impedance interpretation specifies the interaction behavior of the resulting closed loop.</li>
+<li><strong>The desired equation is a design target.</strong> Derive the actuator command from the plant dynamics, then check which assumptions make the target achievable.</li>
+</ol>
+<p>A useful exercise: keep \(K\) and \(D\) fixed and increase the mass in the visualization. Predict what happens to the initial acceleration, steady displacement, and damping ratio before moving the slider.</p>
