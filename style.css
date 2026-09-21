@@ -784,6 +784,15 @@ hr {
   margin: 0.7em 0 !important;
 }
 .blog-post-body .note-lead { font-size: 1.12em; }
+.blog-post-body .codex-watermark {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: right;
+  color: var(--color-text-muted);
+  margin: 0 0 12px;
+}
 .blog-post-body .flow-figure { margin: 22px 0; }
 .blog-post-body .flow-visual {
   display: block;

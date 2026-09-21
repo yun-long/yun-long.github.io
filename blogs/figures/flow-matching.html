@@ -44,7 +44,7 @@
     <label><input type="checkbox" id="reveal">Reveal toy action density</label>
   </div>
   <div id="transport-controls" class="controls" hidden>
-    <label for="time">Time <output id="time-value" for="time">0.00</output><input id="time" type="range" min="0" max="100" value="0" step="1"></label>
+    <label for="time">Flow time s <output id="time-value" for="time">0.00</output><input id="time" type="range" min="0" max="100" value="0" step="1"></label>
     <label for="mode">Paths <select id="mode"><option value="flow">ODE flow</option><option value="pairs">Training interpolation</option></select></label>
   </div>
   <div class="legend" id="data-legend" hidden>
@@ -53,7 +53,7 @@
     <span id="true-legend" hidden><i class="swatch blue"></i>Toy p_data(a | o)</span>
   </div>
   <div class="legend" id="transport-legend" hidden>
-    <span><i class="swatch blue"></i>Current p_t(x | o)</span>
+    <span><i class="swatch blue"></i>Current p_s(x | o)</span>
     <span><i class="swatch orange"></i>Target p_data(a | o)</span>
   </div>
   <svg id="density" role="img" aria-label="Conditional density versus scalar action value, with observation fixed"></svg>
@@ -165,7 +165,7 @@ function drawPaths(w,t) {
   line(pathSvg,left,top,left,bottom,'axis'); line(pathSvg,left,bottom,right,bottom,'axis');
   for(const x of [-3,0,3]) {line(pathSvg,left,sy(x),right,sy(x),'grid');add(pathSvg,'text',{x:left-8,y:sy(x)+4,'text-anchor':'end'},x);}
   for(const s of [0,0.5,1]) {line(pathSvg,sx(s),bottom,sx(s),bottom+4,'axis');add(pathSvg,'text',{x:sx(s),y:bottom+17,'text-anchor':s===0?'start':s===1?'end':'middle'},s.toFixed(1));}
-  add(pathSvg,'text',{x:(left+right)/2,y:h-2,'text-anchor':'middle'},'Flow time t');
+  add(pathSvg,'text',{x:(left+right)/2,y:h-2,'text-anchor':'middle'},'Flow time s');
   const trajectories = mode.value==='flow' ? flows : pairs.map(([a,b])=>Array.from({length:steps+1},(_,k)=>a+(b-a)*k/steps));
   for(const xs of trajectories) {
     const d=xs.map((x,k)=>`${k?'L':'M'}${sx(k/steps).toFixed(2)},${sy(x).toFixed(2)}`).join(' ');
