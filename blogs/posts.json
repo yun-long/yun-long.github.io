@@ -3,7 +3,7 @@
     "slug": "flow-matching",
     "title": "Flow matching for generative control",
     "date": "2026-09-20",
-    "summary": "From observation\u2013action pairs to a conditional action-chunk policy: noise transport, velocity targets, and flow matching, with interactive examples.",
+    "summary": "From a data distribution to a flow model: noise transport, velocity targets, and flow matching, with interactive examples and connections to action-chunk control.",
     "content": "content/flow-matching.html",
     "math": true
   }

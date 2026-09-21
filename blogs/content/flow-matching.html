@@ -8,107 +8,103 @@
 </figure>
 
 <p class="note-lead">Robot controllers can be designed using control theory, trajectory optimization, imitation learning, reinforcement learning, or combinations of these approaches. These methods draw on different sources of information: models of the system dynamics, objectives and constraints, demonstrations, or rewards from interaction. In this note, we focus on imitation learning: given observations and demonstrated action chunks, how can we learn a policy that produces appropriate action sequences for a new observation?</p>
-<p>We formulate this as conditional distribution modeling. From a dataset \(\mathcal D=\{(o_i,a_i)\}\), learn \(p_\theta(a\mid o)\) to approximate the demonstrated action distribution \(p_{\mathrm{data}}(a\mid o)\). Flow matching is the method we will use to train and sample this policy.</p>
+<p>We formulate the learning problem as modeling a data distribution \(p_{\mathrm{data}}(x)\) from examples \(\mathcal D=\{x_i\}_{i=1}^N\). Here \(x\) represents an action chunk. To simplify the derivation, we fix the observation and leave its conditioning implicit in all distributions and vector fields below. Flow matching gives us a way to learn and sample this distribution.</p>
 
 <h2 id="data-distribution">1. What are we trying to model?</h2>
-<p>At robot timestep \(t\), let \(o_t\) contain the available observations, such as camera images, proprioception, or a history of these measurements. One training target is an <em>action chunk</em> of horizon \(H\):</p>
-<div class="equation">\[a_t=(u_t,u_{t+1},\ldots,u_{t+H-1})\in\mathbb R^{H\times d_u},\qquad
-\mathcal D=\{(o_i,a_i)\}_{i=1}^N.\]</div>
-<p>Here \(u_t\in\mathbb R^{d_u}\) is one action; \(a\) denotes the whole chunk. We can flatten it into \(\mathbb R^d\), with \(d=Hd_u\), for the derivation. The pairs describe a joint data distribution \(p_{\mathrm{data}}(o,a)\). At deployment, the observation is given, so our target is its conditional distribution:</p>
-<div class="equation">\[\pi_\theta(a\mid o)\equiv p_\theta(a\mid o)\approx p_{\mathrm{data}}(a\mid o).\]</div>
-<p>We have paired examples, not an evaluable formula for this density. Sampling \((o,a)\sim\mathcal D\) means drawing an observed pair; it does not mean sampling the observation and action independently. Overlapping chunks from the same trajectory can also be correlated.</p>
-<p><strong>Why a distribution?</strong> A deterministic predictor trained with squared error has the population optimum \(f^*(o)=\mathbb E[A\mid o]\). When the conditional action distribution has separated modes, this mean can lie in a low-density region. A generative policy instead aims to sample coherent chunks from the conditional distribution. Flow matching gives us a tractable way to train such a sampler.</p>
+<p>Each example \(x\in\mathbb R^d\) is an action chunk, flattened into a vector. A horizon of \(H\) actions with \(d_u\) coordinates per action gives \(d=Hd_u\). We write</p>
+<div class="equation">\[\mathcal D=\{x_i\}_{i=1}^N,\qquad x_i\sim p_{\mathrm{data}},\qquad p_\theta(x)\approx p_{\mathrm{data}}(x).\]</div>
+<p>We have examples, not an evaluable formula for the density. The goal is to learn a model that can produce new samples with the same distributional structure. The notation suppresses observation inputs; a robot policy still uses them during training and inference.</p>
+<p><strong>Why a distribution?</strong> At a fixed observation, a squared-error point predictor has the population optimum \(\mathbb E[X]\). If the action distribution has separated modes, this mean can fall between valid behaviors. Sampling from a distribution can preserve those alternatives while modeling the actions within a chunk jointly.</p>
 <figure class="flow-figure">
-  <iframe src="figures/flow-matching.html?view=data" title="Action samples for a fixed observation, a Gaussian baseline, and the toy conditional action density" class="flow-visual data-visual" loading="eager"></iframe>
-  <figcaption>A scalar illustration of \(p_{\mathrm{data}}(a\mid o)\) at a fixed observation. Tick marks are demonstrated action values. The full policy models an entire action chunk jointly; this plot only illustrates multimodality in one dimension. Reveal the toy density to compare it with a single Gaussian.</figcaption>
+  <iframe src="figures/flow-matching.html?view=data" title="Data samples, a Gaussian baseline, and the toy data density" class="flow-visual data-visual" loading="eager"></iframe>
+  <figcaption>A scalar illustration of \(p_{\mathrm{data}}(x)\). Tick marks are data samples. The actual policy models an entire action chunk jointly; this plot illustrates multimodality in one dimension. Reveal the toy density to compare it with a single Gaussian.</figcaption>
 </figure>
-<p>For this illustrative observation, use two modes:</p>
-<div class="equation">\[p_{\mathrm{data}}(a\mid o)=\tfrac12\mathcal N(a;-2,0.45^2)+\tfrac12\mathcal N(a;2,0.45^2).\]</div>
-<p>The analytic density is known only in this toy example. In a real dataset, different observations imply different action distributions; one network must learn that dependence.</p>
+<p>Use a two-mode distribution as a running example:</p>
+<div class="equation">\[p_{\mathrm{data}}(x)=\tfrac12\mathcal N(x;-2,0.45^2)+\tfrac12\mathcal N(x;2,0.45^2).\]</div>
+<p>The analytic density is known only in this toy example. For real data, we must infer its structure from the samples.</p>
 
-<h2 id="sampler">2. Define the policy through a sampler</h2>
-<p>For a fixed observation \(o\), transform an easy random variable into an action chunk:</p>
+<h2 id="sampler">2. Define the model through a sampler</h2>
+<p>Transform an easy random variable into a data sample:</p>
 <div class="equation">\[Z_0\sim p_0=\mathcal N(0,I_d),\qquad
-\hat a=T_\theta(Z_0;o),\qquad
-p_\theta(\cdot\mid o)=\big(T_\theta(\cdot;o)\big)_\#p_0.\]</div>
-<p>The pushforward symbol \(\#\) means: draw noise, transform it using the observation, and consider the distribution of the output chunks. For any region \(B\) of action-chunk space,</p>
-<div class="equation">\[\Pr(\hat a\in B\mid o)=\int_{\{z:T_\theta(z;o)\in B\}}p_0(z)\,dz.\]</div>
-<p>The observation supplies context; the noise supplies randomness among possible chunks. We generate actions conditioned on observations, rather than generating observation–action pairs. The <a href="https://arxiv.org/html/2506.02070v1#S1">MIT flow and diffusion notes</a> develop this conditional sampling viewpoint.</p>
+\hat x=T_\theta(Z_0),\qquad p_\theta=(T_\theta)_\#p_0.\]</div>
+<p>The pushforward symbol \(\#\) means: draw noise, transform it, and consider the distribution of the outputs. For any region \(B\) of data space,</p>
+<div class="equation">\[\Pr(\hat x\in B)=\int_{\{z:T_\theta(z)\in B\}}p_0(z)\,dz.\]</div>
+<p>A transformation therefore defines a probability distribution without directly predicting density values. Different noise draws provide randomness among possible outputs. The remaining question is how to represent and train \(T_\theta\). The <a href="https://arxiv.org/html/2506.02070v1#S1">MIT flow and diffusion notes</a> develop this sampling viewpoint.</p>
 
-<h2 id="flow-model">3. Refine a noisy action chunk with a flow</h2>
-<p>A neural network \(v_\theta(x,s;o)\in\mathbb R^d\) predicts a velocity in <em>action-chunk space</em>. Its inputs are the current noisy chunk \(x\), flow time \(s\), and observation \(o\). Generate the chunk with an ODE:</p>
-<div class="equation">\[\frac{dZ_s}{ds}=v_\theta(Z_s,s;o),\qquad Z_0\sim p_0,\qquad \hat a=Z_1.\]</div>
-<p><strong>Two different times:</strong> \(t\) indexes robot execution; \(s\in[0,1]\) indexes the internal generation process. Every flow step refines the <em>entire</em> \(H\)-action chunk. The observation stays fixed during this solve. The predicted flow velocity is not itself a physical robot velocity command.</p>
-<p>Write \(q_s^\theta(\cdot\mid o)=\operatorname{Law}(Z_s\mid o)\). We want \(q_1^\theta(\cdot\mid o)\approx p_{\mathrm{data}}(\cdot\mid o)\). We now have a conditional sampler, but no target for its velocity.</p>
+<h2 id="flow-model">3. Build the transformation from small moves</h2>
+<p>A neural network \(v_\theta(x,s)\in\mathbb R^d\) specifies the velocity at position \(x\) and flow time \(s\). Generate a sample with an ODE:</p>
+<div class="equation">\[\frac{dZ_s}{ds}=v_\theta(Z_s,s),\qquad Z_0\sim p_0,\qquad \hat x=Z_1.\]</div>
+<p><strong>Two different times:</strong> \(t\) indexes robot execution; \(s\in[0,1]\) indexes sample generation. Every flow step refines the entire action chunk. The observation stays fixed during this solve, and the flow velocity is not itself a physical robot velocity command.</p>
+<p>Write \(q_s^\theta=\operatorname{Law}(Z_s)\). Our endpoint goal is \(q_1^\theta=p_\theta\approx p_{\mathrm{data}}\). We now have a sampler, but no training target for its velocity.</p>
 
-<h2 id="reference-path">4. Choose a conditional distribution path</h2>
-<p>Draw a paired example \((o,A)\) from the data and independent noise \(X_0\sim p_0\) of the same shape as the action chunk. Interpolate the action only:</p>
-<div class="equation">\[X_s=(1-s)X_0+sA,\qquad p_s(\cdot\mid o)=\operatorname{Law}(X_s\mid o).\]</div>
-<p>For each fixed \(o\), the reference path starts at Gaussian noise and ends at \(p_{\mathrm{data}}(a\mid o)\). During training we sample different observation–action pairs; we do not need repeated demonstrations with literally identical observations to form training examples. The observation is never interpolated or noised in this construction.</p>
+<h2 id="reference-path">4. Choose a distribution path we can sample</h2>
+<p>Draw a data endpoint \(X_1\sim p_{\mathrm{data}}\) and independent noise \(X_0\sim p_0\). Interpolate:</p>
+<div class="equation">\[X_s=(1-s)X_0+sX_1,\qquad p_s=\operatorname{Law}(X_s).\]</div>
+<p>At \(s=0\), this gives the noise distribution; at \(s=1\), it gives the data distribution. At any intermediate time, one noise draw and one data example produce a sample from \(p_s\). No ODE solve is needed to construct these training samples.</p>
 <figure class="flow-figure">
-  <iframe src="figures/flow-matching.html?view=transport" title="Conditional action density and training versus ODE paths, holding the observation fixed" class="flow-visual transport-visual" loading="lazy"></iframe>
-  <figcaption>Hold \(o\) fixed and move flow time from 0 to 1. The upper curve is the exact toy \(p_s(x\mid o)\). Below it, compare training interpolation with the ODE of the exact marginal velocity. These are paths through action space during generation, not robot trajectories through physical space. No neural network is trained in this figure.</figcaption>
+  <iframe src="figures/flow-matching.html?view=transport" title="Reference density and comparison of training interpolation with ODE paths" class="flow-visual transport-visual" loading="lazy"></iframe>
+  <figcaption>Move flow time from 0 to 1. The upper curve is the exact toy \(p_s(x)\). Below it, compare training interpolation with the ODE of the exact marginal velocity. These are paths through data space during generation, not robot trajectories through physical space. No neural network is trained in this figure.</figcaption>
 </figure>
-<p>\(p_s(\cdot\mid o)\) is our chosen target; \(q_s^\theta(\cdot\mid o)\) is what the model produces. Also, the law of interpolated samples is generally different from the density mixture \((1-s)p_0+s\,p_{\mathrm{data}}(\cdot\mid o)\).</p>
+<p>Keep the distinction: \(p_s\) is our chosen reference path; \(q_s^\theta\) is what the learned ODE produces. Also, the law of interpolated samples is generally different from the density mixture \((1-s)p_0+s\,p_{\mathrm{data}}\).</p>
 
-<h2 id="conditional-target">5. A velocity target from one demonstrated chunk</h2>
-<p>Differentiate the training path with its endpoints held fixed:</p>
-<div class="equation">\[\dot X_s=A-X_0.\]</div>
-<p>This gives a target with the same shape as the chunk. Fix a demonstrated endpoint \(A=a\). Because the noise is independent, its endpoint-conditioned path does not otherwise depend on \(o\):</p>
+<h2 id="conditional-target">5. A velocity target from one data endpoint</h2>
+<p>Differentiate the training path while holding both endpoints fixed:</p>
+<div class="equation">\[\dot X_s=X_1-X_0.\]</div>
+<p>This gives an immediately available velocity label. Equivalently, fix a data endpoint \(X_1=x_1\). Its conditional path and velocity are</p>
 <div class="equation">\[\begin{aligned}
- p_s(x\mid a,o)=p_s(x\mid a)&amp;=\mathcal N\!\left(x;sa,(1-s)^2I_d\right),\\
- u_s(x\mid a)&amp;=\frac{a-x}{1-s},\qquad 0\le s&lt;1.
+ p_s(x\mid x_1)&amp;=\mathcal N\!\left(x;sx_1,(1-s)^2I_d\right),\\
+ u_s(x\mid x_1)&amp;=\frac{x_1-x}{1-s},\qquad 0\le s&lt;1.
 \end{aligned}\]</div>
-<p>Obtain the second line by solving \(x=(1-s)x_0+sa\) for \(x_0\), then substituting into \(a-x_0\). On a sampled training path, the target is simply \(a-X_0\). This endpoint difference avoids dividing by \(1-s\).</p>
-<p>At inference, \(o\) is available but the desired endpoint \(a\) is unknown. We need a velocity depending on \((x,s,o)\), without access to that endpoint.</p>
+<p>Obtain the second line by solving \(x=(1-s)x_0+sx_1\) for \(x_0\), then substituting into \(x_1-x_0\). On a sampled training path, the target is simply \(x_1-X_0\), avoiding division by \(1-s\).</p>
+<p>At inference the destination \(x_1\) is unknown. We need a single velocity depending on the current position and flow time, without access to that endpoint.</p>
 
-<h2 id="marginal-field">6. Average over possible actions for this observation</h2>
-<p>Use the posterior over demonstrated endpoints compatible with both the current noisy chunk and the observation:</p>
+<h2 id="marginal-field">6. Combine the endpoint-conditioned velocities</h2>
+<p>Average over endpoints compatible with being at \(x\) at flow time \(s\). Bayes' rule gives their weights:</p>
 <div class="equation">\[\begin{aligned}
- p_s(x\mid o)&amp;=\int p_s(x\mid a)p_{\mathrm{data}}(a\mid o)\,da,\\
- u_s(x;o)&amp;=\int u_s(x\mid a)\,
- \underbrace{\frac{p_s(x\mid a)p_{\mathrm{data}}(a\mid o)}{p_s(x\mid o)}}_{p(a\mid X_s=x,o)}\,da\\
- &amp;=\mathbb E[A-X_0\mid X_s=x,o].
+ p_s(x)&amp;=\int p_s(x\mid x_1)p_{\mathrm{data}}(x_1)\,dx_1,\\
+ u_s(x)&amp;=\int u_s(x\mid x_1)\,
+ \underbrace{\frac{p_s(x\mid x_1)p_{\mathrm{data}}(x_1)}{p_s(x)}}_{p(x_1\mid X_s=x)}\,dx_1\\
+ &amp;=\mathbb E[X_1-X_0\mid X_s=x].
 \end{aligned}\]</div>
-<p>We marginalize over the action endpoint while retaining the observation. These posterior weights let the field depend on both the noisy chunk and its context.</p>
-<p><strong>Why is this the correct field?</strong> For every fixed \(o\), conservation of probability requires</p>
-<div class="equation">\[\partial_s p_s(x\mid o)+\nabla_x\cdot\big(p_s(x\mid o)u_s(x;o)\big)=0.\]</div>
-<p>Each endpoint-conditioned path satisfies the same continuity equation. Integrating over action endpoints produces the probability flux \(p_s(x\mid o)u_s(x;o)\). Under suitable smoothness and uniqueness assumptions, the averaged field therefore transports the desired conditional distribution. This applies the construction in <a href="https://arxiv.org/html/2210.02747v2#S3">Flow Matching, Section 3</a> at fixed \(o\).</p>
+<p>These are posterior weights, not a uniform average of all destinations. They let the field depend on the current position and preserve multiple modes.</p>
+<p><strong>Why is this the correct field?</strong> Conservation of probability requires the continuity equation:</p>
+<div class="equation">\[\partial_s p_s(x)+\nabla_x\cdot\big(p_s(x)u_s(x)\big)=0.\]</div>
+<p>Each endpoint-conditioned path satisfies this equation. Integrating over endpoints produces the probability flux \(p_s(x)u_s(x)\). Under suitable smoothness and uniqueness assumptions, the averaged field therefore transports the reference distribution. This is the construction in <a href="https://arxiv.org/html/2210.02747v2#S3">Flow Matching, Section 3</a>.</p>
 <details class="derivation">
   <summary>Expand the conservation argument</summary>
-  <p>Hold \(o\) fixed and assume differentiation and integration can be exchanged:</p>
+  <p>Assuming differentiation and integration can be exchanged:</p>
   <div class="equation">\[\begin{aligned}
-  \partial_s p_s(x\mid o)
-  &amp;=\int \partial_s p_s(x\mid a)p_{\mathrm{data}}(a\mid o)\,da\\
-  &amp;=-\nabla_x\cdot\int p_s(x\mid a)u_s(x\mid a)p_{\mathrm{data}}(a\mid o)\,da\\
-  &amp;=-\nabla_x\cdot\big(p_s(x\mid o)u_s(x;o)\big).
+  \partial_s p_s(x)
+  &amp;=\int \partial_s p_s(x\mid x_1)p_{\mathrm{data}}(x_1)\,dx_1\\
+  &amp;=-\nabla_x\cdot\int p_s(x\mid x_1)u_s(x\mid x_1)p_{\mathrm{data}}(x_1)\,dx_1\\
+  &amp;=-\nabla_x\cdot\big(p_s(x)u_s(x)\big).
   \end{aligned}\]</div>
-  <p>An ODE using \(u_s(\cdot;o)\) starts from the same \(p_0\) and has the same density evolution when the equation has a unique solution. It preserves the conditional time marginals, not the training endpoint pairings.</p>
+  <p>An ODE using \(u_s\) starts from the same \(p_0\) and has the same density evolution when the equation has a unique solution. It preserves the time marginals, not the training endpoint pairings.</p>
 </details>
-<p>For the same fixed observation, independent training lines can cross. ODE paths under a sufficiently regular single-valued field cannot cross at the same time. The model needs to reproduce the distributions, not each training line.</p>
+<p>Independent training lines can cross. ODE paths under a sufficiently regular single-valued field cannot cross at the same time. The model needs to reproduce the distributions, not each training line.</p>
 
-<h2 id="training-loss">7. Train on paired observations and action chunks</h2>
-<p>The ideal loss regresses onto \(u_s(x;o)\), but its posterior integral is intractable. Use the sampled action endpoint directly. Draw \((o,A)\) from the joint data distribution, \(X_0\sim\mathcal N(0,I_d)\) independently, and \(s\sim\mathcal U(0,1)\):</p>
+<h2 id="training-loss">7. Learn the field without evaluating the average</h2>
+<p>The ideal loss regresses onto \(u_s(x)\), but its posterior integral is intractable. Instead, draw \(X_1\sim p_{\mathrm{data}}\), independent \(X_0\sim p_0\), and \(s\sim\mathcal U(0,1)\), then use the endpoint difference:</p>
 <div class="equation">\[\begin{aligned}
- X_s&amp;=(1-s)X_0+sA,\\
+ X_s&amp;=(1-s)X_0+sX_1,\\
  \mathcal L_{\mathrm{CFM}}(\theta)
- &amp;=\mathbb E_{(o,A),X_0,s}\left[
- \left\|v_\theta(X_s,s;o)-(A-X_0)\right\|^2\right].
+ &amp;=\mathbb E_{X_0,X_1,s}\left[
+ \left\|v_\theta(X_s,s)-(X_1-X_0)\right\|^2\right].
 \end{aligned}\]</div>
-<p>In practice, the outer expectation is estimated with minibatches of pairs from \(\mathcal D\). The squared norm sums over all action coordinates and chunk positions; a mean reduction differs by a constant scale.</p>
-<p>To see why the loss works, let \(Y=A-X_0\), \(v=v_\theta(X_s,s;o)\), and \(u=\mathbb E[Y\mid X_s,s,o]\). Then</p>
+<p>In practice, sample \(x_1\) from \(\mathcal D\) and estimate the expectation with minibatches. The squared norm sums over all coordinates of the chunk; a mean reduction differs by a constant scale.</p>
+<p>Let \(Y=X_1-X_0\), \(v=v_\theta(X_s,s)\), and \(u=\mathbb E[Y\mid X_s,s]\). Squared-error decomposition gives</p>
 <div class="equation">\[\underbrace{\mathbb E\|v-Y\|^2}_{\mathcal L_{\mathrm{CFM}}}
 =\underbrace{\mathbb E\|v-u\|^2}_{\mathcal L_{\mathrm{FM}}}
 +\underbrace{\mathbb E\|Y-u\|^2}_{\text{independent of }\theta}.\]</div>
-<p>The cross term vanishes because \(\mathbb E[Y-u\mid X_s,s,o]=0\). The two losses have the same expected gradient. At the unrestricted population optimum, the network predicts the desired observation-conditioned marginal velocity. Finite data, capacity, and optimization introduce approximation error.</p>
-<p><strong>Two meanings of conditioning:</strong> the policy conditions on \(o\), which is available during training and inference. Conditional flow matching additionally uses the demonstrated endpoint \(a\) to construct training labels; that endpoint is not provided to the network at inference. See <a href="https://www.physicalintelligence.company/download/pi0.pdf">π₀</a> for an action-chunk policy using observation-conditioned flow matching.</p>
+<p>The cross term vanishes because \(\mathbb E[Y-u\mid X_s,s]=0\). The two losses therefore have the same expected gradient. At the unrestricted population optimum, the network predicts the desired marginal velocity. Finite data, capacity, and optimization introduce approximation error.</p>
+<p>Here, <em>conditional flow matching</em> refers to conditioning training paths on the endpoint \(x_1\). This is separate from the observation conditioning we have left implicit. See <a href="https://www.physicalintelligence.company/download/pi0.pdf">π₀</a> for an action-chunk policy using observation-conditioned flow matching.</p>
 
 <h2 id="sampling">8. From the sampler to a controller</h2>
 <ol class="compact-steps">
-  <li><strong>Train:</strong> draw a pair \((o,a)\), independent noise \(x_0\), and flow time \(s\). Form \(x_s=(1-s)x_0+sa\). Predict \(v_\theta(x_s,s;o)\), regress against \(a-x_0\), and update \(\theta\).</li>
-  <li><strong>Predict a chunk:</strong> obtain the current observation \(o_t\), draw fresh \(z_0\sim\mathcal N(0,I_d)\), and integrate while keeping \(o_t\) fixed. With \(K\) Euler steps:</li>
+  <li><strong>Train:</strong> sample \(x_1\) from the dataset, independent noise \(x_0\), and flow time \(s\). Form \(x_s=(1-s)x_0+sx_1\). Predict \(v_\theta(x_s,s)\), regress against \(x_1-x_0\), and update \(\theta\).</li>
+  <li><strong>Generate:</strong> draw fresh \(z_0\sim\mathcal N(0,I_d)\) and integrate the learned field. With \(K\) Euler steps:</li>
 </ol>
-<div class="equation">\[z_{k+1}=z_k+\frac1K\,v_\theta\!\left(z_k,\frac{k}{K};o_t\right),\quad k=0,\ldots,K-1,\qquad \hat a_t=z_K.\]</div>
-<p>Reshape \(\hat a_t\) into \(H\) actions. A controller can execute a prefix of length \(H_{\mathrm{exec}}\le H\), collect a new observation, and generate another chunk. The execution horizon \(H_{\mathrm{exec}}\), prediction horizon \(H\), and number of flow steps \(K\) are separate choices.</p>
-<p>Training needs no ODE solve. Inference needs the observation and fresh noise, but not a demonstrated action endpoint. Learning the demonstration distribution does not by itself establish closed-loop control performance.</p>
-<p><strong>Limits to keep straight.</strong> Straight training paths do not imply straight generated paths or accurate one-step sampling. Independent noise–action pairing is not globally optimal transport. The linear objective also appears in <a href="https://arxiv.org/html/2209.03003v1#S2">rectified flow</a>. Exact transport into a singular action distribution can require an endpoint limit; small terminal noise avoids the singular conditional endpoint.</p>
+<div class="equation">\[z_{k+1}=z_k+\frac1K\,v_\theta\!\left(z_k,\frac{k}{K}\right),\qquad k=0,\ldots,K-1,\qquad \hat x=z_K.\]</div>
+<p>For control, reshape \(\hat x\) into \(H\) actions. At robot timestep \(t\), the current observation supplies the implicit conditioning for this solve. A controller can execute a prefix of length \(H_{\mathrm{exec}}\le H\), collect a new observation, and generate another chunk. Execution horizon, prediction horizon, and the number of flow steps \(K\) are separate choices.</p>
+<p>Training needs no ODE solve. Inference uses fresh noise and the observation, but not a data endpoint. Learning the demonstration distribution does not by itself establish closed-loop control performance.</p>
+<p><strong>Limits to keep straight.</strong> Straight training paths do not imply straight generated paths or accurate one-step sampling. Independent noise–data pairing is not globally optimal transport. The linear objective also appears in <a href="https://arxiv.org/html/2209.03003v1#S2">rectified flow</a>. Exact transport into a singular data distribution can require an endpoint limit; small terminal noise avoids the singular conditional endpoint.</p>

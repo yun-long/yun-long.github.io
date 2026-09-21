@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flow matching: conditional action distributions</title>
+<title>Flow matching: data distributions</title>
 <link rel="stylesheet" href="../../style.css">
 <style>
   html, body { height: auto; background: transparent; }
@@ -41,7 +41,7 @@
 <body>
 <div class="figure" id="figure">
   <div id="data-controls" class="controls" hidden>
-    <label><input type="checkbox" id="reveal">Reveal toy action density</label>
+    <label><input type="checkbox" id="reveal">Reveal toy data density</label>
   </div>
   <div id="transport-controls" class="controls" hidden>
     <label for="time">Flow time s <output id="time-value" for="time">0.00</output><input id="time" type="range" min="0" max="100" value="0" step="1"></label>
@@ -50,14 +50,14 @@
   <div class="legend" id="data-legend" hidden>
     <span><i class="swatch gray"></i>Observed histogram</span>
     <span><i class="swatch orange"></i>Single Gaussian baseline</span>
-    <span id="true-legend" hidden><i class="swatch blue"></i>Toy p_data(a | o)</span>
+    <span id="true-legend" hidden><i class="swatch blue"></i>Toy p_data(x)</span>
   </div>
   <div class="legend" id="transport-legend" hidden>
-    <span><i class="swatch blue"></i>Current p_s(x | o)</span>
-    <span><i class="swatch orange"></i>Target p_data(a | o)</span>
+    <span><i class="swatch blue"></i>Current p_s(x)</span>
+    <span><i class="swatch orange"></i>Target p_data(x)</span>
   </div>
-  <svg id="density" role="img" aria-label="Conditional density versus scalar action value, with observation fixed"></svg>
-  <svg id="paths" role="img" aria-label="Noisy action value versus flow time, with observation fixed" hidden></svg>
+  <svg id="density" role="img" aria-label="Density versus scalar data value"></svg>
+  <svg id="paths" role="img" aria-label="Sample position versus flow time" hidden></svg>
   <p id="status" class="status" aria-live="polite"></p>
 </div>
 <script>
@@ -144,7 +144,7 @@ function drawDensity(w,t) {
   line(densitySvg,left,top,left,bottom,'axis'); line(densitySvg,left,bottom,right,bottom,'axis');
   for(const y of [0,0.3,0.6]) {line(densitySvg,left,sy(y),right,sy(y),'grid');add(densitySvg,'text',{x:left-8,y:sy(y)+4,'text-anchor':'end'},y.toFixed(1));}
   for(const x of (w<400?[-3,0,3]:[-4,-2,0,2,4])) {line(densitySvg,sx(x),bottom,sx(x),bottom+4,'axis');add(densitySvg,'text',{x:sx(x),y:bottom+19,'text-anchor':'middle'},x);}
-  add(densitySvg,'text',{x:(left+right)/2,y:h-4,'text-anchor':'middle'},'Action coordinate (fixed o)');
+  add(densitySvg,'text',{x:(left+right)/2,y:h-4,'text-anchor':'middle'},'Data coordinate x');
   if(isData) {
     const count=28, bw=2*extent/count, bins=Array(count).fill(0);
     data.forEach(x=>bins[Math.min(count-1,Math.max(0,Math.floor((x+extent)/bw)))]++);
@@ -161,7 +161,7 @@ function drawPaths(w,t) {
   const h=245,left=52,right=w-14,top=30,bottom=h-38;
   const sx=t=>left+t*(right-left), sy=x=>bottom-(x+extent)/(2*extent)*(bottom-top);
   setup(pathSvg,w,h,mode.value==='flow'?'Noncrossing ODE trajectories':'Crossing noise-data interpolation lines');
-  add(pathSvg,'text',{x:left,y:16},'Noisy action x');
+  add(pathSvg,'text',{x:left,y:16},'Position x');
   line(pathSvg,left,top,left,bottom,'axis'); line(pathSvg,left,bottom,right,bottom,'axis');
   for(const x of [-3,0,3]) {line(pathSvg,left,sy(x),right,sy(x),'grid');add(pathSvg,'text',{x:left-8,y:sy(x)+4,'text-anchor':'end'},x);}
   for(const s of [0,0.5,1]) {line(pathSvg,sx(s),bottom,sx(s),bottom+4,'axis');add(pathSvg,'text',{x:sx(s),y:bottom+17,'text-anchor':s===0?'start':s===1?'end':'middle'},s.toFixed(1));}
@@ -185,10 +185,10 @@ function draw() {
   drawDensity(w,t);
   if(!isData) drawPaths(w,t);
   status.textContent=isData
-    ? '160 toy action samples at a fixed observation. The Gaussian baseline matches the population mean and variance, but misses both modes.'
+    ? '160 fixed toy data samples. The Gaussian baseline matches the population mean and variance, but misses both modes.'
     : mode.value==='flow'
       ? 'Exact toy velocity, numerically integrated. Dots follow 34 representative noise quantiles; trajectories do not cross.'
-      : '34 noise–action pairs at a fixed observation. Their straight lines may cross; the density above is the exact population marginal.';
+      : '34 independent noise–data pairs. Their straight lines may cross; the density above is the exact population marginal.';
 }
 slider.addEventListener('input',draw);
 mode.addEventListener('change',draw);
