@@ -23,7 +23,7 @@ This folder contains the blog for the website. The setup is simplified around a 
   "title": "My New Post",
   "date": "2025-01-01",
   "summary": "One sentence summary for the listing.",
-  "content": "blogs/content/my-new-post.html"
+  "content": "content/my-new-post.html"
 }
 ```
 
@@ -34,5 +34,6 @@ This folder contains the blog for the website. The setup is simplified around a 
 ## Notes
 
 - Dates use ISO format (`YYYY-MM-DD`) and are displayed nicely client-side
+- For notes with equations, set `"math": true` in the manifest. Write inline TeX inside `\(...\)` and display TeX inside `<div class="equation">\[...\]</div>`. The post layout loads MathJax for these notes.
 - The main list (`blog.html`) reads from `posts.json` and links to `post.html`
 - Legacy files remain for compatibility but are not required going forward

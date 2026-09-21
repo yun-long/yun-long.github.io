@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Blog Post - Yunlong Song</title>
-    <link rel="stylesheet" href="../style.css?v=20260505-7">
+    <link rel="stylesheet" href="../style.css?v=20260920-flow-v2">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Highlight.js for code highlighting -->
@@ -11,6 +11,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     
     <script>
+        let mathReady;
+
+        async function renderMath(element) {
+            if (!mathReady) {
+                window.MathJax = {
+                    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+                    startup: { typeset: false }
+                };
+                mathReady = new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js';
+                    script.onload = () => window.MathJax.startup.promise.then(resolve, reject);
+                    script.onerror = () => reject(new Error('Unable to load equation renderer'));
+                    document.head.appendChild(script);
+                });
+            }
+            await mathReady;
+            await window.MathJax.typesetPromise([element]);
+        }
+
         function getQueryParam(name) {
             const params = new URLSearchParams(window.location.search);
             return params.get(name);
@@ -36,6 +56,7 @@
 
             try {
                 const manifestRes = await fetch('posts.json', { cache: 'no-cache' });
+                if (!manifestRes.ok) throw new Error('Unable to load notes');
                 const posts = await manifestRes.json();
                 const post = posts.find(p => p.slug === slug);
                 if (!post) throw new Error('Not found');
@@ -44,6 +65,7 @@
                 titleEl.textContent = post.title;
 
                 const contentRes = await fetch(post.content, { cache: 'no-cache' });
+                if (!contentRes.ok) throw new Error('Unable to load note');
                 const html = await contentRes.text();
                 if (!html || html.trim() === '') {
                     bodyEl.innerHTML = '<p>This post has no content yet. Add your HTML to <code>'+post.content+'</code>.</p>';
@@ -54,6 +76,14 @@
                         window.hljs.highlightAll();
                     }
                     buildTOC();
+                    if (post.math) {
+                        renderMath(bodyEl).catch(() => {
+                            const notice = document.createElement('p');
+                            notice.setAttribute('role', 'status');
+                            notice.textContent = 'Equations could not be rendered. Reload the page to try again.';
+                            bodyEl.prepend(notice);
+                        });
+                    }
                 }
             } catch (e) {
                 titleEl.textContent = 'Post not found';
@@ -158,7 +188,7 @@
             <div class="blog-post-content">
                 <a href="../blog.html" class="back-to-blog">
                     <i class="fas fa-arrow-left"></i>
-                    Back to Blog
+                    Back to Personal Notes
                 </a>
 
                 <div class="blog-post-header">
@@ -168,7 +198,7 @@
                 <div class="blog-post-body" id="post-body"></div>
 
                 <div class="blog-navigation">
-                    <a href="../blog.html">← All Posts</a>
+                    <a href="../blog.html">← All Personal Notes</a>
                 </div>
             </div>
         </div>

@@ -773,6 +773,37 @@ hr {
 }
 
 .blog-post-body p { margin: 1rem 0; }
+.blog-post-body .equation {
+  overflow-x: auto;
+  margin: 24px 0;
+  padding: 8px 12px;
+  background: var(--color-surface);
+  border-left: 2px solid var(--color-border-strong);
+}
+.blog-post-body .equation mjx-container[display="true"] {
+  margin: 0.7em 0 !important;
+}
+.blog-post-body .note-lead { font-size: 1.12em; }
+.blog-post-body .flow-figure { margin: 22px 0; }
+.blog-post-body .flow-visual {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+.blog-post-body .data-visual { height: 390px; }
+.blog-post-body .transport-visual { height: 650px; }
+.blog-post-body .flow-figure figcaption {
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+.blog-post-body details.derivation {
+  padding: 12px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.blog-post-body details.derivation summary { cursor: pointer; font-weight: 600; }
+.blog-post-body .compact-steps li { margin: 0.65rem 0; }
 .blog-post-body h2 {
   margin: 2.2rem 0 0.9rem;
   color: #2c3e50;
