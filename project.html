@@ -50,6 +50,34 @@
               <div class="project-item">
                   <div class="project-header">
                       <a href="#" class="project-title" onclick="toggleDescription(this)">
+                          Model-based RL for Perceptive Quadrupedal Locomotion
+                          <span class="toggle-icon">▼</span>
+                      </a>
+                  </div>
+                  <div class="project-description">
+                          <p>
+                            Learning collective behavior for legged robot swarms is hard: realistic contact-rich
+                            simulation is not differentiable, while differentiable simulators are too simplified
+                            to capture legged locomotion. We introduce an asymmetric physics framework that
+                            decouples the two. A high-fidelity, non-differentiable simulator generates realistic
+                            motion and contact, while differentiable surrogate models provide the gradients used
+                            to train navigation and locomotion policies end-to-end. This enables up to 512
+                            quadrupeds to learn coordinated navigation in cluttered environments. At deployment,
+                            each robot relies only on a single forward-facing depth camera, with no communication,
+                            central planning, or global maps. The policies transfer zero-shot to six physical
+                            quadrupeds across five real-world scenarios, where the swarm exhibits emergent
+                            behaviors such as predictive avoidance, right-side yielding, pausing at bottlenecks,
+                            and wall following.
+                          </p>
+                          <video class="project-video" autoplay loop muted playsinline>
+                              <source src="videos/perceptive_web.mp4" type="video/mp4">
+                          </video>
+                  </div>
+              </div>
+
+              <div class="project-item">
+                  <div class="project-header">
+                      <a href="#" class="project-title" onclick="toggleDescription(this)">
                           Pixel-to-Action Control
                           <span class="toggle-icon">▼</span>
                       </a>
