@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attention in translation: a heatmap and weighted read</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:18px 14px;background:#f5f1e6;color:#222;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+h1{font:600 21px/1.3 Georgia,serif;margin:0 0 8px}h2{font-size:14px;margin:22px 0 8px}p{margin:8px 0;color:#555}
+.sentence{font:18px/1.6 Georgia,serif;color:#222}.sentence span{white-space:nowrap}.small{font-size:12px}
+.controls{display:flex;align-items:center;gap:16px;margin:16px 0}
+label{flex:1}label span{display:flex;justify-content:space-between}input{display:block;width:100%;accent-color:#346a72;margin:10px 0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid #346a72;outline-offset:3px}
+table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:4px;font-variant-numeric:tabular-nums}
+th{font-weight:500;font-size:13px}th:first-child{width:22%}
+.heat td{text-align:center;height:43px;font-size:13px}
+.heat th button{border:0;background:transparent;min-height:43px;width:100%;padding:4px;text-align:left}
+.heat th button[aria-pressed=true]{font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.heat tr.selected td{box-shadow:inset 0 -3px #222}
+.axes{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#555}
+.legend{display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:12px;margin:8px 0}
+.gradient{width:90px;height:8px;background:linear-gradient(to right,#edf0e9,#346a72)}
+#read-diagram{display:block;width:100%;height:210px}
+#read-diagram text{font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#222}
+.result{border-top:1px solid #d9d2c0;padding-top:10px;text-align:center}
+.result strong{font-variant-numeric:tabular-nums}
+details{margin-top:16px;border-top:1px solid #d9d2c0;padding-top:10px}
+summary{cursor:pointer}
+.math{font-size:12px;overflow-wrap:anywhere}
+.math td,.math th{padding:7px 3px;text-align:left;border-bottom:1px solid #d9d2c0}
+.math th:first-child{width:20%}
+.vector{font-variant-numeric:tabular-nums}
+@media(max-width:380px){body{padding:14px 8px}.heat th,.heat td{font-size:12px}.sentence{font-size:16px}.axes{font-size:11px}table{border-spacing:3px}}
+</style>
+</head>
+<body>
+<h1>One sentence, four different reads</h1>
+<div class="sentence"><span>The black cat sleeps</span> → <span>Le chat noir dort</span></div>
+<p class="small">Illustrative cross-attention, not a trained translator. Select a French output step to inspect its read.</p>
+<div class="controls">
+<label for="strength"><span>Query strength <output id="strength-value" for="strength">3.0</output></span><input id="strength" type="range" min="0" max="6" step="0.1" value="3"></label>
+</div>
+<div class="axes"><span>Rows: decoder output steps ↓</span><span>Columns: source words →</span></div>
+<table class="heat" aria-label="Attention heatmap: rows are French output steps, columns are English source words. Each row sums to 100 percent.">
+<thead><tr><th scope="col">Read for</th><th scope="col">The</th><th scope="col">black</th><th scope="col">cat</th><th scope="col">sleeps</th></tr></thead>
+<tbody id="heatmap"></tbody>
+</table>
+<div class="legend"><span>0%</span><span class="gradient" aria-hidden="true"></span><span>100% attention weight</span></div>
+<h2 id="read-heading">Follow the selected read</h2>
+<svg id="read-diagram" role="img" aria-label="Source value vectors merge into a weighted context vector"></svg>
+<div class="result" role="status" aria-live="polite"><strong id="context"></strong><p class="small" id="detail"></p></div>
+<details>
+<summary>Show the numbers: query → scores → weighted values</summary>
+<p class="small vector" id="query"></p>
+<table class="math" aria-label="Exact construction of the selected attention read">
+<thead><tr><th scope="col">Source</th><th scope="col">Key k</th><th scope="col">Score</th><th scope="col">α × value</th></tr></thead>
+<tbody id="calculation"></tbody>
+</table>
+<p class="small">Four key coordinates: score = q·k / √4. Values have two coordinates. Sum the final column to obtain c; these coordinates have no assigned linguistic meaning.</p>
+</details>
+<script src="attention-math.js?v=translation-v1"></script>
+<script>
+const {memory, steps, read} = AttentionExample;
+const strength = document.getElementById('strength');
+const heatmap = document.getElementById('heatmap');
+const diagram = document.getElementById('read-diagram');
+const vector = (v, digits = 2) => '(' + v.map(x => x.toFixed(digits)).join(', ') + ')';
+let selected = 1;
+heatmap.innerHTML = steps.map((step,t) => '<tr id="row-'+t+'"><th scope="row"><button type="button" data-step="'+t+'" aria-label="Inspect step '+(t+1)+': '+step.word+'">'+(t+1)+'. '+step.word+'</button></th>'+memory.map((_,i)=>'<td id="cell-'+t+'-'+i+'"></td>').join('')+'</tr>').join('');
+function draw(result) {
+  const w = diagram.getBoundingClientRect().width;
+  const positions = memory.map((_,i) => w*(i+0.5)/4);
+  diagram.setAttribute('viewBox','0 0 '+w+' 210');
+  diagram.innerHTML = '<title>Weighted read for '+steps[selected].word+'</title><desc>Each source value flows into the context. Link width is proportional to its attention weight.</desc>' +
+    memory.map((item,i) => '<path d="M '+positions[i]+' 67 C '+positions[i]+' 110, '+w/2+' 100, '+w/2+' 142" fill="none" stroke="#346a72" stroke-opacity="0.55" stroke-width="'+(20*result.weights[i])+'"/><text x="'+positions[i]+'" y="18" text-anchor="middle">'+item.name+'</text><text x="'+positions[i]+'" y="39" text-anchor="middle">'+vector(item.value,0)+'</text><text x="'+positions[i]+'" y="60" text-anchor="middle">'+(100*result.weights[i]).toFixed(1)+'%</text>').join('') +
+    '<rect x="'+(w/2-81)+'" y="144" width="162" height="36" fill="#e3e9e2"/><text x="'+w/2+'" y="167" text-anchor="middle">c = '+vector(result.context)+'</text><text x="'+w/2+'" y="204" text-anchor="middle">↓ decoder uses c to predict “'+steps[selected].word+'”</text>';
+}
+function render() {
+  const scale = Number(strength.value);
+  document.getElementById('strength-value').textContent = scale.toFixed(1);
+  steps.forEach((step,t) => {
+    const result = read(t,scale);
+    document.getElementById('row-'+t).classList.toggle('selected',t===selected);
+    heatmap.querySelector('[data-step="'+t+'"]').setAttribute('aria-pressed',String(t===selected));
+    result.weights.forEach((weight,i) => {
+      const cell = document.getElementById('cell-'+t+'-'+i);
+      cell.textContent = (100*weight).toFixed(1)+'%';
+      const low=[237,240,233], high=[52,106,114];
+      cell.style.backgroundColor = 'rgb('+low.map((c,j)=>Math.round(c+(high[j]-c)*weight)).join(',')+')';
+      cell.style.color = weight > .65 ? '#fff' : '#222';
+    });
+  });
+  const result = read(selected,scale);
+  document.getElementById('read-heading').textContent = 'Read '+(selected+1)+': preparing to predict “'+steps[selected].word+'”';
+  document.getElementById('context').textContent = 'The context is a mixture of value vectors.';
+  document.getElementById('detail').textContent = scale===0 ? 'A zero query gives every source word 25% of the read.' : '“'+memory[steps[selected].source].name+'” contributes '+(100*result.weights[steps[selected].source]).toFixed(1)+'%; other words still contribute. Line width shows weight.';
+  document.getElementById('query').textContent = 'q = '+vector(result.query,1)+'; scores = '+vector(result.scores,1);
+  document.getElementById('calculation').innerHTML = memory.map((m,i)=>'<tr><th scope="row">'+m.name+'</th><td>'+vector(m.key,0)+'</td><td>'+result.scores[i].toFixed(1)+'</td><td>'+vector(result.contributions[i])+'</td></tr>').join('');
+  draw(result);
+}
+heatmap.addEventListener('click',event => {
+  const button=event.target.closest('button[data-step]');
+  if(button){selected=Number(button.dataset.step);render();}
+});
+strength.addEventListener('input',render);
+new ResizeObserver(()=>draw(read(selected,Number(strength.value)))).observe(diagram);
+new ResizeObserver(() => {
+  try { if (window.frameElement) window.frameElement.style.height = (document.body.scrollHeight + 4) + 'px'; } catch (_) { /* Standalone or opaque-origin preview uses the default height. */ }
+}).observe(document.body);
+render();
+</script>
+</body>
+</html>

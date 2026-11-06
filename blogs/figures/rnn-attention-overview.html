@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How RNNs and attention move information</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:4px 0;color:#222;background:#fdfaf3;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+section{padding:18px 0 14px;border-top:1px solid #d9d2c0}
+h2{font-size:16px;margin:0 0 5px}p{font-size:13px;color:#555;margin:5px 0 0}
+svg{display:block;width:100%}
+svg text{font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#222}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 12px;font-size:12px;color:#555}
+.legend span{display:flex;align-items:center;gap:6px}
+.line{display:inline-block;width:24px;border-top:2px solid #346a72}
+.equations{margin:12px 0;padding:10px 8px;background:#f1eee5;border-left:2px solid #b8af9b;overflow-x:auto}
+math{font-size:1.15rem;margin:8px 0}
+.line.dashed{border-top-style:dashed;border-color:#83569b}
+.single-diagram { padding: 0; }
+.single-diagram section { border: 0; padding: 0; }
+.single-diagram section h2, .single-diagram section p,
+.single-diagram .equations, .single-diagram .legend,
+.single-diagram > p { display: none; }
+</style>
+</head>
+<body>
+<div class="legend"><span><i class="line"></i>Information flow</span><span><i class="line dashed"></i>Query controls the read</span></div>
+<section>
+<h2>1. RNN · pass information along a chain</h2>
+<svg id="rnn" role="img" aria-label="Each word enters its own recurrent state. Earlier information must pass through the intervening states to reach the final state."></svg>
+<div class="equations" aria-label="Recurrent state update">
+<math display="block"><msub><mi>h</mi><mi>t</mi></msub><mo>=</mo><msub><mi>f</mi><mi>θ</mi></msub><mo>(</mo><msub><mi>h</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>x</mi><mi>t</mi></msub><mo>)</mo></math>
+</div>
+<p>Each state combines the current word with the previous state. To reach h₄, information from “The” passes through h₂ and h₃.</p>
+</section>
+<section>
+<h2>2. RNN + attention · read from stored states</h2>
+<svg id="cross" role="img" aria-label="An encoder stores four recurrent states. A decoder query controls a weighted read, emphasizing the cat state, before the decoder predicts chat."></svg>
+<div class="equations" aria-label="Attention scores, weights, and context">
+<math display="block"><msub><mi>e</mi><mrow><mi>t</mi><mi>i</mi></mrow></msub><mo>=</mo><msub><mi>a</mi><mi>θ</mi></msub><mo>(</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>h</mi><mi>i</mi></msub><mo>)</mo></math>
+<math display="block"><msub><mi>α</mi><mrow><mi>t</mi><mi>i</mi></mrow></msub><mo>=</mo><mfrac><mrow><mi mathvariant="normal">exp</mi><mo>(</mo><msub><mi>e</mi><mrow><mi>t</mi><mi>i</mi></mrow></msub><mo>)</mo></mrow><mrow><munder><mo>∑</mo><mi>j</mi></munder><mi mathvariant="normal">exp</mi><mo>(</mo><msub><mi>e</mi><mrow><mi>t</mi><mi>j</mi></mrow></msub><mo>)</mo></mrow></mfrac><mo>,</mo><mspace width="1em"/><msub><mi>c</mi><mi>t</mi></msub><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><msub><mi>α</mi><mrow><mi>t</mi><mi>i</mi></mrow></msub><msub><mi>h</mi><mi>i</mi></msub></math>
+</div>
+<p>The encoder still reads sequentially. The decoder keeps access to every source state, and its previous state supplies a query for the current read. Here the read emphasizes “cat.”</p>
+</section>
+<section>
+<h2>3. Self-attention · connect positions directly</h2>
+<svg id="self" role="img" aria-label="Each input position can contribute to every output position. The read for the cat position is highlighted; all four output reads use the same input layer."></svg>
+<div class="equations" aria-label="Self-attention scores, weights, and output">
+<math display="block"><msub><mi>e</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><msubsup><mi>q</mi><mi>i</mi><mo>⊤</mo></msubsup><msub><mi>k</mi><mi>j</mi></msub></mrow><msqrt><msub><mi>d</mi><mi>k</mi></msub></msqrt></mfrac><mo>,</mo><mspace width="1em"/><msub><mi>α</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><mi mathvariant="normal">exp</mi><mo>(</mo><msub><mi>e</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>)</mo></mrow><mrow><munder><mo>∑</mo><mi>ℓ</mi></munder><mi mathvariant="normal">exp</mi><mo>(</mo><msub><mi>e</mi><mrow><mi>i</mi><mi>ℓ</mi></mrow></msub><mo>)</mo></mrow></mfrac></math>
+<math display="block"><msub><mi>o</mi><mi>i</mi></msub><mo>=</mo><munder><mo>∑</mo><mi>j</mi></munder><msub><mi>α</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>v</mi><mi>j</mi></msub></math>
+</div>
+<p>qᵢ is the query at position i; kⱼ and vⱼ are the key and value at position j. dₖ is the key dimension. Each row of weights sums to one.</p>
+<p>Each input produces a query, key, and value. Highlighted arrows show the read for “cat”; faint arrows show the other reads. These outputs can be computed together. Full, unmasked attention is shown.</p>
+</section>
+<p>Arrows illustrate access paths; emphasized weights are hand-chosen, not learned measurements. An attention read mixes vectors—it does not directly translate a word.</p>
+<script>
+const panel = new URLSearchParams(location.search).get('panel');
+if (['rnn','cross','self'].includes(panel)) {
+ document.body.classList.add('single-diagram');
+ document.querySelectorAll('section').forEach(section => { section.hidden = !section.querySelector('#'+panel); });
+}
+const words=['The','black','cat','sleeps'];
+const sub=['₁','₂','₃','₄'];
+const teal='#346a72', purple='#83569b', neutral='#ccd0ca';
+function label(x,y,text,extra=''){return '<text x="'+x+'" y="'+y+'" text-anchor="middle" '+extra+'>'+text+'</text>';}
+function box(x,y,width,text,active=false){return '<rect x="'+(x-width/2)+'" y="'+(y-16)+'" width="'+width+'" height="32" rx="3" fill="'+(active?'#e0e9e2':'#f1eee5')+'" stroke="'+(active?teal:'#c4bfae')+'"/>'+label(x,y+4,text);}
+function arrow(id,x1,y1,x2,y2,color=teal,width=1.7,dashed=false){return '<path d="M '+x1+' '+y1+' L '+x2+' '+y2+'" stroke="'+color+'" stroke-width="'+width+'" fill="none" '+(dashed?'stroke-dasharray="4 4" ':'')+'marker-end="url(#'+id+(dashed?'-query':'-arrow')+')"/>';}
+function setup(id,height,desc) {
+ const svg=document.getElementById(id), w=svg.getBoundingClientRect().width;
+ svg.setAttribute('viewBox','0 0 '+w+' '+height); svg.style.height=height+'px';
+ const defs='<title>'+desc+'</title><defs><marker id="'+id+'-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6" fill="'+teal+'"/></marker><marker id="'+id+'-query" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6" fill="'+purple+'"/></marker></defs>';
+ return {svg,w,x:words.map((_,i)=>w*(i+.5)/4),defs};
+}
+function draw(){
+ let {svg,w,x,defs}=setup('rnn',175,'Recurrent states carry information forward');
+ let paths='',nodes='';
+ words.forEach((word,i)=>{
+  paths+=arrow('rnn',x[i],37,x[i],72);
+  if(i<3)paths+=arrow('rnn',x[i]+25,90,x[i+1]-27,90);
+  nodes+=label(x[i],25,word)+box(x[i],90,50,'h'+sub[i],i===3);
+ });
+ paths+=arrow('rnn',x[3],107,x[3],136);
+ svg.innerHTML=defs+paths+nodes+label(x[3],158,'next word');
+ ({svg,w,x,defs}=setup('cross',280,'A decoder reads from all source states'));
+ paths='';nodes='';
+ words.forEach((word,i)=>{
+  nodes+=label(x[i],22,word)+box(x[i],58,48,'h'+sub[i],i===2);
+  if(i<3)paths+=arrow('cross',x[i]+25,58,x[i+1]-26,58,teal,1);
+  paths+=arrow('cross',x[i],76,w*.53+(i-1.5)*9,133,teal,i===2?4:1);
+ });
+ const prev=w*.16, current=w*.53, out=w*.87;
+ paths+=arrow('cross',prev+29,231,current-27,231);
+ paths+=arrow('cross',current+29,231,out-22,231);
+ paths+=arrow('cross',current,166,current,213);
+ paths+='<path d="M '+prev+' 213 L '+prev+' 150 L '+(current-65)+' 150" stroke="'+purple+'" stroke-width="1.5" stroke-dasharray="4 4" fill="none" marker-end="url(#cross-query)"/>';
+ nodes+=box(current,150,126,'read → context c',true)+box(prev,231,58,'sₜ₋₁')+box(current,231,52,'sₜ')+label(out,235,'“chat”');
+ nodes+=label(prev,132,'query')+label(current,193,'context')+label(current,269,'decoder step');
+ svg.innerHTML=defs+paths+nodes;
+ ({svg,w,x,defs}=setup('self',216,'Self-attention reads across the input layer'));
+ paths='';nodes='';
+ // Draw every allowed access path first, then highlight one output read.
+ x.forEach((from)=>x.forEach((to)=>{paths+='<path d="M '+from+' 71 L '+to+' 158" stroke="'+neutral+'" stroke-width="1" fill="none"/>';}));
+ x.forEach((from,i)=>{paths+=arrow('self',from,71,x[2],158,teal,i===2?3:1.6);});
+ words.forEach((word,i)=>{nodes+=label(x[i],20,word)+box(x[i],54,50,'x'+sub[i],i===2)+box(x[i],176,50,'o'+sub[i],i===2);});
+ nodes+=label(w/2,211,'One output vector per position');
+ svg.innerHTML=defs+paths+nodes;
+}
+new ResizeObserver(draw).observe(document.body);
+new ResizeObserver(()=>{
+ try{if(window.frameElement)window.frameElement.style.height=(document.body.scrollHeight+4)+'px';}catch(_){}
+}).observe(document.body);
+draw();
+</script>
+</body>
+</html>
